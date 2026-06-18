@@ -8,6 +8,14 @@ group = "com.shiftarc"
 version = "0.0.1"
 description = "ShiftARC planning application API"
 
+springBoot {
+    buildInfo {
+        properties {
+            time = null
+        }
+    }
+}
+
 java {
     toolchain {
         languageVersion = JavaLanguageVersion.of(17)

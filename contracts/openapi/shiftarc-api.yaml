@@ -1,0 +1,76 @@
+openapi: 3.1.0
+info:
+  title: ShiftARC API
+  version: 0.0.1
+  description: Contract for the local ShiftARC foundation API.
+servers:
+  - url: /
+security: []
+paths:
+  /api/v1/system/status:
+    get:
+      operationId: getSystemStatus
+      summary: Check API and database availability
+      tags:
+        - System
+      responses:
+        "200":
+          description: The API and database are available.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SystemStatusResponse"
+        "503":
+          description: The database is unavailable.
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ProblemDetail"
+components:
+  schemas:
+    SystemStatusResponse:
+      type: object
+      additionalProperties: false
+      required:
+        - service
+        - version
+        - status
+        - database
+      properties:
+        service:
+          type: string
+          example: shiftarc-api
+        version:
+          type: string
+          example: 0.0.1
+        status:
+          $ref: "#/components/schemas/ComponentStatus"
+        database:
+          $ref: "#/components/schemas/ComponentStatus"
+    ComponentStatus:
+      type: string
+      enum:
+        - UP
+    ProblemDetail:
+      type: object
+      additionalProperties: true
+      required:
+        - type
+        - title
+        - status
+        - detail
+        - instance
+      properties:
+        type:
+          type: string
+          format: uri-reference
+        title:
+          type: string
+        status:
+          type: integer
+          format: int32
+        detail:
+          type: string
+        instance:
+          type: string
+          format: uri-reference
