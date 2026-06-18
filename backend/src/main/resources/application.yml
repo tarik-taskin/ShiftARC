@@ -1,6 +1,20 @@
 spring:
   application:
     name: shiftarc-api
+  flyway:
+    enabled: true
+    default-schema: public
+    table: flyway_schema_history
+    locations: classpath:db/migration
+    baseline-on-migrate: false
+    validate-on-migrate: true
+    validate-migration-naming: true
+    fail-on-missing-locations: true
+    out-of-order: false
+    clean-disabled: true
+  jpa:
+    hibernate:
+      ddl-auto: none
   profiles:
     active: ${SPRING_PROFILES_ACTIVE:local}
 
