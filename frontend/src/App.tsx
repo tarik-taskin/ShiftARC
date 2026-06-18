@@ -1,122 +1,259 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from './assets/vite.svg'
-import heroImg from './assets/hero.png'
 import './App.css'
 
+import { useSystemStatus } from './api/system-status/useSystemStatus'
+import type {
+  SystemStatusClientError,
+  SystemStatusRequestState,
+} from './api/system-status/types'
+
+type StatusTone = 'up' | 'checking' | 'down' | 'unknown'
+
+interface StatusCardProps {
+  label: string
+  technology: string
+  value: string
+  detail: string
+  endpoint: string
+  tone: StatusTone
+}
+
 function App() {
-  const [count, setCount] = useState(0)
+  const { state, refresh } = useSystemStatus()
+  const apiStatus = getApiStatus(state)
+  const databaseStatus = getDatabaseStatus(state)
+  const isLoading = state.phase === 'loading'
 
   return (
-    <>
-      <section id="center">
-        <div className="hero">
-          <img src={heroImg} className="base" width="170" height="179" alt="" />
-          <img src={reactLogo} className="framework" alt="React logo" />
-          <img src={viteLogo} className="vite" alt="Vite logo" />
-        </div>
-        <div>
-          <h1>Get started</h1>
-          <p>
-            Edit <code>src/App.tsx</code> and save to test <code>HMR</code>
-          </p>
-        </div>
-        <button
-          type="button"
-          className="counter"
-          onClick={() => setCount((count) => count + 1)}
-        >
-          Count is {count}
-        </button>
+    <main className="foundation-shell">
+      <div className="ambient ambient-left" aria-hidden="true" />
+      <div className="ambient ambient-right" aria-hidden="true" />
+
+      <header className="site-header">
+        <a className="brand" href="/" aria-label="ShiftARC ana sayfası">
+          <span className="brand-mark" aria-hidden="true">
+            <span />
+          </span>
+          <span>ShiftARC</span>
+        </a>
+        <span className="version-badge">v0.0.1 · local foundation</span>
+      </header>
+
+      <section className="hero-section" aria-labelledby="page-title">
+        <p className="eyebrow">Teknik doğrulama ekranı</p>
+        <h1 id="page-title">Yerel geliştirme ortamı</h1>
+        <p className="hero-copy">
+          React, Spring Boot ve PostgreSQL arasındaki bağlantıyı tek bakışta
+          doğrulayın. Bu ekran ürün ana sayfası değil, ShiftARC temelinin sağlık
+          kontrolüdür.
+        </p>
       </section>
 
-      <div className="ticks"></div>
+      <section className="status-panel" aria-labelledby="status-heading">
+        <div className="status-panel-header">
+          <div aria-live="polite">
+            <p className="section-label">Sistem durumu</p>
+            <h2 id="status-heading">{getOverallStatus(state)}</h2>
+          </div>
+          <button
+            className="retry-button"
+            type="button"
+            onClick={refresh}
+            disabled={isLoading}
+          >
+            <span className={isLoading ? 'retry-icon is-spinning' : 'retry-icon'}>
+              ↻
+            </span>
+            {isLoading ? 'Kontrol ediliyor' : 'Yeniden kontrol et'}
+          </button>
+        </div>
 
-      <section id="next-steps">
-        <div id="docs">
-          <svg className="icon" role="presentation" aria-hidden="true">
-            <use href="/icons.svg#documentation-icon"></use>
-          </svg>
-          <h2>Documentation</h2>
-          <p>Your questions, answered</p>
-          <ul>
-            <li>
-              <a href="https://vite.dev/" target="_blank">
-                <img className="logo" src={viteLogo} alt="" />
-                Explore Vite
-              </a>
-            </li>
-            <li>
-              <a href="https://react.dev/" target="_blank">
-                <img className="button-icon" src={reactLogo} alt="" />
-                Learn more
-              </a>
-            </li>
-          </ul>
+        <div className="status-grid" aria-live="polite">
+          <StatusCard
+            label="Frontend"
+            technology="React + Vite"
+            value="Çalışıyor"
+            detail="Arayüz tarayıcıda başarıyla yüklendi."
+            endpoint="localhost:5173"
+            tone="up"
+          />
+          <StatusCard
+            label="API"
+            technology="Spring Boot"
+            value={apiStatus.value}
+            detail={apiStatus.detail}
+            endpoint="localhost:8080"
+            tone={apiStatus.tone}
+          />
+          <StatusCard
+            label="Veritabanı"
+            technology="PostgreSQL 16"
+            value={databaseStatus.value}
+            detail={databaseStatus.detail}
+            endpoint="localhost:5432"
+            tone={databaseStatus.tone}
+          />
         </div>
-        <div id="social">
-          <svg className="icon" role="presentation" aria-hidden="true">
-            <use href="/icons.svg#social-icon"></use>
-          </svg>
-          <h2>Connect with us</h2>
-          <p>Join the Vite community</p>
-          <ul>
-            <li>
-              <a href="https://github.com/vitejs/vite" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#github-icon"></use>
-                </svg>
-                GitHub
-              </a>
-            </li>
-            <li>
-              <a href="https://chat.vite.dev/" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#discord-icon"></use>
-                </svg>
-                Discord
-              </a>
-            </li>
-            <li>
-              <a href="https://x.com/vite_js" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#x-icon"></use>
-                </svg>
-                X.com
-              </a>
-            </li>
-            <li>
-              <a href="https://bsky.app/profile/vite.dev" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#bluesky-icon"></use>
-                </svg>
-                Bluesky
-              </a>
-            </li>
-          </ul>
-        </div>
+
+        {state.phase === 'error' ? (
+          <div className="error-notice" role="alert">
+            <span className="error-symbol" aria-hidden="true">
+              !
+            </span>
+            <div>
+              <strong>Bağlantı doğrulanamadı</strong>
+              <p>{getErrorMessage(state.error)}</p>
+            </div>
+          </div>
+        ) : null}
       </section>
 
-      <div className="ticks"></div>
-      <section id="spacer"></section>
-    </>
+      <footer className="foundation-footer">
+        <span>ShiftARC 0.0.1</span>
+        <span aria-hidden="true">•</span>
+        <span>Lokal teknik temel</span>
+      </footer>
+    </main>
   )
+}
+
+function StatusCard({
+  label,
+  technology,
+  value,
+  detail,
+  endpoint,
+  tone,
+}: StatusCardProps) {
+  return (
+    <article className={`status-card status-${tone}`}>
+      <div className="card-heading">
+        <div>
+          <p className="card-label">{label}</p>
+          <h3>{technology}</h3>
+        </div>
+        <span className="status-dot" aria-hidden="true" />
+      </div>
+      <p className="status-value">{value}</p>
+      <p className="status-detail">{detail}</p>
+      <code>{endpoint}</code>
+    </article>
+  )
+}
+
+function getOverallStatus(state: SystemStatusRequestState): string {
+  if (state.phase === 'loading') {
+    return 'Bağlantılar kontrol ediliyor'
+  }
+
+  if (state.phase === 'success') {
+    return 'Tüm servisler hazır'
+  }
+
+  return 'Kurulum doğrulaması gerekiyor'
+}
+
+function getApiStatus(state: SystemStatusRequestState) {
+  if (state.phase === 'loading') {
+    return {
+      tone: 'checking' as const,
+      value: 'Kontrol ediliyor',
+      detail: 'API yanıtı bekleniyor.',
+    }
+  }
+
+  if (state.phase === 'success') {
+    return {
+      tone: 'up' as const,
+      value: 'Çalışıyor',
+      detail: `${state.data.service} · v${state.data.version}`,
+    }
+  }
+
+  if (state.error.kind === 'http') {
+    const isGatewayUnavailable =
+      state.error.statusCode === 502 || state.error.statusCode === 504
+
+    if (isGatewayUnavailable) {
+      return {
+        tone: 'down' as const,
+        value: 'Ulaşılamıyor',
+        detail: 'Vite proxy Spring Boot API bağlantısını kuramadı.',
+      }
+    }
+
+    return {
+      tone: state.error.statusCode === 503 ? ('up' as const) : ('down' as const),
+      value: state.error.statusCode === 503 ? 'Yanıt veriyor' : 'Hata döndü',
+      detail: `HTTP ${state.error.statusCode ?? 'hatası'} alındı.`,
+    }
+  }
+
+  if (state.error.kind === 'invalid-response') {
+    return {
+      tone: 'down' as const,
+      value: 'Uyumsuz yanıt',
+      detail: 'API yanıtı beklenen sözleşmeyle eşleşmedi.',
+    }
+  }
+
+  return {
+    tone: 'down' as const,
+    value: 'Ulaşılamıyor',
+    detail: 'Spring Boot API bağlantısı kurulamadı.',
+  }
+}
+
+function getDatabaseStatus(state: SystemStatusRequestState) {
+  if (state.phase === 'loading') {
+    return {
+      tone: 'checking' as const,
+      value: 'Kontrol ediliyor',
+      detail: 'API üzerinden veritabanı yanıtı bekleniyor.',
+    }
+  }
+
+  if (state.phase === 'success') {
+    return {
+      tone: 'up' as const,
+      value: 'Bağlı',
+      detail: 'SELECT 1 sağlık kontrolü başarılı.',
+    }
+  }
+
+  if (state.error.kind === 'http' && state.error.statusCode === 503) {
+    return {
+      tone: 'down' as const,
+      value: 'Bağlantı yok',
+      detail: 'API veritabanı sağlık kontrolünü tamamlayamadı.',
+    }
+  }
+
+  return {
+    tone: 'unknown' as const,
+    value: 'Doğrulanamadı',
+    detail: 'API erişilemediği için veritabanı durumu bilinmiyor.',
+  }
+}
+
+function getErrorMessage(error: SystemStatusClientError): string {
+  switch (error.kind) {
+    case 'timeout':
+      return 'API zamanında yanıt vermedi. Backend sürecinin çalıştığını kontrol edin.'
+    case 'network':
+      return 'Spring Boot API erişilemiyor. Backend sürecini başlatıp tekrar deneyin.'
+    case 'http':
+      if (error.statusCode === 502 || error.statusCode === 504) {
+        return 'Vite proxy Spring Boot API sürecine ulaşamadı. Backend sürecini başlatıp tekrar deneyin.'
+      }
+
+      return error.statusCode === 503
+        ? 'API çalışıyor ancak PostgreSQL bağlantısı kurulamadı. Lokal DB ayarlarını kontrol edin.'
+        : `API beklenmeyen bir HTTP ${error.statusCode ?? ''} yanıtı döndürdü.`
+    case 'invalid-response':
+      return 'API yanıtı ShiftARC sistem durumu sözleşmesiyle eşleşmiyor.'
+    case 'aborted':
+      return 'Durum kontrolü iptal edildi.'
+  }
 }
 
 export default App
