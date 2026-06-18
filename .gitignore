@@ -1,5 +1,17 @@
+# Environment and secrets
+.env
+.env.*
+!.env.example
+!.env.*.example
+*.local
+**/application-*-secrets.yml
+**/application-*-secrets.yaml
+secrets/
+*.pem
+*.key
+
 # Logs
-logs
+logs/
 *.log
 npm-debug.log*
 yarn-debug.log*
@@ -7,18 +19,46 @@ yarn-error.log*
 pnpm-debug.log*
 lerna-debug.log*
 
-node_modules
-dist
-dist-ssr
-*.local
+# Frontend dependencies and outputs
+node_modules/
+dist/
+dist-ssr/
+coverage/
+.vite/
+*.tsbuildinfo
+playwright-report/
+test-results/
 
-# Editor directories and files
+# Backend and Gradle outputs
+.gradle/
+build/
+out/
+bin/
+target/
+!**/src/**/build/
+!**/src/**/out/
+
+# IDE settings
+.idea/
 .vscode/*
 !.vscode/extensions.json
-.idea
-.DS_Store
+*.iml
+*.ipr
+*.iws
 *.suo
 *.ntvs*
 *.njsproj
 *.sln
 *.sw?
+
+# Operating system files
+.DS_Store
+Thumbs.db
+Desktop.ini
+
+# Temporary files
+*.tmp
+*.temp
+*.bak
+*.orig
+*~
