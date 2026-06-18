@@ -59,8 +59,12 @@ function App() {
             type="button"
             onClick={refresh}
             disabled={isLoading}
+            aria-label={isLoading ? 'Kontrol ediliyor' : 'Yeniden kontrol et'}
           >
-            <span className={isLoading ? 'retry-icon is-spinning' : 'retry-icon'}>
+            <span
+              className={isLoading ? 'retry-icon is-spinning' : 'retry-icon'}
+              aria-hidden="true"
+            >
               ↻
             </span>
             {isLoading ? 'Kontrol ediliyor' : 'Yeniden kontrol et'}
