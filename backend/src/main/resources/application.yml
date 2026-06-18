@@ -1,0 +1,8 @@
+spring:
+  application:
+    name: shiftarc-api
+  profiles:
+    active: ${SPRING_PROFILES_ACTIVE:local}
+
+server:
+  port: ${SHIFTARC_API_PORT:8080}

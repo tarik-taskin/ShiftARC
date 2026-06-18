@@ -1,0 +1,15 @@
+spring:
+  datasource:
+    url: ${SHIFTARC_DB_URL:jdbc:postgresql://localhost:5432/shiftarc}
+    username: ${SHIFTARC_DB_USERNAME:shiftarc_app}
+    password: ${SHIFTARC_DB_PASSWORD}
+    driver-class-name: org.postgresql.Driver
+    hikari:
+      pool-name: ShiftArcHikariPool
+      minimum-idle: 1
+      maximum-pool-size: 5
+      connection-timeout: 5000
+      initialization-fail-timeout: 5000
+      validation-timeout: 3000
+      idle-timeout: 600000
+      max-lifetime: 1800000
