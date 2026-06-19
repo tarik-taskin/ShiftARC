@@ -88,6 +88,15 @@ ve zorunlu environment değerlerini kontrol eder.
 .\scripts\dev.ps1
 ```
 
+Windows'ta aynı akış çift tıklanabilir başlatıcıyla da çalıştırılabilir:
+
+```powershell
+.\scripts\start-shiftarc.bat
+```
+
+Başlatıcı frontend ve backend süreçlerini birlikte açar. Lokal PostgreSQL'in
+çalışıyor ve `.env.local` dosyasının hazırlanmış olması gerekir.
+
 Servis adresleri:
 
 - Frontend: <http://localhost:5173>
