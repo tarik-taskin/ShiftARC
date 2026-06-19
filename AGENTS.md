@@ -151,6 +151,19 @@ edilir.
 - Yeni görev gerektiren farklı ekranlarda ayrı form üretme; `TaskDialog` bileşenini
   yeniden kullan. Dialog içinden `CategoryDialog` ile kategori ekleme akışını koru.
 
+### Günlük plan davranışı
+
+- Günlük plan aynı workspace ve tarih için tek snapshot'tır; sıradan GET mevcut planı
+  değiştirmemeli veya yeniden üretmemelidir.
+- Tarih ve saat hesabını sunucu varsayılanından değil workspace IANA saat diliminden yap.
+- Plan blokları gün tipinin snapshot kopyasıdır; kaynak gün tipi sonradan değişse bile
+  mevcut plan sessizce değişmemelidir.
+- Görev yerleşiminde kategori kesişimi zorunludur. Günlük istekleri beş dakikaya
+  yuvarla ve sığmayan süreyi `daily_plan_warning` içinde görünür biçimde sakla.
+- Algoritma şimdilik deterministik başlangıç yaklaşımıdır; gerçekleşen süreyi düşme,
+  kullanıcı ayarlı öncelik ve daha gelişmiş dağıtım sonraki fazlarda eklenmelidir.
+- Yeniden üretim yalnız aktif plan ve doğru optimistic-lock sürümüyle yapılmalıdır.
+
 ### Veritabanı
 
 - Uygulama `shiftarc_app` sınırlı rolüyle çalışır; PostgreSQL superuser kullanma.
@@ -243,7 +256,7 @@ docs(project): add development guidance
 ## Mevcut kapsam sınırı
 
 `0.1.0` içinde authentication, trigger, pomodoro ve production deployment yoktur.
-Kategori, gün tipi, haftalık şablon ve görev yönetimi kullanılabilir durumdadır;
-otomatik planlama, süre gerçekleşmeleri, tarih istisnaları ve geçmiş özellikleri yalnız
+Kategori, gün tipi, haftalık şablon, görev yönetimi ve temel günlük plan kullanılabilir;
+süre gerçekleşmeleri, tarih istisnaları ve geçmiş özellikleri yalnız
 tanımlanan ürün fazlarında eklenir. Kullanıcı farklı bir faz istemedikçe ileri fazları
 altyapı görevi bahanesiyle erkenden uygulama.

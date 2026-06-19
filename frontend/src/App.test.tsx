@@ -11,11 +11,15 @@ const {
   mockUseWorkspace,
   mockUseCompleteOnboarding,
   mockUseUpdateWorkspaceSettings,
+  mockUseTodayPlan,
+  mockUseRegenerateTodayPlan,
 } = vi.hoisted(() => ({
   mockUseSystemStatus: vi.fn(),
   mockUseWorkspace: vi.fn(),
   mockUseCompleteOnboarding: vi.fn(),
   mockUseUpdateWorkspaceSettings: vi.fn(),
+  mockUseTodayPlan: vi.fn(),
+  mockUseRegenerateTodayPlan: vi.fn(),
 }))
 
 vi.mock('./api/system-status/useSystemStatus', () => ({
@@ -26,6 +30,11 @@ vi.mock('./api/workspace/queries', () => ({
   useWorkspace: mockUseWorkspace,
   useCompleteOnboarding: mockUseCompleteOnboarding,
   useUpdateWorkspaceSettings: mockUseUpdateWorkspaceSettings,
+}))
+
+vi.mock('./api/daily-plan/queries', () => ({
+  useTodayPlan: mockUseTodayPlan,
+  useRegenerateTodayPlan: mockUseRegenerateTodayPlan,
 }))
 
 describe('foundation status screen', () => {
@@ -174,6 +183,8 @@ describe('product application shell', () => {
       isSuccess: false,
       error: null,
     })
+    mockUseTodayPlan.mockReturnValue({ data: dailyPlanFixture(), isPending: false, isError: false })
+    mockUseRegenerateTodayPlan.mockReturnValue({ mutate: vi.fn(), isPending: false })
   })
 
   afterEach(() => {
@@ -185,9 +196,7 @@ describe('product application shell', () => {
 
     renderApp()
 
-    expect(
-      screen.getByRole('heading', { name: 'Bugünün ritmini kur.' }),
-    ).toBeInTheDocument()
+    expect(screen.getByRole('heading', { name: 'ML Dersi', level: 1 })).toBeInTheDocument()
     expect(
       within(screen.getByRole('navigation', { name: 'Ana navigasyon' })).getByRole(
         'link',
@@ -248,5 +257,16 @@ function workspaceFixture(overrides: { onboardingCompleted: boolean }) {
     backgroundMode: 'TIME_AWARE' as const,
     onboardingCompleted: overrides.onboardingCompleted,
     version: 0,
+  }
+}
+
+function dailyPlanFixture() {
+  return {
+    id: '71000000-0000-0000-0000-000000000001', date: '2026-06-19', timezone: 'Europe/Istanbul',
+    sourceDayTypeId: '51000000-0000-0000-0000-000000000001', sourceDayTypeName: 'İş Günü', status: 'ACTIVE' as const,
+    version: 0, generatedAt: '2026-06-19T10:00:00Z', warnings: [], blocks: [{
+      id: '72000000-0000-0000-0000-000000000001', name: 'İş', startMinute: 0, endMinute: 1440,
+      items: [{ id: '73000000-0000-0000-0000-000000000001', taskId: '61000000-0000-0000-0000-000000000001', taskTitle: 'ML Dersi', taskType: 'WORK_ITEM' as const, importance: 5, plannedStartMinute: 0, plannedEndMinute: 1440, status: 'PLANNED' as const }],
+    }],
   }
 }

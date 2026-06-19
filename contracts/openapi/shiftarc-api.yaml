@@ -355,6 +355,30 @@ paths:
             application/json: { schema: { $ref: "#/components/schemas/TaskResponse" } }
         "404": { $ref: "#/components/responses/TaskNotFound" }
         "409": { $ref: "#/components/responses/TaskConflict" }
+  /api/v1/daily-plan/today:
+    get:
+      operationId: getTodayPlan
+      summary: Get or deterministically generate today's plan
+      tags: [Daily plan]
+      responses:
+        "200":
+          description: Today's persisted plan.
+          content:
+            application/json: { schema: { $ref: "#/components/schemas/DailyPlanResponse" } }
+        "409": { $ref: "#/components/responses/DailyPlanConflict" }
+  /api/v1/daily-plan/today/regenerate:
+    post:
+      operationId: regenerateTodayPlan
+      summary: Regenerate today's future plan structure
+      tags: [Daily plan]
+      parameters:
+        - { $ref: "#/components/parameters/EntityVersion" }
+      responses:
+        "200":
+          description: Regenerated plan.
+          content:
+            application/json: { schema: { $ref: "#/components/schemas/DailyPlanResponse" } }
+        "409": { $ref: "#/components/responses/DailyPlanConflict" }
   /api/v1/workspace:
     get:
       operationId: getWorkspace
@@ -518,7 +542,57 @@ components:
     TaskConflict:
       description: The task version conflicts with current state.
       content: { application/problem+json: { schema: { $ref: "#/components/schemas/ProblemDetail" } } }
+    DailyPlanConflict:
+      description: The weekday has no day type or the plan version is stale.
+      content: { application/problem+json: { schema: { $ref: "#/components/schemas/ProblemDetail" } } }
   schemas:
+    DailyPlanResponse:
+      type: object
+      additionalProperties: false
+      required: [id, date, timezone, sourceDayTypeId, sourceDayTypeName, status, version, generatedAt, blocks, warnings]
+      properties:
+        id: { type: string, format: uuid }
+        date: { type: string, format: date }
+        timezone: { type: string }
+        sourceDayTypeId: { type: string, format: uuid }
+        sourceDayTypeName: { type: string }
+        status: { type: string, enum: [ACTIVE, COMPLETED] }
+        version: { type: integer, format: int64, minimum: 0 }
+        generatedAt: { type: string, format: date-time }
+        blocks: { type: array, items: { $ref: "#/components/schemas/DailyPlanBlock" } }
+        warnings: { type: array, items: { $ref: "#/components/schemas/DailyPlanWarning" } }
+    DailyPlanBlock:
+      type: object
+      additionalProperties: false
+      required: [id, name, startMinute, endMinute, items]
+      properties:
+        id: { type: string, format: uuid }
+        name: { type: string }
+        startMinute: { type: integer, minimum: 0, maximum: 1435 }
+        endMinute: { type: integer, minimum: 5, maximum: 1440 }
+        items: { type: array, items: { $ref: "#/components/schemas/DailyPlanItem" } }
+    DailyPlanItem:
+      type: object
+      additionalProperties: false
+      required: [id, taskId, taskTitle, taskType, importance, plannedStartMinute, plannedEndMinute, status]
+      properties:
+        id: { type: string, format: uuid }
+        taskId: { type: string, format: uuid }
+        taskTitle: { type: string }
+        taskType: { $ref: "#/components/schemas/TaskType" }
+        importance: { type: integer, minimum: 1, maximum: 5 }
+        plannedStartMinute: { type: integer }
+        plannedEndMinute: { type: integer }
+        status: { type: string, enum: [PLANNED, ACTIVE, COMPLETED, SKIPPED] }
+    DailyPlanWarning:
+      type: object
+      additionalProperties: false
+      required: [taskId, reasonCode, unallocatedMinutes, detail]
+      properties:
+        taskId: { type: string, format: uuid }
+        reasonCode: { type: string }
+        unallocatedMinutes: { type: integer, minimum: 5 }
+        detail: { type: string }
     TaskType:
       type: string
       enum: [WORK_ITEM, HABIT]

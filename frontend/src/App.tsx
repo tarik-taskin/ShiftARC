@@ -4,7 +4,8 @@ import { useLocation } from 'react-router-dom'
 
 import { ProductShell } from '@/app/product-shell'
 import { WorkspaceGate } from '@/app/workspace-gate'
-import { FeaturePage, TodayPage } from '@/pages/feature-page'
+import { FeaturePage } from '@/pages/feature-page'
+import { TodayPage } from '@/pages/today-page'
 import { SystemStatusPage } from '@/pages/system-status-page'
 import { WorkspacePreferencesPage } from '@/pages/workspace-preferences-page'
 

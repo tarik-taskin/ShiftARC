@@ -50,6 +50,14 @@ taşıyabilir; önem, son tarih, oluşturulma zamanı, tip, durum ve kategoriye 
 filtrelenebilir. Görevler tamamlanabilir, arşivlenebilir ve yeniden aktifleştirilebilir.
 Uygulama üst çubuğundaki `Yeni görev` eylemi aynı dialogu her sayfadan açar.
 
+Ana sayfa workspace saat diliminde canlı saat ve saniyeyi, bugünün gün tipinden
+üretilmiş 24 saatlik snapshot çizelgesini ve kırmızı mevcut-zaman imlecini gösterir.
+Günlük plan üreticisi görevleri kategori uyumu ve önem sırasıyla değerlendirir; iş
+parçacığı süresini son tarihe kalan günlere, alışkanlık hedefini haftada kalan günlere
+böler. Beş dakikalık günlük hedefler uygun bloklara yerleştirilir, sığmayan kısım
+silinmek yerine açık bir plan uyarısı olarak saklanır. Aynı güne yapılan normal GET
+mevcut snapshot'ı korur; kullanıcı isterse sürüm kontrollü yeniden üretim yapabilir.
+
 ## Ön koşullar
 
 - Windows PowerShell 5.1 veya PowerShell 7+
@@ -259,6 +267,8 @@ Mevcut ürün endpoint'leri:
 - `POST /api/v1/tasks`
 - `PUT /api/v1/tasks/{taskId}`
 - `POST /api/v1/tasks/{taskId}/status/{status}`
+- `GET /api/v1/daily-plan/today`
+- `POST /api/v1/daily-plan/today/regenerate`
 - `GET /api/v1/system/status`
 
 Bir endpoint veya payload değiştirildiğinde önce OpenAPI sözleşmesi, ardından
@@ -301,7 +311,7 @@ JDBC exception veya bağlantı secret'ı response'a eklenmez.
 ## 0.1.0 geliştirme kapsamı dışında olanlar
 
 - Authentication ve kullanıcı hesapları
-- Görev süre gerçekleşmeleri, planlama algoritması ve tarih istisnaları
+- Görev çalıştırma oturumları, süre gerçekleşmeleri ve tarih istisnaları
 - Planlama algoritması
 - Trigger ve pomodoro akışları
 - Production deployment, container veya managed servis kurulumu
