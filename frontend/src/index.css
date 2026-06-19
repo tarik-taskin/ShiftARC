@@ -52,6 +52,9 @@
   --input: rgba(207, 231, 220, 0.14);
   --ring: #65e6aa;
   --sidebar: #091410;
+  --ambient-one: rgba(58, 177, 124, 0.16);
+  --ambient-two: rgba(61, 98, 183, 0.11);
+  --grid-line: rgba(255, 255, 255, 0.014);
   color: var(--foreground);
   background: var(--background);
   font-family: var(--font-sans);
@@ -100,10 +103,10 @@ a {
   position: relative;
   isolation: isolate;
   background:
-    radial-gradient(circle at 12% -8%, rgba(58, 177, 124, 0.16), transparent 32rem),
-    radial-gradient(circle at 92% 10%, rgba(61, 98, 183, 0.11), transparent 30rem),
-    linear-gradient(rgba(255, 255, 255, 0.014) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(255, 255, 255, 0.014) 1px, transparent 1px),
+    radial-gradient(circle at 12% -8%, var(--ambient-one), transparent 32rem),
+    radial-gradient(circle at 92% 10%, var(--ambient-two), transparent 30rem),
+    linear-gradient(var(--grid-line) 1px, transparent 1px),
+    linear-gradient(90deg, var(--grid-line) 1px, transparent 1px),
     var(--background);
   background-size: auto, auto, 56px 56px, 56px 56px, auto;
 }
@@ -149,38 +152,74 @@ a {
   --status-glow: rgba(148, 163, 184, 0.35);
 }
 
-@media (prefers-color-scheme: light) {
-  :root {
-    --background: #f3f7f4;
-    --foreground: #10221a;
-    --card: #fbfdfc;
-    --card-foreground: #10221a;
-    --popover: #ffffff;
-    --popover-foreground: #10221a;
-    --primary: #087d50;
-    --primary-foreground: #f5fff9;
-    --secondary: #e5eee9;
-    --secondary-foreground: #183d2c;
-    --muted: #e9f0ec;
-    --muted-foreground: #61736a;
-    --accent: #e1eee7;
-    --accent-foreground: #10221a;
-    --destructive: #b42318;
-    --border: rgba(25, 60, 44, 0.13);
-    --input: rgba(25, 60, 44, 0.16);
-    --ring: #087d50;
-    --sidebar: #edf4f0;
-  }
+[data-theme="dawn"] {
+  --background: #fbf7ed;
+  --foreground: #2b2118;
+  --card: #fffdf8;
+  --card-foreground: #2b2118;
+  --popover: #fffdf8;
+  --popover-foreground: #2b2118;
+  --primary: #b45309;
+  --primary-foreground: #fffaf0;
+  --secondary: #efe4cf;
+  --secondary-foreground: #55351d;
+  --muted: #f2e9d8;
+  --muted-foreground: #786956;
+  --accent: #f0e2c8;
+  --accent-foreground: #382719;
+  --destructive: #b42318;
+  --border: rgba(89, 62, 35, 0.15);
+  --input: rgba(89, 62, 35, 0.18);
+  --ring: #b45309;
+  --sidebar: #f5ecdc;
+  --ambient-one: rgba(245, 158, 11, 0.16);
+  --ambient-two: rgba(244, 114, 182, 0.1);
+  --grid-line: rgba(89, 62, 35, 0.025);
+}
 
-  .app-canvas {
-    background:
-      radial-gradient(circle at 12% -8%, rgba(62, 190, 130, 0.16), transparent 32rem),
-      radial-gradient(circle at 92% 10%, rgba(95, 132, 210, 0.12), transparent 30rem),
-      linear-gradient(rgba(14, 65, 42, 0.022) 1px, transparent 1px),
-      linear-gradient(90deg, rgba(14, 65, 42, 0.022) 1px, transparent 1px),
-      var(--background);
-    background-size: auto, auto, 56px 56px, 56px 56px, auto;
-  }
+[data-theme="aurora"] {
+  --background: #080b1d;
+  --foreground: #f2efff;
+  --card: #10152d;
+  --card-foreground: #f2efff;
+  --popover: #10152d;
+  --popover-foreground: #f2efff;
+  --primary: #a78bfa;
+  --primary-foreground: #160d32;
+  --secondary: #182344;
+  --secondary-foreground: #e8e4ff;
+  --muted: #141c38;
+  --muted-foreground: #99a6c8;
+  --accent: #19264a;
+  --accent-foreground: #f5f3ff;
+  --destructive: #fb7185;
+  --border: rgba(196, 181, 253, 0.15);
+  --input: rgba(196, 181, 253, 0.18);
+  --ring: #a78bfa;
+  --sidebar: #0b1027;
+  --ambient-one: rgba(139, 92, 246, 0.2);
+  --ambient-two: rgba(34, 211, 238, 0.12);
+  --grid-line: rgba(196, 181, 253, 0.018);
+}
+
+[data-background-mode="TIME_AWARE"][data-day-phase="morning"] {
+  --ambient-one: color-mix(in srgb, var(--primary) 24%, transparent);
+  --ambient-two: rgba(251, 191, 36, 0.12);
+}
+
+[data-background-mode="TIME_AWARE"][data-day-phase="day"] {
+  --ambient-one: color-mix(in srgb, var(--primary) 18%, transparent);
+  --ambient-two: rgba(59, 130, 246, 0.1);
+}
+
+[data-background-mode="TIME_AWARE"][data-day-phase="evening"] {
+  --ambient-one: rgba(249, 115, 22, 0.15);
+  --ambient-two: color-mix(in srgb, var(--primary) 17%, transparent);
+}
+
+[data-background-mode="TIME_AWARE"][data-day-phase="night"] {
+  --ambient-one: color-mix(in srgb, var(--primary) 15%, transparent);
+  --ambient-two: rgba(79, 70, 229, 0.14);
 }
 
 @media (prefers-reduced-motion: reduce) {

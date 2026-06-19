@@ -4,6 +4,7 @@ import {
   History,
   LayoutDashboard,
   ListTodo,
+  Palette,
   Settings2,
   Shapes,
   type LucideIcon,
@@ -53,6 +54,12 @@ export const primaryNavigation: NavigationItem[] = [
 ]
 
 export const utilityNavigation: NavigationItem[] = [
+  {
+    label: 'Görünüm',
+    path: '/settings/preferences',
+    icon: Palette,
+    description: 'Tema ve arka plan tercihleri',
+  },
   {
     label: 'Sistem durumu',
     shortLabel: 'Sistem',

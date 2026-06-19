@@ -32,6 +32,7 @@ function Invoke-QualityStep {
 
 Push-Location $frontendRoot
 try {
+    Invoke-QualityStep -Name "OpenAPI contract" -Action { & npm.cmd run contract:check }
     Invoke-QualityStep -Name "Frontend lint" -Action { & npm.cmd run lint }
     Invoke-QualityStep -Name "Frontend tests" -Action { & npm.cmd run test }
     Invoke-QualityStep -Name "Frontend build" -Action { & npm.cmd run build }

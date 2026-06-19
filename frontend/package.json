@@ -6,11 +6,13 @@
   "scripts": {
     "dev": "vite",
     "build": "tsc -b && vite build",
+    "contract:check": "node scripts/check-openapi.mjs",
     "lint": "eslint .",
     "test": "vitest run",
     "preview": "vite preview"
   },
   "dependencies": {
+    "@hookform/resolvers": "^5.4.0",
     "@radix-ui/react-slot": "^1.3.0",
     "@tanstack/react-query": "^5.101.0",
     "class-variance-authority": "^0.7.1",
@@ -43,6 +45,7 @@
     "typescript": "~6.0.2",
     "typescript-eslint": "^8.59.2",
     "vite": "^8.0.12",
-    "vitest": "^4.1.9"
+    "vitest": "^4.1.9",
+    "yaml": "^2.9.0"
   }
 }

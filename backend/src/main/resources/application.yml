@@ -13,8 +13,12 @@ spring:
     out-of-order: false
     clean-disabled: true
   jpa:
+    open-in-view: false
     hibernate:
-      ddl-auto: none
+      ddl-auto: validate
+    properties:
+      hibernate:
+        default_schema: shiftarc
   profiles:
     active: ${SPRING_PROFILES_ACTIVE:local}
 

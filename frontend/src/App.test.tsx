@@ -6,12 +6,26 @@ import { BrowserRouter } from 'react-router-dom'
 import App from './App'
 import { SystemStatusClientError } from './api/system-status/types'
 
-const { mockUseSystemStatus } = vi.hoisted(() => ({
+const {
+  mockUseSystemStatus,
+  mockUseWorkspace,
+  mockUseCompleteOnboarding,
+  mockUseUpdateWorkspaceSettings,
+} = vi.hoisted(() => ({
   mockUseSystemStatus: vi.fn(),
+  mockUseWorkspace: vi.fn(),
+  mockUseCompleteOnboarding: vi.fn(),
+  mockUseUpdateWorkspaceSettings: vi.fn(),
 }))
 
 vi.mock('./api/system-status/useSystemStatus', () => ({
   useSystemStatus: mockUseSystemStatus,
+}))
+
+vi.mock('./api/workspace/queries', () => ({
+  useWorkspace: mockUseWorkspace,
+  useCompleteOnboarding: mockUseCompleteOnboarding,
+  useUpdateWorkspaceSettings: mockUseUpdateWorkspaceSettings,
 }))
 
 describe('foundation status screen', () => {
@@ -143,6 +157,25 @@ function getStatusCard(heading: string): HTMLElement {
 }
 
 describe('product application shell', () => {
+  beforeEach(() => {
+    mockUseWorkspace.mockReturnValue({
+      data: workspaceFixture({ onboardingCompleted: true }),
+      isPending: false,
+      isError: false,
+    })
+    mockUseCompleteOnboarding.mockReturnValue({
+      mutateAsync: vi.fn(),
+      isPending: false,
+      error: null,
+    })
+    mockUseUpdateWorkspaceSettings.mockReturnValue({
+      mutateAsync: vi.fn(),
+      isPending: false,
+      isSuccess: false,
+      error: null,
+    })
+  })
+
   afterEach(() => {
     cleanup()
   })
@@ -165,4 +198,55 @@ describe('product application shell', () => {
       screen.getByRole('link', { name: 'Sistem durumunu aç' }),
     ).toHaveAttribute('href', '/settings/system')
   })
+
+  it('shows onboarding before exposing the product workspace', async () => {
+    mockUseWorkspace.mockReturnValue({
+      data: workspaceFixture({ onboardingCompleted: false }),
+      isPending: false,
+      isError: false,
+    })
+    window.history.pushState({}, '', '/')
+
+    renderApp()
+
+    expect(
+      await screen.findByRole('heading', {
+        name: 'Çalışma alanını kendine uydur.',
+      }),
+    ).toBeInTheDocument()
+    expect(
+      screen.getByRole('button', { name: 'ShiftARC’ı hazırla' }),
+    ).toBeInTheDocument()
+    expect(
+      screen.queryByRole('navigation', { name: 'Ana navigasyon' }),
+    ).not.toBeInTheDocument()
+  })
+
+  it('exposes persisted appearance preferences after onboarding', () => {
+    window.history.pushState({}, '', '/settings/preferences')
+
+    renderApp()
+
+    expect(
+      screen.getByRole('heading', { name: 'ShiftARC’ın atmosferini seç.' }),
+    ).toBeInTheDocument()
+    expect(
+      screen.getByRole('button', {
+        name: 'Arc Midnight: Derin yeşil, sakin ve yüksek odaklı.',
+      }),
+    ).toHaveAttribute('aria-pressed', 'true')
+  })
 })
+
+function workspaceFixture(overrides: { onboardingCompleted: boolean }) {
+  return {
+    id: '00000000-0000-0000-0000-000000000001',
+    name: 'Lokal Çalışma Alanı',
+    timezone: 'Europe/Istanbul',
+    weekStartsOn: 1,
+    themeId: 'arc-midnight' as const,
+    backgroundMode: 'TIME_AWARE' as const,
+    onboardingCompleted: overrides.onboardingCompleted,
+    version: 0,
+  }
+}

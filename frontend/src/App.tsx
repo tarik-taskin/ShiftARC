@@ -1,10 +1,27 @@
 import { Navigate, Route, Routes } from 'react-router-dom'
+import { useLocation } from 'react-router-dom'
 
 import { ProductShell } from '@/app/product-shell'
+import { WorkspaceGate } from '@/app/workspace-gate'
 import { FeaturePage, TodayPage } from '@/pages/feature-page'
 import { SystemStatusPage } from '@/pages/system-status-page'
+import { WorkspacePreferencesPage } from '@/pages/workspace-preferences-page'
 
 function App() {
+  const location = useLocation()
+
+  if (location.pathname === '/settings/system') {
+    return <ProductRoutes />
+  }
+
+  return (
+    <WorkspaceGate>
+      <ProductRoutes />
+    </WorkspaceGate>
+  )
+}
+
+function ProductRoutes() {
   return (
     <Routes>
       <Route element={<ProductShell />}>
@@ -53,6 +70,7 @@ function App() {
             />
           }
         />
+        <Route path="settings/preferences" element={<WorkspacePreferencesPage />} />
         <Route path="settings/system" element={<SystemStatusPage />} />
         <Route path="*" element={<Navigate to="/" replace />} />
       </Route>

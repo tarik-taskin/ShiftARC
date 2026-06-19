@@ -2,11 +2,76 @@ openapi: 3.1.0
 info:
   title: ShiftARC API
   version: 0.1.0
-  description: Contract for the local ShiftARC foundation API.
+  description: Contract for the local ShiftARC planning application API.
 servers:
   - url: /
 security: []
 paths:
+  /api/v1/workspace:
+    get:
+      operationId: getWorkspace
+      summary: Get the local workspace and its preferences
+      tags:
+        - Workspace
+      responses:
+        "200":
+          description: The local workspace.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/WorkspaceResponse"
+        "404":
+          $ref: "#/components/responses/WorkspaceNotFound"
+  /api/v1/workspace/settings:
+    patch:
+      operationId: updateWorkspaceSettings
+      summary: Update local workspace preferences
+      tags:
+        - Workspace
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/WorkspaceSettingsUpdateRequest"
+      responses:
+        "200":
+          description: The updated workspace.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/WorkspaceResponse"
+        "400":
+          $ref: "#/components/responses/InvalidRequest"
+        "404":
+          $ref: "#/components/responses/WorkspaceNotFound"
+        "409":
+          $ref: "#/components/responses/WorkspaceConflict"
+  /api/v1/onboarding:
+    post:
+      operationId: completeOnboarding
+      summary: Complete local workspace onboarding
+      tags:
+        - Workspace
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/OnboardingRequest"
+      responses:
+        "200":
+          description: Onboarding was completed.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/WorkspaceResponse"
+        "400":
+          $ref: "#/components/responses/InvalidRequest"
+        "404":
+          $ref: "#/components/responses/WorkspaceNotFound"
+        "409":
+          $ref: "#/components/responses/WorkspaceConflict"
   /api/v1/system/status:
     get:
       operationId: getSystemStatus
@@ -27,7 +92,118 @@ paths:
               schema:
                 $ref: "#/components/schemas/ProblemDetail"
 components:
+  responses:
+    InvalidRequest:
+      description: The request is invalid.
+      content:
+        application/problem+json:
+          schema:
+            $ref: "#/components/schemas/ProblemDetail"
+    WorkspaceNotFound:
+      description: The local workspace does not exist.
+      content:
+        application/problem+json:
+          schema:
+            $ref: "#/components/schemas/ProblemDetail"
+    WorkspaceConflict:
+      description: The workspace was changed or onboarding is already complete.
+      content:
+        application/problem+json:
+          schema:
+            $ref: "#/components/schemas/ProblemDetail"
   schemas:
+    WorkspaceResponse:
+      type: object
+      additionalProperties: false
+      required:
+        - id
+        - name
+        - timezone
+        - weekStartsOn
+        - themeId
+        - backgroundMode
+        - onboardingCompleted
+        - version
+      properties:
+        id:
+          type: string
+          format: uuid
+        name:
+          type: string
+        timezone:
+          type: string
+          example: Europe/Istanbul
+        weekStartsOn:
+          type: integer
+          minimum: 1
+          maximum: 7
+          example: 1
+        themeId:
+          $ref: "#/components/schemas/ThemeId"
+        backgroundMode:
+          $ref: "#/components/schemas/BackgroundMode"
+        onboardingCompleted:
+          type: boolean
+        version:
+          type: integer
+          format: int64
+          minimum: 0
+    WorkspaceSettingsUpdateRequest:
+      type: object
+      additionalProperties: false
+      required:
+        - timezone
+        - themeId
+        - backgroundMode
+        - version
+      properties:
+        timezone:
+          type: string
+          minLength: 1
+          maxLength: 64
+        themeId:
+          $ref: "#/components/schemas/ThemeId"
+        backgroundMode:
+          $ref: "#/components/schemas/BackgroundMode"
+        version:
+          type: integer
+          format: int64
+          minimum: 0
+    OnboardingRequest:
+      type: object
+      additionalProperties: false
+      required:
+        - timezone
+        - themeId
+        - backgroundMode
+        - includeSampleData
+        - version
+      properties:
+        timezone:
+          type: string
+          minLength: 1
+          maxLength: 64
+        themeId:
+          $ref: "#/components/schemas/ThemeId"
+        backgroundMode:
+          $ref: "#/components/schemas/BackgroundMode"
+        includeSampleData:
+          type: boolean
+        version:
+          type: integer
+          format: int64
+          minimum: 0
+    ThemeId:
+      type: string
+      enum:
+        - arc-midnight
+        - dawn
+        - aurora
+    BackgroundMode:
+      type: string
+      enum:
+        - TIME_AWARE
+        - STATIC
     SystemStatusResponse:
       type: object
       additionalProperties: false

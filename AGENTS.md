@@ -87,11 +87,15 @@ edilir.
 - Loading, success, error ve retry durumlarını açıkça modelle.
 - Responsive davranış ve klavye/ekran okuyucu erişilebilirliğini koru.
 - Animasyonlar `prefers-reduced-motion` tercihine uymalıdır.
+- Tema renklerini component içine gömme; `data-theme` ve merkezi CSS token
+  manifestlerini kullan.
 
 ### Backend
 
 - Ana paket `com.shiftarc.api` altında kalır.
 - Controller yalnız HTTP dönüşümünü; service uygulama davranışını yönetir.
+- JPA entity/repository katmanı persistence ayrıntısını service katmanından ayırır.
+- Hibernate şemayı yalnız `validate` eder; create/update DDL yetkisi verilmez.
 - JDBC veya internal exception ayrıntılarını API response'una taşıma.
 - Kullanıcıya dönen hatalarda standart Problem Details biçimini kullan.
 - Lokal profile ait secret doğrulamasını kaldırma veya sessiz varsayılan parola ekleme.

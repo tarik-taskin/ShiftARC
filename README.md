@@ -13,8 +13,20 @@ kapsamda değildir.
 - React 19, TypeScript 6, Vite 8
 - Spring Boot 4.1, Java 17, Gradle Wrapper
 - PostgreSQL 16, Flyway 12
+- Spring Data JPA (yalnız mapping/query; DDL yalnız Flyway)
 - Contract-first OpenAPI 3.1
 - Vitest, Testing Library, JUnit 5 ve MockMvc
+
+## Mevcut ürün akışı
+
+İlk açılışta ShiftARC lokal workspace kaydını API üzerinden yükler ve onboarding
+ekranını gösterir. Kullanıcı IANA saat dilimini, `Arc Midnight`, `Dawn` veya
+`Aurora` temasını, saate duyarlı ya da sabit arka plan davranışını ve örnek
+planlama verilerinin eklenip eklenmeyeceğini seçebilir.
+
+Örnek veri seçeneği altı kategori, iki gün tipi ve pazartesi–pazar şablonunu tek
+transaction içinde oluşturur; görev oluşturmaz. Tercihler daha sonra `Görünüm`
+sayfasından güncellenebilir.
 
 ## Ön koşullar
 
@@ -202,6 +214,13 @@ API sözleşmesinin kaynak doğrusu:
 ```text
 contracts/openapi/shiftarc-api.yaml
 ```
+
+Mevcut ürün endpoint'leri:
+
+- `GET /api/v1/workspace`
+- `PATCH /api/v1/workspace/settings`
+- `POST /api/v1/onboarding`
+- `GET /api/v1/system/status`
 
 Bir endpoint veya payload değiştirildiğinde önce OpenAPI sözleşmesi, ardından
 backend uygulaması, frontend tip/client kodu ve testler aynı değişiklik amacı

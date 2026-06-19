@@ -11,10 +11,12 @@ import {
 import { BrandMark } from '@/components/brand-mark'
 import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
+import { useOptionalWorkspace } from '@/app/workspace-context'
 
 export function ProductShell() {
   const location = useLocation()
   const reduceMotion = useReducedMotion()
+  const workspace = useOptionalWorkspace()
   const currentPage =
     allNavigation.find((item) => item.path === location.pathname) ??
     primaryNavigation[0]
@@ -41,7 +43,7 @@ export function ProductShell() {
                 ShiftARC
               </span>
               <span className="block font-mono text-[10px] text-muted-foreground">
-                local workspace · 0.1.0
+                {workspace?.name ?? 'local workspace'} · 0.1.0
               </span>
             </span>
           </NavLink>
@@ -56,10 +58,12 @@ export function ProductShell() {
             <div className="rounded-2xl border border-border/70 bg-card/55 p-4">
               <div className="flex items-center gap-2 text-xs font-semibold text-foreground">
                 <span className="size-2 rounded-full bg-emerald-400 shadow-[0_0_14px_rgba(52,211,153,0.7)]" />
-                Lokal çalışma alanı
+                {workspace?.name ?? 'Lokal çalışma alanı'}
               </div>
               <p className="mt-2 text-xs leading-5 text-muted-foreground">
-                Ürün iskeleti hazır. Domain modülleri sırayla bağlanacak.
+                {workspace
+                  ? 'Tercihler PostgreSQL çalışma alanıyla eşitlendi.'
+                  : 'Sistem görünümü bağlantıdan bağımsız kullanılabilir.'}
               </p>
             </div>
             {utilityNavigation.map((item) => (

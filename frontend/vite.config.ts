@@ -13,6 +13,26 @@ export default defineConfig({
       '@': fileURLToPath(new URL('./src', import.meta.url)),
     },
   },
+  build: {
+    rolldownOptions: {
+      output: {
+        codeSplitting: {
+          groups: [
+            {
+              name: 'react-vendor',
+              test: /node_modules[\\/](react|react-dom|react-router|@tanstack)/,
+              priority: 2,
+            },
+            {
+              name: 'ui-vendor',
+              test: /node_modules[\\/](motion|lucide-react|zod|react-hook-form|@hookform)/,
+              priority: 1,
+            },
+          ],
+        },
+      },
+    },
+  },
   server: {
     proxy: {
       '/api': {
