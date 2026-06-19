@@ -277,6 +277,84 @@ paths:
           $ref: "#/components/responses/InvalidRequest"
         "409":
           $ref: "#/components/responses/WeeklyPlanConflict"
+  /api/v1/tasks:
+    get:
+      operationId: listTasks
+      summary: List and filter local workspace tasks
+      tags: [Tasks]
+      parameters:
+        - { name: type, in: query, schema: { $ref: "#/components/schemas/TaskType" } }
+        - { name: status, in: query, schema: { $ref: "#/components/schemas/TaskStatus" } }
+        - { name: categoryId, in: query, schema: { type: string, format: uuid } }
+        - { name: search, in: query, schema: { type: string, maxLength: 160, default: "" } }
+        - name: sort
+          in: query
+          schema: { type: string, enum: [PRIORITY, DEADLINE, CREATED], default: PRIORITY }
+      responses:
+        "200":
+          description: Filtered tasks.
+          content:
+            application/json:
+              schema: { type: array, items: { $ref: "#/components/schemas/TaskResponse" } }
+    post:
+      operationId: createTask
+      summary: Create a work item or habit
+      tags: [Tasks]
+      requestBody:
+        required: true
+        content:
+          application/json: { schema: { $ref: "#/components/schemas/TaskWriteRequest" } }
+      responses:
+        "201":
+          description: Task created.
+          content:
+            application/json: { schema: { $ref: "#/components/schemas/TaskResponse" } }
+        "400": { $ref: "#/components/responses/InvalidRequest" }
+  /api/v1/tasks/{id}:
+    parameters:
+      - name: id
+        in: path
+        required: true
+        schema: { type: string, format: uuid }
+    put:
+      operationId: updateTask
+      summary: Update task details
+      tags: [Tasks]
+      requestBody:
+        required: true
+        content:
+          application/json: { schema: { $ref: "#/components/schemas/TaskWriteRequest" } }
+      responses:
+        "200":
+          description: Task updated.
+          content:
+            application/json: { schema: { $ref: "#/components/schemas/TaskResponse" } }
+        "400": { $ref: "#/components/responses/InvalidRequest" }
+        "404": { $ref: "#/components/responses/TaskNotFound" }
+        "409": { $ref: "#/components/responses/TaskConflict" }
+  /api/v1/tasks/{id}/status/{status}:
+    parameters:
+      - name: id
+        in: path
+        required: true
+        schema: { type: string, format: uuid }
+      - name: status
+        in: path
+        required: true
+        schema: { $ref: "#/components/schemas/TaskStatus" }
+    post:
+      operationId: setTaskStatus
+      summary: Complete, archive, or reactivate a task
+      tags: [Tasks]
+      parameters:
+        - { $ref: "#/components/parameters/EntityVersion" }
+      responses:
+        "200":
+          description: Task status changed.
+          content:
+            application/json: { schema: { $ref: "#/components/schemas/TaskResponse" } }
+        "404": { $ref: "#/components/responses/TaskNotFound" }
+        "409": { $ref: "#/components/responses/TaskConflict" }
   /api/v1/workspace:
     get:
       operationId: getWorkspace
@@ -434,7 +512,62 @@ components:
         application/problem+json:
           schema:
             $ref: "#/components/schemas/ProblemDetail"
+    TaskNotFound:
+      description: The task does not exist in the local workspace.
+      content: { application/problem+json: { schema: { $ref: "#/components/schemas/ProblemDetail" } } }
+    TaskConflict:
+      description: The task version conflicts with current state.
+      content: { application/problem+json: { schema: { $ref: "#/components/schemas/ProblemDetail" } } }
   schemas:
+    TaskType:
+      type: string
+      enum: [WORK_ITEM, HABIT]
+    TaskStatus:
+      type: string
+      enum: [ACTIVE, COMPLETED, ARCHIVED]
+    TaskCategory:
+      type: object
+      additionalProperties: false
+      required: [id, name, color, icon, archived]
+      properties:
+        id: { type: string, format: uuid }
+        name: { type: string }
+        color: { type: string }
+        icon: { type: [string, "null"] }
+        archived: { type: boolean }
+    TaskResponse:
+      type: object
+      additionalProperties: false
+      required: [id, type, title, description, importance, status, totalRequiredMinutes, deadline, weeklyTargetMinutes, categories, version, completedAt, createdAt, updatedAt]
+      properties:
+        id: { type: string, format: uuid }
+        type: { $ref: "#/components/schemas/TaskType" }
+        title: { type: string }
+        description: { type: [string, "null"] }
+        importance: { type: integer, minimum: 1, maximum: 5 }
+        status: { $ref: "#/components/schemas/TaskStatus" }
+        totalRequiredMinutes: { type: [integer, "null"], minimum: 5 }
+        deadline: { type: [string, "null"], format: date }
+        weeklyTargetMinutes: { type: [integer, "null"], minimum: 5 }
+        categories: { type: array, items: { $ref: "#/components/schemas/TaskCategory" } }
+        version: { type: integer, format: int64, minimum: 0 }
+        completedAt: { type: [string, "null"], format: date-time }
+        createdAt: { type: string, format: date-time }
+        updatedAt: { type: string, format: date-time }
+    TaskWriteRequest:
+      type: object
+      additionalProperties: false
+      required: [type, title, importance, categoryIds]
+      properties:
+        type: { $ref: "#/components/schemas/TaskType" }
+        title: { type: string, minLength: 1, maxLength: 160 }
+        description: { type: [string, "null"], maxLength: 2000 }
+        importance: { type: integer, minimum: 1, maximum: 5 }
+        totalRequiredMinutes: { type: [integer, "null"], minimum: 5 }
+        deadline: { type: [string, "null"], format: date }
+        weeklyTargetMinutes: { type: [integer, "null"], minimum: 5 }
+        categoryIds: { type: array, maxItems: 64, uniqueItems: true, items: { type: string, format: uuid } }
+        version: { type: [integer, "null"], format: int64, minimum: 0 }
     WeeklyPlanResponse:
       type: object
       additionalProperties: false

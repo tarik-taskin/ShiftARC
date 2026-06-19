@@ -44,6 +44,12 @@ tiplerini atar. Plan eksik günlerle taslak olarak kaydedilebilir; yedi günün 
 atandığında tamamlandı durumuna geçer. Bütün hafta tek transaction içinde yazılır ve
 workspace sürümü üzerinden eşzamanlı değişiklik çakışmaları engellenir.
 
+`Görevler` sayfası son tarih ve toplam süre taşıyan iş parçacıklarıyla haftalık süre
+hedefli alışkanlıkları yönetir. Her görev 1–5 önem derecesi ve birden fazla kategori
+taşıyabilir; önem, son tarih, oluşturulma zamanı, tip, durum ve kategoriye göre
+filtrelenebilir. Görevler tamamlanabilir, arşivlenebilir ve yeniden aktifleştirilebilir.
+Uygulama üst çubuğundaki `Yeni görev` eylemi aynı dialogu her sayfadan açar.
+
 ## Ön koşullar
 
 - Windows PowerShell 5.1 veya PowerShell 7+
@@ -249,6 +255,10 @@ Mevcut ürün endpoint'leri:
 - `PUT /api/v1/day-types/{dayTypeId}/blocks`
 - `GET /api/v1/weekly-plan`
 - `PUT /api/v1/weekly-plan`
+- `GET /api/v1/tasks`
+- `POST /api/v1/tasks`
+- `PUT /api/v1/tasks/{taskId}`
+- `POST /api/v1/tasks/{taskId}/status/{status}`
 - `GET /api/v1/system/status`
 
 Bir endpoint veya payload değiştirildiğinde önce OpenAPI sözleşmesi, ardından
@@ -291,7 +301,7 @@ JDBC exception veya bağlantı secret'ı response'a eklenmez.
 ## 0.1.0 geliştirme kapsamı dışında olanlar
 
 - Authentication ve kullanıcı hesapları
-- Görev yönetimi ve belirli tarihlere ait gün tipi istisnaları
+- Görev süre gerçekleşmeleri, planlama algoritması ve tarih istisnaları
 - Planlama algoritması
 - Trigger ve pomodoro akışları
 - Production deployment, container veya managed servis kurulumu

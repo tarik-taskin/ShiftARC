@@ -26,6 +26,10 @@ const WeeklyPlanPage = lazy(() =>
   })),
 )
 
+const TasksPage = lazy(() =>
+  import('@/pages/tasks-page').then((module) => ({ default: module.TasksPage })),
+)
+
 function App() {
   const location = useLocation()
 
@@ -64,12 +68,7 @@ function ProductRoutes() {
         <Route
           path="tasks"
           element={
-            <FeaturePage
-              eyebrow="Görev merkezi"
-              title="İşlerini ve alışkanlıklarını tek yerde tut."
-              description="Son tarihli iş parçacıkları ile haftalık hedefli alışkanlıklar aynı çalışma alanında yönetilecek."
-              nextStep="Görev domain'i Faz 7'de bağlanacak."
-            />
+            <Suspense fallback={<div role="status">Görevler yükleniyor…</div>}><TasksPage /></Suspense>
           }
         />
         <Route

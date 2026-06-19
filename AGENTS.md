@@ -139,6 +139,18 @@ edilir.
   optimistic-lock kontrolü uygula.
 - Belirli tarihlere ait istisnaları tekrar eden haftalık şablona karıştırma.
 
+### Görev davranışı
+
+- `WORK_ITEM` yalnız son tarih ve beş dakikalık toplam süre; `HABIT` yalnız beş
+  dakikalık haftalık hedef taşır. Tip alanlarını backend'de birlikte doğrula.
+- Bütün görevler 1–5 önem derecesine sahiptir ve sıfır veya daha fazla aktif
+  workspace kategorisine bağlanabilir.
+- Tamamlama `completed_at` üretmeli; yeniden aktifleştirme veya arşivleme bu alanı
+  temizlemelidir. Fiziksel silme yapma.
+- Güncelleme ve durum geçişlerinde optimistic-lock sürümünü zorunlu tut.
+- Yeni görev gerektiren farklı ekranlarda ayrı form üretme; `TaskDialog` bileşenini
+  yeniden kullan. Dialog içinden `CategoryDialog` ile kategori ekleme akışını koru.
+
 ### Veritabanı
 
 - Uygulama `shiftarc_app` sınırlı rolüyle çalışır; PostgreSQL superuser kullanma.
@@ -231,7 +243,7 @@ docs(project): add development guidance
 ## Mevcut kapsam sınırı
 
 `0.1.0` içinde authentication, trigger, pomodoro ve production deployment yoktur.
-Kategori, gün tipi ve haftalık şablon yönetimi kullanılabilir durumdadır; görev,
-günlük plan, tarih istisnaları ve geçmiş özellikleri yalnız tanımlanan ürün fazlarında
-eklenir. Kullanıcı farklı bir faz istemedikçe ileri fazları altyapı görevi bahanesiyle
-erkenden uygulama.
+Kategori, gün tipi, haftalık şablon ve görev yönetimi kullanılabilir durumdadır;
+otomatik planlama, süre gerçekleşmeleri, tarih istisnaları ve geçmiş özellikleri yalnız
+tanımlanan ürün fazlarında eklenir. Kullanıcı farklı bir faz istemedikçe ileri fazları
+altyapı görevi bahanesiyle erkenden uygulama.

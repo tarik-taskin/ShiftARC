@@ -1,5 +1,6 @@
 import { AnimatePresence, motion, useReducedMotion } from 'motion/react'
-import { Activity, ArrowUpRight } from 'lucide-react'
+import { Activity, ArrowUpRight, Plus } from 'lucide-react'
+import { useState } from 'react'
 import { NavLink, Outlet, useLocation } from 'react-router-dom'
 
 import {
@@ -12,11 +13,13 @@ import { BrandMark } from '@/components/brand-mark'
 import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
 import { useOptionalWorkspace } from '@/app/workspace-context'
+import { TaskDialog } from '@/features/tasks/task-dialog'
 
 export function ProductShell() {
   const location = useLocation()
   const reduceMotion = useReducedMotion()
   const workspace = useOptionalWorkspace()
+  const [taskDialogOpen, setTaskDialogOpen] = useState(false)
   const currentPage =
     allNavigation.find((item) => item.path === location.pathname) ??
     primaryNavigation[0]
@@ -92,6 +95,8 @@ export function ProductShell() {
               </div>
             </div>
 
+            <div className="flex items-center gap-2">
+            {workspace ? <Button size="sm" onClick={() => setTaskDialogOpen(true)}><Plus className="size-4" /><span className="hidden sm:inline">Yeni görev</span></Button> : null}
             <Button asChild variant="outline" size="sm">
               <NavLink
                 to="/settings/system"
@@ -102,6 +107,7 @@ export function ProductShell() {
                 <ArrowUpRight className="size-3.5 opacity-60" aria-hidden="true" />
               </NavLink>
             </Button>
+            </div>
           </header>
 
           <AnimatePresence mode="wait" initial={false}>
@@ -144,6 +150,7 @@ export function ProductShell() {
           )
         })}
       </nav>
+      {taskDialogOpen ? <TaskDialog open onOpenChange={setTaskDialogOpen} /> : null}
     </div>
   )
 }
