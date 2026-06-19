@@ -28,6 +28,11 @@ planlama verilerinin eklenip eklenmeyeceğini seçebilir.
 transaction içinde oluşturur; görev oluşturmaz. Tercihler daha sonra `Görünüm`
 sayfasından güncellenebilir.
 
+`Kategoriler` sayfası görev ve zaman bloklarında kullanılacak planlama sözlüğünü
+yönetir. Kategoriler isim, renk ve ikonla oluşturulabilir; aranabilir, düzenlenebilir,
+arşivlenebilir ve veri kaybı olmadan geri yüklenebilir. Aynı çalışma alanında kategori
+adları büyük-küçük harf ayrımından bağımsız olarak benzersizdir.
+
 ## Ön koşullar
 
 - Windows PowerShell 5.1 veya PowerShell 7+
@@ -220,6 +225,11 @@ Mevcut ürün endpoint'leri:
 - `GET /api/v1/workspace`
 - `PATCH /api/v1/workspace/settings`
 - `POST /api/v1/onboarding`
+- `GET /api/v1/categories`
+- `POST /api/v1/categories`
+- `PUT /api/v1/categories/{categoryId}`
+- `DELETE /api/v1/categories/{categoryId}`
+- `POST /api/v1/categories/{categoryId}/restore`
 - `GET /api/v1/system/status`
 
 Bir endpoint veya payload değiştirildiğinde önce OpenAPI sözleşmesi, ardından
@@ -262,7 +272,7 @@ JDBC exception veya bağlantı secret'ı response'a eklenmez.
 ## 0.1.0 geliştirme kapsamı dışında olanlar
 
 - Authentication ve kullanıcı hesapları
-- Görev, kategori, gün tipi ve zaman bloğu domain modelleri
+- Görev, gün tipi ve zaman bloğu yönetim akışları
 - Planlama algoritması
 - Trigger ve pomodoro akışları
 - Production deployment, container veya managed servis kurulumu

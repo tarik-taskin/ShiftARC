@@ -1,3 +1,4 @@
+import { lazy, Suspense } from 'react'
 import { Navigate, Route, Routes } from 'react-router-dom'
 import { useLocation } from 'react-router-dom'
 
@@ -6,6 +7,12 @@ import { WorkspaceGate } from '@/app/workspace-gate'
 import { FeaturePage, TodayPage } from '@/pages/feature-page'
 import { SystemStatusPage } from '@/pages/system-status-page'
 import { WorkspacePreferencesPage } from '@/pages/workspace-preferences-page'
+
+const CategoriesPage = lazy(() =>
+  import('@/pages/categories-page').then((module) => ({
+    default: module.CategoriesPage,
+  })),
+)
 
 function App() {
   const location = useLocation()
@@ -57,6 +64,14 @@ function ProductRoutes() {
               description="Son tarihli iş parçacıkları ile haftalık hedefli alışkanlıklar aynı çalışma alanında yönetilecek."
               nextStep="Görev domain'i Faz 7'de bağlanacak."
             />
+          }
+        />
+        <Route
+          path="categories"
+          element={
+            <Suspense fallback={<div role="status">Kategoriler yükleniyor…</div>}>
+              <CategoriesPage />
+            </Suspense>
           }
         />
         <Route

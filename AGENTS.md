@@ -109,6 +109,15 @@ edilir.
   güncellenir.
 - Breaking değişiklikler açıkça belirtilmeden mevcut `/api/v1` davranışını bozma.
 
+### Kategori davranışı
+
+- Kategori silme fiziksel silme değildir; arşivleme ve geri yükleme akışını koru.
+- İsim benzersizliği çalışma alanı içinde ve büyük-küçük harf ayrımından bağımsızdır.
+- Güncelleme, arşivleme ve geri yüklemede istemcinin gönderdiği optimistic-lock
+  sürümünü doğrula; çakışmaları standart Problem Details yanıtıyla bildir.
+- Görev oluşturma gibi başka akışlardan kategori eklemek gerektiğinde mevcut
+  `CategoryDialog` bileşenini yeniden kullan.
+
 ### Veritabanı
 
 - Uygulama `shiftarc_app` sınırlı rolüyle çalışır; PostgreSQL superuser kullanma.
@@ -201,6 +210,6 @@ docs(project): add development guidance
 ## Mevcut kapsam sınırı
 
 `0.1.0` içinde authentication, trigger, pomodoro ve production deployment yoktur.
-Kategori, gün tipi, görev, günlük plan ve geçmiş özellikleri yalnız tanımlanan
-ürün fazlarında eklenir; kullanıcı farklı bir faz istemedikçe ileri fazları
-altyapı görevi bahanesiyle erkenden uygulama.
+Kategori yönetimi kullanılabilir durumdadır; gün tipi, görev, günlük plan ve geçmiş
+özellikleri yalnız tanımlanan ürün fazlarında eklenir. Kullanıcı farklı bir faz
+istemedikçe ileri fazları altyapı görevi bahanesiyle erkenden uygulama.

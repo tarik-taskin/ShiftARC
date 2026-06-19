@@ -11,6 +11,7 @@ import org.springframework.test.context.ActiveProfiles;
 
 import com.shiftarc.api.workspace.WorkspaceRepository;
 import com.shiftarc.api.workspace.WorkspaceSettingsRepository;
+import com.shiftarc.api.category.CategoryRepository;
 
 import static org.mockito.Mockito.mock;
 
@@ -44,6 +45,11 @@ class ShiftArcApiApplicationTests {
         @Bean
         WorkspaceSettingsRepository workspaceSettingsRepository() {
             return mock(WorkspaceSettingsRepository.class);
+        }
+
+        @Bean
+        CategoryRepository categoryRepository() {
+            return mock(CategoryRepository.class);
         }
     }
 }

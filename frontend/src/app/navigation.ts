@@ -7,6 +7,7 @@ import {
   Palette,
   Settings2,
   Shapes,
+  Tags,
   type LucideIcon,
 } from 'lucide-react'
 
@@ -44,6 +45,13 @@ export const primaryNavigation: NavigationItem[] = [
     path: '/tasks',
     icon: ListTodo,
     description: 'İş parçacıkları ve alışkanlıklar',
+  },
+  {
+    label: 'Kategoriler',
+    shortLabel: 'Kategori',
+    path: '/categories',
+    icon: Tags,
+    description: 'Görev ve zaman bloğu bağlamları',
   },
   {
     label: 'Geçmiş',

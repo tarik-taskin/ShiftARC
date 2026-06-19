@@ -121,7 +121,7 @@ export function ProductShell() {
       </div>
 
       <nav
-        className="fixed inset-x-3 bottom-3 z-40 grid grid-cols-5 rounded-2xl border border-border/75 bg-sidebar/92 p-1.5 shadow-2xl shadow-black/25 backdrop-blur-2xl lg:hidden"
+        className="fixed inset-x-3 bottom-3 z-40 grid grid-cols-6 rounded-2xl border border-border/75 bg-sidebar/92 p-1.5 shadow-2xl shadow-black/25 backdrop-blur-2xl lg:hidden"
         aria-label="Mobil navigasyon"
       >
         {primaryNavigation.map((item) => {

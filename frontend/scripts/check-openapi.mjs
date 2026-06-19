@@ -18,6 +18,9 @@ if (contract.info?.version !== packageJson.version) {
 }
 
 for (const path of [
+  '/api/v1/categories',
+  '/api/v1/categories/{id}',
+  '/api/v1/categories/{id}/restore',
   '/api/v1/workspace',
   '/api/v1/workspace/settings',
   '/api/v1/onboarding',
