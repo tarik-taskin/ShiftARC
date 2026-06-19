@@ -250,3 +250,7 @@ portlar `5173`, `8080` ve `5432`dir.
 
 En güncel geliştirme ve commit kuralları için [AGENTS.md](AGENTS.md) dosyasını
 okuyun.
+
+## Sürüm notları
+
+- [`0.0.1` — Lokal teknik temel](docs/releases/0.0.1.md)
