@@ -1,6 +1,7 @@
 import { cleanup, render, screen, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
+import { BrowserRouter } from 'react-router-dom'
 
 import App from './App'
 import { SystemStatusClientError } from './api/system-status/types'
@@ -19,6 +20,7 @@ describe('foundation status screen', () => {
   beforeEach(() => {
     mockUseSystemStatus.mockReset()
     refresh.mockReset()
+    window.history.pushState({}, '', '/settings/system')
   })
 
   afterEach(() => {
@@ -31,7 +33,7 @@ describe('foundation status screen', () => {
       refresh,
     })
 
-    render(<App />)
+    renderApp()
 
     expect(
       screen.getByRole('heading', { name: 'Bağlantılar kontrol ediliyor' }),
@@ -53,7 +55,7 @@ describe('foundation status screen', () => {
         phase: 'success',
         data: {
           service: 'shiftarc-api',
-          version: '0.0.1',
+          version: '0.1.0',
           status: 'UP',
           database: 'UP',
         },
@@ -61,13 +63,13 @@ describe('foundation status screen', () => {
       refresh,
     })
 
-    render(<App />)
+    renderApp()
 
     expect(
       screen.getByRole('heading', { name: 'Tüm servisler hazır' }),
     ).toBeInTheDocument()
     expect(
-      within(getStatusCard('Spring Boot')).getByText('shiftarc-api · v0.0.1'),
+      within(getStatusCard('Spring Boot')).getByText('shiftarc-api · v0.1.0'),
     ).toBeInTheDocument()
     expect(
       within(getStatusCard('PostgreSQL 16')).getByText('Bağlı'),
@@ -88,7 +90,7 @@ describe('foundation status screen', () => {
       refresh,
     })
 
-    render(<App />)
+    renderApp()
 
     expect(
       within(getStatusCard('Spring Boot')).getByText('Yanıt veriyor'),
@@ -114,7 +116,7 @@ describe('foundation status screen', () => {
     })
     const user = userEvent.setup()
 
-    render(<App />)
+    renderApp()
     await user.click(
       screen.getByRole('button', { name: 'Yeniden kontrol et' }),
     )
@@ -122,6 +124,14 @@ describe('foundation status screen', () => {
     expect(refresh).toHaveBeenCalledTimes(1)
   })
 })
+
+function renderApp() {
+  return render(
+    <BrowserRouter>
+      <App />
+    </BrowserRouter>,
+  )
+}
 
 function getStatusCard(heading: string): HTMLElement {
   const card = screen.getByRole('heading', { name: heading }).closest('article')
@@ -131,3 +141,28 @@ function getStatusCard(heading: string): HTMLElement {
 
   return card
 }
+
+describe('product application shell', () => {
+  afterEach(() => {
+    cleanup()
+  })
+
+  it('renders the product navigation and today workspace', () => {
+    window.history.pushState({}, '', '/')
+
+    renderApp()
+
+    expect(
+      screen.getByRole('heading', { name: 'Bugünün ritmini kur.' }),
+    ).toBeInTheDocument()
+    expect(
+      within(screen.getByRole('navigation', { name: 'Ana navigasyon' })).getByRole(
+        'link',
+        { name: 'Gün tipleri' },
+      ),
+    ).toHaveAttribute('href', '/day-types')
+    expect(
+      screen.getByRole('link', { name: 'Sistem durumunu aç' }),
+    ).toHaveAttribute('href', '/settings/system')
+  })
+})

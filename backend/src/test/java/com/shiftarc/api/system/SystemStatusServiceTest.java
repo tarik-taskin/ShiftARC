@@ -34,12 +34,12 @@ class SystemStatusServiceTest {
     void returnsApiAndDatabaseStatusWhenProbeSucceeds() {
         when(jdbcTemplate.queryForObject("SELECT 1", Integer.class)).thenReturn(1);
         when(buildProperties.getName()).thenReturn("shiftarc-api");
-        when(buildProperties.getVersion()).thenReturn("0.0.1");
+        when(buildProperties.getVersion()).thenReturn("0.1.0");
 
         SystemStatusResponse response = systemStatusService.getStatus();
 
         assertEquals("shiftarc-api", response.service());
-        assertEquals("0.0.1", response.version());
+        assertEquals("0.1.0", response.version());
         assertEquals(SystemComponentStatus.UP, response.status());
         assertEquals(SystemComponentStatus.UP, response.database());
     }

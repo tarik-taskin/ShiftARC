@@ -10,9 +10,9 @@ ShiftARC; günlük ve haftalık planlama, zaman analizi, takvim kontrolü, göre
 önceliklendirme, trigger ve pomodoro özelliklerine doğru gelişecek web tabanlı
 bir planlama uygulamasıdır.
 
-Mevcut sürüm `0.0.1` yalnız lokal teknik temeldir. React, Spring Boot ve
-PostgreSQL bağlantısını kurar. Domain özelliklerinin henüz bulunmaması hata veya
-eksik migration değildir.
+Mevcut `0.1.0` geliştirme serisi ilk kullanılabilir lokal ürün akışını kurar.
+React, Spring Boot ve PostgreSQL temeli hazırdır; domain özellikleri fazlar
+halinde sözleşme, backend ve frontend birlikte güncellenerek eklenir.
 
 ## Repository haritası
 
@@ -191,6 +191,7 @@ docs(project): add development guidance
 
 ## Mevcut kapsam sınırı
 
-`0.0.1` içinde authentication, görevler, kategoriler, gün tipleri, planlama
-algoritması, trigger, pomodoro ve production deployment yoktur. Kullanıcı farklı
-bir faz istemedikçe bu özellikleri altyapı görevi bahanesiyle ekleme.
+`0.1.0` içinde authentication, trigger, pomodoro ve production deployment yoktur.
+Kategori, gün tipi, görev, günlük plan ve geçmiş özellikleri yalnız tanımlanan
+ürün fazlarında eklenir; kullanıcı farklı bir faz istemedikçe ileri fazları
+altyapı görevi bahanesiyle erkenden uygulama.

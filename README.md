@@ -3,10 +3,10 @@
 ShiftARC; günlük ve haftalık planlama, zaman analizi, takvim kontrolü ve odak
 akışları için geliştirilen web tabanlı bir planlama uygulamasıdır.
 
-Mevcut `0.0.1` sürümü ürün özelliklerini değil, lokal geliştirme temelini
-hazırlar. React frontend, Spring Boot API ve PostgreSQL aynı makinede birlikte
-çalışır. Deployment, kullanıcı hesabı ve planlama domain'i henüz kapsamda
-değildir.
+Mevcut `0.1.0` geliştirme sürümü, doğrulanmış lokal temelin üzerinde ilk
+kullanılabilir ürün akışını oluşturmaktadır. React frontend, Spring Boot API ve
+PostgreSQL aynı makinede birlikte çalışır. Deployment ve kullanıcı hesabı henüz
+kapsamda değildir.
 
 ## Teknoloji tabanı
 
@@ -206,7 +206,7 @@ Sistem durumu başarılı yanıtı:
 ```json
 {
   "service": "shiftarc-api",
-  "version": "0.0.1",
+  "version": "0.1.0",
   "status": "UP",
   "database": "UP"
 }
@@ -232,7 +232,7 @@ JDBC exception veya bağlantı secret'ı response'a eklenmez.
 - Actuator yalnız genel health endpoint'ini açar ve detay göstermez.
 - Testler gerçek lokal veritabanını değiştirmez.
 
-## 0.0.1 kapsamında olmayanlar
+## 0.1.0 geliştirme kapsamı dışında olanlar
 
 - Authentication ve kullanıcı hesapları
 - Görev, kategori, gün tipi ve zaman bloğu domain modelleri

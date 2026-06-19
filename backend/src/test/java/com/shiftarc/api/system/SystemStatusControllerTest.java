@@ -34,7 +34,7 @@ class SystemStatusControllerTest {
         when(systemStatusService.getStatus()).thenReturn(
             new SystemStatusResponse(
                 "shiftarc-api",
-                "0.0.1",
+                "0.1.0",
                 SystemComponentStatus.UP,
                 SystemComponentStatus.UP
             )
@@ -44,7 +44,7 @@ class SystemStatusControllerTest {
             .andExpect(status().isOk())
             .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
             .andExpect(jsonPath("$.service").value("shiftarc-api"))
-            .andExpect(jsonPath("$.version").value("0.0.1"))
+            .andExpect(jsonPath("$.version").value("0.1.0"))
             .andExpect(jsonPath("$.status").value("UP"))
             .andExpect(jsonPath("$.database").value("UP"));
     }
