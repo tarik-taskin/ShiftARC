@@ -89,8 +89,8 @@ export const productMilestones = [
   {
     icon: Shapes,
     title: 'Plan durumu',
-    value: 'Kurulum bekleniyor',
-    detail: 'Zaman blokları ve kategoriler sonraki adımlarda bağlanacak.',
+    value: 'Gün tipleri hazır',
+    detail: 'Haftalık şablon kurulduğunda bugünün zaman blokları burada etkinleşecek.',
   },
   {
     icon: ListTodo,

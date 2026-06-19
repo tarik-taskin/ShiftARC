@@ -118,6 +118,16 @@ edilir.
 - Görev oluşturma gibi başka akışlardan kategori eklemek gerektiğinde mevcut
   `CategoryDialog` bileşenini yeniden kullan.
 
+### Gün tipi davranışı
+
+- Her gün tipi zaman çizelgesi 00:00–24:00 aralığını boşluk ve çakışma olmadan
+  tamamen kapsamalıdır.
+- Blok sınırları beş dakikalık ızgaraya uymalı; sıralama istemciden gelse bile
+  backend bütün çizelgeyi yeniden doğrulamalıdır.
+- Zaman blokları yalnız aynı çalışma alanındaki aktif kategorileri kabul eder.
+- Gün tipi silme fiziksel silme değildir; arşivleme ve optimistic-lock sürümünü koru.
+- Haftalık gün atamalarını gün tipi editörüne ekleme; bu davranış ayrı ürün fazıdır.
+
 ### Veritabanı
 
 - Uygulama `shiftarc_app` sınırlı rolüyle çalışır; PostgreSQL superuser kullanma.
@@ -210,6 +220,6 @@ docs(project): add development guidance
 ## Mevcut kapsam sınırı
 
 `0.1.0` içinde authentication, trigger, pomodoro ve production deployment yoktur.
-Kategori yönetimi kullanılabilir durumdadır; gün tipi, görev, günlük plan ve geçmiş
-özellikleri yalnız tanımlanan ürün fazlarında eklenir. Kullanıcı farklı bir faz
-istemedikçe ileri fazları altyapı görevi bahanesiyle erkenden uygulama.
+Kategori ve gün tipi yönetimi kullanılabilir durumdadır; haftalık atama, görev,
+günlük plan ve geçmiş özellikleri yalnız tanımlanan ürün fazlarında eklenir. Kullanıcı
+farklı bir faz istemedikçe ileri fazları altyapı görevi bahanesiyle erkenden uygulama.

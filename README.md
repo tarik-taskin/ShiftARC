@@ -33,6 +33,12 @@ yönetir. Kategoriler isim, renk ve ikonla oluşturulabilir; aranabilir, düzenl
 arşivlenebilir ve veri kaybı olmadan geri yüklenebilir. Aynı çalışma alanında kategori
 adları büyük-küçük harf ayrımından bağımsız olarak benzersizdir.
 
+`Gün tipleri` sayfası 00:00–24:00 arasını kesintisiz zaman blokları halinde tasarlar.
+Yeni bir gün tipi tam günü kaplayan `Plansız` blokla başlar. Çizelgeye tıklanan nokta
+en yakın beş dakikaya yuvarlanarak yeni blok sınırı oluşturur; bloklara birden fazla
+aktif kategori atanabilir, bloklar düzenlenebilir veya komşusuyla birleştirilebilir.
+Gün tipleri geçmiş bağlantıları silmeden arşivlenip geri yüklenebilir.
+
 ## Ön koşullar
 
 - Windows PowerShell 5.1 veya PowerShell 7+
@@ -230,6 +236,12 @@ Mevcut ürün endpoint'leri:
 - `PUT /api/v1/categories/{categoryId}`
 - `DELETE /api/v1/categories/{categoryId}`
 - `POST /api/v1/categories/{categoryId}/restore`
+- `GET /api/v1/day-types`
+- `POST /api/v1/day-types`
+- `PUT /api/v1/day-types/{dayTypeId}`
+- `DELETE /api/v1/day-types/{dayTypeId}`
+- `POST /api/v1/day-types/{dayTypeId}/restore`
+- `PUT /api/v1/day-types/{dayTypeId}/blocks`
 - `GET /api/v1/system/status`
 
 Bir endpoint veya payload değiştirildiğinde önce OpenAPI sözleşmesi, ardından
@@ -272,7 +284,7 @@ JDBC exception veya bağlantı secret'ı response'a eklenmez.
 ## 0.1.0 geliştirme kapsamı dışında olanlar
 
 - Authentication ve kullanıcı hesapları
-- Görev, gün tipi ve zaman bloğu yönetim akışları
+- Görev ve haftalık gün tipi atama akışları
 - Planlama algoritması
 - Trigger ve pomodoro akışları
 - Production deployment, container veya managed servis kurulumu

@@ -118,6 +118,132 @@ paths:
           $ref: "#/components/responses/CategoryNotFound"
         "409":
           $ref: "#/components/responses/CategoryConflict"
+  /api/v1/day-types:
+    get:
+      operationId: listDayTypes
+      summary: List local workspace day types with their complete timelines
+      tags: [Day types]
+      parameters:
+        - name: includeArchived
+          in: query
+          schema:
+            type: boolean
+            default: false
+      responses:
+        "200":
+          description: Day types ordered by archive state and name.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/DayTypeResponse"
+    post:
+      operationId: createDayType
+      summary: Create a day type with one full-day unplanned block
+      tags: [Day types]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/DayTypeCreateRequest"
+      responses:
+        "201":
+          description: Day type created.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DayTypeResponse"
+        "400":
+          $ref: "#/components/responses/InvalidRequest"
+        "409":
+          $ref: "#/components/responses/DayTypeConflict"
+  /api/v1/day-types/{id}:
+    parameters:
+      - $ref: "#/components/parameters/DayTypeId"
+    put:
+      operationId: updateDayType
+      summary: Update day type metadata
+      tags: [Day types]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/DayTypeUpdateRequest"
+      responses:
+        "200":
+          description: Day type updated.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DayTypeResponse"
+        "400":
+          $ref: "#/components/responses/InvalidRequest"
+        "404":
+          $ref: "#/components/responses/DayTypeNotFound"
+        "409":
+          $ref: "#/components/responses/DayTypeConflict"
+    delete:
+      operationId: archiveDayType
+      summary: Archive a day type without deleting its timeline
+      tags: [Day types]
+      parameters:
+        - $ref: "#/components/parameters/EntityVersion"
+      responses:
+        "204":
+          description: Day type archived.
+        "404":
+          $ref: "#/components/responses/DayTypeNotFound"
+        "409":
+          $ref: "#/components/responses/DayTypeConflict"
+  /api/v1/day-types/{id}/restore:
+    parameters:
+      - $ref: "#/components/parameters/DayTypeId"
+    post:
+      operationId: restoreDayType
+      summary: Restore an archived day type
+      tags: [Day types]
+      parameters:
+        - $ref: "#/components/parameters/EntityVersion"
+      responses:
+        "200":
+          description: Day type restored.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DayTypeResponse"
+        "404":
+          $ref: "#/components/responses/DayTypeNotFound"
+        "409":
+          $ref: "#/components/responses/DayTypeConflict"
+  /api/v1/day-types/{id}/blocks:
+    parameters:
+      - $ref: "#/components/parameters/DayTypeId"
+    put:
+      operationId: replaceDayTypeBlocks
+      summary: Replace a day type's complete 00:00–24:00 timeline
+      tags: [Day types]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/DayTypeBlocksUpdateRequest"
+      responses:
+        "200":
+          description: Timeline updated.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DayTypeResponse"
+        "400":
+          $ref: "#/components/responses/InvalidRequest"
+        "404":
+          $ref: "#/components/responses/DayTypeNotFound"
+        "409":
+          $ref: "#/components/responses/DayTypeConflict"
   /api/v1/workspace:
     get:
       operationId: getWorkspace
@@ -211,6 +337,13 @@ components:
       schema:
         type: string
         format: uuid
+    DayTypeId:
+      name: id
+      in: path
+      required: true
+      schema:
+        type: string
+        format: uuid
     EntityVersion:
       name: version
       in: query
@@ -250,7 +383,140 @@ components:
         application/problem+json:
           schema:
             $ref: "#/components/schemas/ProblemDetail"
+    DayTypeNotFound:
+      description: The day type does not exist in the local workspace.
+      content:
+        application/problem+json:
+          schema:
+            $ref: "#/components/schemas/ProblemDetail"
+    DayTypeConflict:
+      description: The day type name or version conflicts with current state.
+      content:
+        application/problem+json:
+          schema:
+            $ref: "#/components/schemas/ProblemDetail"
   schemas:
+    DayTypeResponse:
+      type: object
+      additionalProperties: false
+      required: [id, name, color, archived, version, blocks, createdAt, updatedAt]
+      properties:
+        id:
+          type: string
+          format: uuid
+        name:
+          type: string
+        color:
+          type: string
+          pattern: "^#[0-9A-Fa-f]{6}$"
+        archived:
+          type: boolean
+        version:
+          type: integer
+          format: int64
+          minimum: 0
+        blocks:
+          type: array
+          minItems: 1
+          items:
+            $ref: "#/components/schemas/DayTypeBlockResponse"
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+    DayTypeBlockResponse:
+      type: object
+      additionalProperties: false
+      required: [id, name, startMinute, endMinute, categoryIds]
+      properties:
+        id:
+          type: string
+          format: uuid
+        name:
+          type: string
+        startMinute:
+          type: integer
+          minimum: 0
+          maximum: 1435
+        endMinute:
+          type: integer
+          minimum: 5
+          maximum: 1440
+        categoryIds:
+          type: array
+          uniqueItems: true
+          items:
+            type: string
+            format: uuid
+    DayTypeCreateRequest:
+      type: object
+      additionalProperties: false
+      required: [name, color]
+      properties:
+        name:
+          type: string
+          minLength: 1
+          maxLength: 80
+        color:
+          type: string
+          pattern: "^#[0-9A-Fa-f]{6}$"
+    DayTypeUpdateRequest:
+      type: object
+      additionalProperties: false
+      required: [name, color, version]
+      properties:
+        name:
+          type: string
+          minLength: 1
+          maxLength: 80
+        color:
+          type: string
+          pattern: "^#[0-9A-Fa-f]{6}$"
+        version:
+          type: integer
+          format: int64
+          minimum: 0
+    DayTypeBlocksUpdateRequest:
+      type: object
+      additionalProperties: false
+      required: [version, blocks]
+      properties:
+        version:
+          type: integer
+          format: int64
+          minimum: 0
+        blocks:
+          type: array
+          minItems: 1
+          maxItems: 288
+          items:
+            $ref: "#/components/schemas/DayTypeBlockInput"
+    DayTypeBlockInput:
+      type: object
+      additionalProperties: false
+      required: [name, startMinute, endMinute, categoryIds]
+      properties:
+        name:
+          type: string
+          minLength: 1
+          maxLength: 80
+        startMinute:
+          type: integer
+          minimum: 0
+          maximum: 1435
+        endMinute:
+          type: integer
+          minimum: 5
+          maximum: 1440
+        categoryIds:
+          type: array
+          maxItems: 64
+          uniqueItems: true
+          items:
+            type: string
+            format: uuid
     CategoryResponse:
       type: object
       additionalProperties: false

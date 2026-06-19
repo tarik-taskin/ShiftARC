@@ -14,6 +14,12 @@ const CategoriesPage = lazy(() =>
   })),
 )
 
+const DayTypesPage = lazy(() =>
+  import('@/pages/day-types-page').then((module) => ({
+    default: module.DayTypesPage,
+  })),
+)
+
 function App() {
   const location = useLocation()
 
@@ -40,19 +46,16 @@ function ProductRoutes() {
               eyebrow="Haftalık ritim"
               title="Her güne doğru karakteri ver."
               description="Pazartesiden pazara tekrarlayan gün tipi düzeni burada kurulacak."
-              nextStep="Gün tipleri ve haftalık şablon Faz 5–6'da etkinleşecek."
+              nextStep="Gün tipleri hazır; haftalık şablon Faz 6'da etkinleşecek."
             />
           }
         />
         <Route
           path="day-types"
           element={
-            <FeaturePage
-              eyebrow="Zaman mimarisi"
-              title="Bir günü blok blok tasarla."
-              description="00:00–24:00 çizelgesini bölerek zaman bloklarını ve kabul ettikleri kategorileri yöneteceksin."
-              nextStep="Etkileşimli zaman çizelgesi Faz 5'te eklenecek."
-            />
+            <Suspense fallback={<div role="status">Gün tipleri yükleniyor…</div>}>
+              <DayTypesPage />
+            </Suspense>
           }
         />
         <Route
