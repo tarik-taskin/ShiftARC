@@ -23,7 +23,7 @@ class MigrationResourcesTest {
         Resource[] migrations = new PathMatchingResourcePatternResolver()
             .getResources("classpath*:db/migration/*.sql");
 
-        assertEquals(1, migrations.length);
+        assertEquals(3, migrations.length);
         for (Resource migration : migrations) {
             assertTrue(VERSIONED_MIGRATION_NAME.matcher(migration.getFilename()).matches());
         }
@@ -38,5 +38,29 @@ class MigrationResourcesTest {
         assertTrue(sql.contains("CREATE SCHEMA IF NOT EXISTS shiftarc"));
         assertTrue(sql.contains("AUTHORIZATION CURRENT_USER"));
         assertFalse(sql.toLowerCase().contains("create table"));
+    }
+
+    @Test
+    void definesTheCoreDomainAndAppendOnlyExecutionHistory() throws IOException {
+        String coreDomain = migrationSql("V2__create_core_planning_domain.sql");
+        String executionHistory = migrationSql(
+            "V3__create_daily_plan_and_execution_history.sql"
+        );
+
+        assertTrue(coreDomain.contains("CREATE TABLE shiftarc.workspace"));
+        assertTrue(coreDomain.contains("CREATE TABLE shiftarc.day_type_block"));
+        assertTrue(coreDomain.contains("CREATE TABLE shiftarc.task"));
+        assertTrue(coreDomain.contains("day_type_block_five_minute_grid"));
+        assertTrue(coreDomain.contains("task_type_fields_valid"));
+        assertTrue(executionHistory.contains("CREATE TABLE shiftarc.daily_plan"));
+        assertTrue(executionHistory.contains("CREATE TABLE shiftarc.task_execution_session"));
+        assertTrue(executionHistory.contains("task_execution_single_active_session"));
+        assertTrue(executionHistory.contains("task_execution_event_append_only"));
+    }
+
+    private String migrationSql(String filename) throws IOException {
+        Resource migration = new PathMatchingResourcePatternResolver()
+            .getResource("classpath:db/migration/" + filename);
+        return migration.getContentAsString(StandardCharsets.UTF_8);
     }
 }

@@ -11,6 +11,10 @@ $ErrorActionPreference = "Stop"
 $repoRoot = Split-Path -Parent $PSScriptRoot
 $frontendRoot = Join-Path $repoRoot "frontend"
 $backendRoot = Join-Path $repoRoot "backend"
+$environmentFile = Join-Path $repoRoot ".env.local"
+
+. (Join-Path $PSScriptRoot "local-environment.ps1")
+Import-ShiftArcLocalEnvironment -Path $environmentFile -Quiet
 
 function Invoke-QualityStep {
     param(

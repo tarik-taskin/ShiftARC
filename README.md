@@ -32,7 +32,7 @@ Global Gradle kurulumu gerekmez. `backend/gradlew.bat` repoyla birlikte gelir.
 Repo kökünde çalıştırın:
 
 ```powershell
-.\scripts\bootstrap-database.ps1
+.\scripts\bootstrap-database.ps1 -IncludeTestDatabases
 ```
 
 Script PostgreSQL araçlarını PATH, çalışan Windows servisi veya standart kurulum
@@ -40,6 +40,8 @@ dizininden bulur. Aşağıdaki kaynakları oluşturur:
 
 - Sınırlı uygulama rolü: `shiftarc_app`
 - Uygulama veritabanı: `shiftarc`
+- İzole entegrasyon veritabanı: `shiftarc_test`
+- İzole tarayıcı testi veritabanı: `shiftarc_e2e`
 
 Script yeni uygulama rolünün parolasını güvenli terminal istemiyle sorar. Bu
 parolayı bir sonraki adımda lokal environment dosyasına yazın. Parolayı README,
@@ -59,6 +61,8 @@ SHIFTARC_API_PORT=8080
 SHIFTARC_DB_URL=jdbc:postgresql://localhost:5432/shiftarc
 SHIFTARC_DB_USERNAME=shiftarc_app
 SHIFTARC_DB_PASSWORD=
+SHIFTARC_TEST_DB_URL=jdbc:postgresql://localhost:5432/shiftarc_test
+SHIFTARC_E2E_DB_URL=jdbc:postgresql://localhost:5432/shiftarc_e2e
 ```
 
 `.env.local` Git tarafından ignore edilir. `.env.local.example` hiçbir zaman
@@ -165,7 +169,9 @@ Set-Location backend
 .\gradlew.bat clean test bootJar --no-daemon --console=plain
 ```
 
-Test profili gerçek PostgreSQL'e bağlanmaz ve lokal veriyi değiştirmez.
+Migration entegrasyon testi yalnız `shiftarc_test` veritabanına bağlanır. URL'nin
+loopback host kullanması ve veritabanı adının `_test` veya `_e2e` ile bitmesi kod
+tarafından zorunlu tutulur; `shiftarc` uygulama verisi testlerden etkilenmez.
 
 ## Repository yapısı
 
@@ -222,7 +228,8 @@ JDBC exception veya bağlantı secret'ı response'a eklenmez.
 - Uygulanmış migration değiştirilmez veya yeniden adlandırılmaz.
 - Yeni değişiklik yeni ve sıralı bir `V<n>__description.sql` dosyasıdır.
 - Hibernate/JPA otomatik DDL üretimi kapalıdır.
-- Mevcut V1 migration yalnız uygulamaya ait `shiftarc` şemasını oluşturur.
+- V1 uygulamaya ait `shiftarc` şemasını, V2 workspace ve planlama çekirdeğini,
+  V3 ise günlük plan ve append-only çalışma geçmişini oluşturur.
 
 ## Güvenlik temeli
 
@@ -230,7 +237,8 @@ JDBC exception veya bağlantı secret'ı response'a eklenmez.
 - Gerçek parolalar ve bağlantı secret'ları Git'e alınmaz.
 - Secret değerleri hata mesajlarına, API response'larına ve loglara yazılmaz.
 - Actuator yalnız genel health endpoint'ini açar ve detay göstermez.
-- Testler gerçek lokal veritabanını değiştirmez.
+- Testler yalnız açıkça ayrılmış `shiftarc_test` ve `shiftarc_e2e`
+  veritabanlarını değiştirebilir; uygulama veritabanına bağlanmaları engellenir.
 
 ## 0.1.0 geliştirme kapsamı dışında olanlar
 

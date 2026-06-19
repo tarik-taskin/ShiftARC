@@ -30,52 +30,7 @@ $backendRoot = Join-Path $repoRoot "backend"
 $environmentFile = Join-Path $repoRoot ".env.local"
 $logRoot = Join-Path $repoRoot "logs\dev"
 
-function Import-LocalEnvironment {
-    param([Parameter(Mandatory)][string]$Path)
-
-    if (-not (Test-Path -LiteralPath $Path)) {
-        Write-Host "No .env.local file found; existing process environment will be used."
-        return
-    }
-
-    foreach ($line in Get-Content -LiteralPath $Path) {
-        $trimmedLine = $line.Trim()
-        if (-not $trimmedLine -or $trimmedLine.StartsWith("#")) {
-            continue
-        }
-
-        $separatorIndex = $trimmedLine.IndexOf("=")
-        if ($separatorIndex -lt 1) {
-            throw "Invalid .env.local entry. Expected KEY=VALUE."
-        }
-
-        $name = $trimmedLine.Substring(0, $separatorIndex).Trim()
-        $value = $trimmedLine.Substring($separatorIndex + 1).Trim()
-
-        $isValidName = [regex]::IsMatch(
-            $name,
-            "^[A-Za-z_][A-Za-z0-9_]*$",
-            [Text.RegularExpressions.RegexOptions]::CultureInvariant
-        )
-        if (-not $isValidName) {
-            throw "Invalid environment variable name in .env.local: $name"
-        }
-
-        if (
-            $value.Length -ge 2 -and
-            (($value.StartsWith('"') -and $value.EndsWith('"')) -or
-             ($value.StartsWith("'") -and $value.EndsWith("'")))
-        ) {
-            $value = $value.Substring(1, $value.Length - 2)
-        }
-
-        if ($null -eq [Environment]::GetEnvironmentVariable($name, "Process")) {
-            [Environment]::SetEnvironmentVariable($name, $value, "Process")
-        }
-    }
-
-    Write-Host "Loaded local environment from .env.local."
-}
+. (Join-Path $PSScriptRoot "local-environment.ps1")
 
 function Assert-CommandAvailable {
     param(
@@ -259,7 +214,7 @@ function Show-ProcessFailure {
     }
 }
 
-Import-LocalEnvironment -Path $environmentFile
+Import-ShiftArcLocalEnvironment -Path $environmentFile
 
 $startFrontend = $Target -in @("all", "frontend")
 $startBackend = $Target -in @("all", "backend")

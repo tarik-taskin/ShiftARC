@@ -1,17 +1,21 @@
 <#
 .SYNOPSIS
-Creates the restricted PostgreSQL application role and local database for ShiftARC.
+Creates the restricted PostgreSQL application role and local databases for ShiftARC.
 
 .DESCRIPTION
 Finds PostgreSQL tools from PATH, a running Windows service, or a standard
 installation directory. The administrator password is passed only to child
 PostgreSQL processes and is removed from the process environment on completion.
+Test databases are opt-in and always use the `_test` and `_e2e` suffixes.
 
 .EXAMPLE
 .\scripts\bootstrap-database.ps1
 
 .EXAMPLE
 .\scripts\bootstrap-database.ps1 -PostgresBin "C:\Program Files\PostgreSQL\16\bin"
+
+.EXAMPLE
+.\scripts\bootstrap-database.ps1 -IncludeTestDatabases
 #>
 [CmdletBinding()]
 param(
@@ -34,6 +38,9 @@ param(
     [Parameter()]
     [ValidatePattern("^[a-z][a-z0-9_]*$")]
     [string]$ApplicationRole = "shiftarc_app",
+
+    [Parameter()]
+    [switch]$IncludeTestDatabases,
 
     [Parameter()]
     [string]$PostgresBin
@@ -134,6 +141,44 @@ function Invoke-PsqlScalar {
     return ($result | Out-String).Trim()
 }
 
+function Ensure-Database {
+    param(
+        [Parameter(Mandatory)][string]$Name,
+        [Parameter(Mandatory)][string]$CreateDatabaseExecutable
+    )
+
+    $databaseOwner = Invoke-PsqlScalar -Executable $psql -Sql @"
+SELECT pg_get_userbyid(datdba)
+FROM pg_database
+WHERE datname = '$Name';
+"@
+
+    if (-not $databaseOwner) {
+        Write-Host "Creating database '$Name'."
+        & $CreateDatabaseExecutable @(
+            "--host", $HostName,
+            "--port", $Port,
+            "--username", $AdminUser,
+            "--owner", $ApplicationRole,
+            $Name
+        )
+
+        if ($LASTEXITCODE -ne 0) {
+            throw "Database '$Name' could not be created."
+        }
+
+        $databaseOwner = $ApplicationRole
+        Write-Host "Database '$Name' created."
+    }
+    else {
+        Write-Host "Database '$Name' already exists."
+    }
+
+    if ($databaseOwner -ne $ApplicationRole) {
+        throw "Database '$Name' is owned by '$databaseOwner'; expected owner is '$ApplicationRole'."
+    }
+}
+
 $resolvedPostgresBin = Resolve-PostgresBin -RequestedPath $PostgresBin
 $psql = Join-Path $resolvedPostgresBin "psql.exe"
 $createUser = Join-Path $resolvedPostgresBin "createuser.exe"
@@ -192,35 +237,14 @@ WHERE rolname = '$ApplicationRole';
         throw "Role '$ApplicationRole' does not have the expected restricted privileges. Current state: $roleState"
     }
 
-    $databaseOwner = Invoke-PsqlScalar -Executable $psql -Sql @"
-SELECT pg_get_userbyid(datdba)
-FROM pg_database
-WHERE datname = '$DatabaseName';
-"@
-
-    if (-not $databaseOwner) {
-        Write-Host "Creating database '$DatabaseName'."
-        & $createDatabase @(
-            "--host", $HostName,
-            "--port", $Port,
-            "--username", $AdminUser,
-            "--owner", $ApplicationRole,
-            $DatabaseName
-        )
-
-        if ($LASTEXITCODE -ne 0) {
-            throw "Database '$DatabaseName' could not be created."
-        }
-
-        $databaseOwner = $ApplicationRole
-        Write-Host "Database created."
-    }
-    else {
-        Write-Host "Database '$DatabaseName' already exists."
+    $databaseNames = @($DatabaseName)
+    if ($IncludeTestDatabases) {
+        $databaseNames += "${DatabaseName}_test"
+        $databaseNames += "${DatabaseName}_e2e"
     }
 
-    if ($databaseOwner -ne $ApplicationRole) {
-        throw "Database '$DatabaseName' is owned by '$databaseOwner'; expected owner is '$ApplicationRole'."
+    foreach ($targetDatabase in $databaseNames) {
+        Ensure-Database -Name $targetDatabase -CreateDatabaseExecutable $createDatabase
     }
 
     Write-Host ""
@@ -228,6 +252,10 @@ WHERE datname = '$DatabaseName';
     Write-Host "SHIFTARC_DB_URL=jdbc:postgresql://${HostName}:$Port/$DatabaseName"
     Write-Host "SHIFTARC_DB_USERNAME=$ApplicationRole"
     Write-Host "Add SHIFTARC_DB_PASSWORD to your secure local environment file."
+    if ($IncludeTestDatabases) {
+        Write-Host "SHIFTARC_TEST_DB_URL=jdbc:postgresql://${HostName}:$Port/${DatabaseName}_test"
+        Write-Host "SHIFTARC_E2E_DB_URL=jdbc:postgresql://${HostName}:$Port/${DatabaseName}_e2e"
+    }
 }
 finally {
     if ($adminPasswordPointer -ne [IntPtr]::Zero) {

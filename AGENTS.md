@@ -112,7 +112,9 @@ edilir.
 - Uygulanmış migration'ı düzenleme, silme veya yeniden adlandırma.
 - Yeni migration adı `V<n>__lowercase_description.sql` biçimindedir.
 - Hibernate/JPA `ddl-auto` ile schema oluşturma veya güncelleme yapma.
-- Testleri gerçek lokal/production veritabanına bağlama.
+- Testleri `shiftarc` veya production veritabanına bağlama. PostgreSQL entegrasyon
+  testleri yalnız loopback üzerindeki `_test`/`_e2e` son ekli izole veritabanlarını
+  kullanabilir.
 - Sahte örnek domain tablolarını yalnız altyapıyı kanıtlamak için oluşturma.
 
 ## Secret ve güvenlik kuralları
@@ -138,6 +140,9 @@ Backend değişikliklerinde:
 - HTTP sözleşmesi MockMvc ile,
 - Configuration fail-fast davranışı context testiyle,
 - Migration naming ve kaynak bütünlüğü otomatik testle korunur.
+- PostgreSQL constraint ve migration zinciri `shiftarc_test` üzerinde boş şemadan
+  başlayarak doğrulanır; test URL güvenlik kontrolü geçmeden destructive hazırlık
+  işlemi çalıştırılmaz.
 
 Bug fix commit'i mümkünse önce hatayı yeniden üreten test içermelidir.
 
