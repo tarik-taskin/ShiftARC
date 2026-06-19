@@ -128,6 +128,17 @@ edilir.
 - Gün tipi silme fiziksel silme değildir; arşivleme ve optimistic-lock sürümünü koru.
 - Haftalık gün atamalarını gün tipi editörüne ekleme; bu davranış ayrı ürün fazıdır.
 
+### Haftalık plan davranışı
+
+- Haftanın günleri ISO-8601 düzeninde `1=Pazartesi` ile `7=Pazar` arasında tutulur.
+- Haftalık şablon kısmi kaydı kabul eder; `complete` yalnız yedi gün de atandığında
+  true olur.
+- Tek bir gün iki kez gönderilemez ve yalnız aktif, aynı workspace'e ait gün tipleri
+  yeni atamalarda kullanılabilir.
+- Bütün atamaları tek transaction içinde değiştir ve workspace settings sürümüyle
+  optimistic-lock kontrolü uygula.
+- Belirli tarihlere ait istisnaları tekrar eden haftalık şablona karıştırma.
+
 ### Veritabanı
 
 - Uygulama `shiftarc_app` sınırlı rolüyle çalışır; PostgreSQL superuser kullanma.
@@ -220,6 +231,7 @@ docs(project): add development guidance
 ## Mevcut kapsam sınırı
 
 `0.1.0` içinde authentication, trigger, pomodoro ve production deployment yoktur.
-Kategori ve gün tipi yönetimi kullanılabilir durumdadır; haftalık atama, görev,
-günlük plan ve geçmiş özellikleri yalnız tanımlanan ürün fazlarında eklenir. Kullanıcı
-farklı bir faz istemedikçe ileri fazları altyapı görevi bahanesiyle erkenden uygulama.
+Kategori, gün tipi ve haftalık şablon yönetimi kullanılabilir durumdadır; görev,
+günlük plan, tarih istisnaları ve geçmiş özellikleri yalnız tanımlanan ürün fazlarında
+eklenir. Kullanıcı farklı bir faz istemedikçe ileri fazları altyapı görevi bahanesiyle
+erkenden uygulama.

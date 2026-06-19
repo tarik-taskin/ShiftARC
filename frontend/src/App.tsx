@@ -20,6 +20,12 @@ const DayTypesPage = lazy(() =>
   })),
 )
 
+const WeeklyPlanPage = lazy(() =>
+  import('@/pages/weekly-plan-page').then((module) => ({
+    default: module.WeeklyPlanPage,
+  })),
+)
+
 function App() {
   const location = useLocation()
 
@@ -42,12 +48,9 @@ function ProductRoutes() {
         <Route
           path="week"
           element={
-            <FeaturePage
-              eyebrow="Haftalık ritim"
-              title="Her güne doğru karakteri ver."
-              description="Pazartesiden pazara tekrarlayan gün tipi düzeni burada kurulacak."
-              nextStep="Gün tipleri hazır; haftalık şablon Faz 6'da etkinleşecek."
-            />
+            <Suspense fallback={<div role="status">Haftalık plan yükleniyor…</div>}>
+              <WeeklyPlanPage />
+            </Suspense>
           }
         />
         <Route

@@ -244,6 +244,39 @@ paths:
           $ref: "#/components/responses/DayTypeNotFound"
         "409":
           $ref: "#/components/responses/DayTypeConflict"
+  /api/v1/weekly-plan:
+    get:
+      operationId: getWeeklyPlan
+      summary: Get the recurring Monday-to-Sunday day type assignments
+      tags: [Weekly plan]
+      responses:
+        "200":
+          description: Seven weekday slots and their optional day type assignments.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/WeeklyPlanResponse"
+    put:
+      operationId: replaceWeeklyPlan
+      summary: Atomically replace the recurring weekday assignments
+      tags: [Weekly plan]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/WeeklyPlanUpdateRequest"
+      responses:
+        "200":
+          description: Weekly plan saved.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/WeeklyPlanResponse"
+        "400":
+          $ref: "#/components/responses/InvalidRequest"
+        "409":
+          $ref: "#/components/responses/WeeklyPlanConflict"
   /api/v1/workspace:
     get:
       operationId: getWorkspace
@@ -395,7 +428,87 @@ components:
         application/problem+json:
           schema:
             $ref: "#/components/schemas/ProblemDetail"
+    WeeklyPlanConflict:
+      description: Workspace settings changed before the weekly plan was saved.
+      content:
+        application/problem+json:
+          schema:
+            $ref: "#/components/schemas/ProblemDetail"
   schemas:
+    WeeklyPlanResponse:
+      type: object
+      additionalProperties: false
+      required: [version, complete, days]
+      properties:
+        version:
+          type: integer
+          format: int64
+          minimum: 0
+        complete:
+          type: boolean
+        days:
+          type: array
+          minItems: 7
+          maxItems: 7
+          items:
+            $ref: "#/components/schemas/WeeklyPlanDay"
+    WeeklyPlanDay:
+      type: object
+      additionalProperties: false
+      required: [dayOfWeek, dayType]
+      properties:
+        dayOfWeek:
+          type: integer
+          minimum: 1
+          maximum: 7
+        dayType:
+          oneOf:
+            - $ref: "#/components/schemas/WeeklyPlanDayType"
+            - type: "null"
+    WeeklyPlanDayType:
+      type: object
+      additionalProperties: false
+      required: [id, name, color, archived, blockCount]
+      properties:
+        id:
+          type: string
+          format: uuid
+        name:
+          type: string
+        color:
+          type: string
+          pattern: "^#[0-9A-Fa-f]{6}$"
+        archived:
+          type: boolean
+        blockCount:
+          type: integer
+          minimum: 1
+    WeeklyPlanUpdateRequest:
+      type: object
+      additionalProperties: false
+      required: [version, assignments]
+      properties:
+        version:
+          type: integer
+          format: int64
+          minimum: 0
+        assignments:
+          type: array
+          maxItems: 7
+          items:
+            $ref: "#/components/schemas/WeeklyPlanAssignment"
+    WeeklyPlanAssignment:
+      type: object
+      additionalProperties: false
+      required: [dayOfWeek, dayTypeId]
+      properties:
+        dayOfWeek:
+          type: integer
+          minimum: 1
+          maximum: 7
+        dayTypeId:
+          type: string
+          format: uuid
     DayTypeResponse:
       type: object
       additionalProperties: false

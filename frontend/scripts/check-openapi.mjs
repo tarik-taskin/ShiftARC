@@ -25,6 +25,7 @@ for (const path of [
   '/api/v1/day-types/{id}',
   '/api/v1/day-types/{id}/restore',
   '/api/v1/day-types/{id}/blocks',
+  '/api/v1/weekly-plan',
   '/api/v1/workspace',
   '/api/v1/workspace/settings',
   '/api/v1/onboarding',

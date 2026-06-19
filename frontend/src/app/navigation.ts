@@ -83,8 +83,8 @@ export const productMilestones = [
   {
     icon: CalendarDays,
     title: 'Gün tipi',
-    value: 'Henüz seçilmedi',
-    detail: 'Haftalık şablon tamamlandığında burada görünecek.',
+    value: 'Haftalık şablona bağlı',
+    detail: 'Bugünün etkin akışı günlük plan motoru bağlandığında burada görünecek.',
   },
   {
     icon: Shapes,

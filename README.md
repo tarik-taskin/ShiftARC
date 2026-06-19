@@ -39,6 +39,11 @@ en yakın beş dakikaya yuvarlanarak yeni blok sınırı oluşturur; bloklara bi
 aktif kategori atanabilir, bloklar düzenlenebilir veya komşusuyla birleştirilebilir.
 Gün tipleri geçmiş bağlantıları silmeden arşivlenip geri yüklenebilir.
 
+`Haftalık plan` sayfası pazartesiden pazara yedi sabit gün yuvasına aktif gün
+tiplerini atar. Plan eksik günlerle taslak olarak kaydedilebilir; yedi günün tamamı
+atandığında tamamlandı durumuna geçer. Bütün hafta tek transaction içinde yazılır ve
+workspace sürümü üzerinden eşzamanlı değişiklik çakışmaları engellenir.
+
 ## Ön koşullar
 
 - Windows PowerShell 5.1 veya PowerShell 7+
@@ -242,6 +247,8 @@ Mevcut ürün endpoint'leri:
 - `DELETE /api/v1/day-types/{dayTypeId}`
 - `POST /api/v1/day-types/{dayTypeId}/restore`
 - `PUT /api/v1/day-types/{dayTypeId}/blocks`
+- `GET /api/v1/weekly-plan`
+- `PUT /api/v1/weekly-plan`
 - `GET /api/v1/system/status`
 
 Bir endpoint veya payload değiştirildiğinde önce OpenAPI sözleşmesi, ardından
@@ -284,7 +291,7 @@ JDBC exception veya bağlantı secret'ı response'a eklenmez.
 ## 0.1.0 geliştirme kapsamı dışında olanlar
 
 - Authentication ve kullanıcı hesapları
-- Görev ve haftalık gün tipi atama akışları
+- Görev yönetimi ve belirli tarihlere ait gün tipi istisnaları
 - Planlama algoritması
 - Trigger ve pomodoro akışları
 - Production deployment, container veya managed servis kurulumu
