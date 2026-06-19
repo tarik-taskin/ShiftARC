@@ -52,7 +52,12 @@ function Import-LocalEnvironment {
         $name = $trimmedLine.Substring(0, $separatorIndex).Trim()
         $value = $trimmedLine.Substring($separatorIndex + 1).Trim()
 
-        if ($name -notmatch "^[A-Za-z_][A-Za-z0-9_]*$") {
+        $isValidName = [regex]::IsMatch(
+            $name,
+            "^[A-Za-z_][A-Za-z0-9_]*$",
+            [Text.RegularExpressions.RegexOptions]::CultureInvariant
+        )
+        if (-not $isValidName) {
             throw "Invalid environment variable name in .env.local: $name"
         }
 
