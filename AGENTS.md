@@ -180,6 +180,14 @@ edilir.
 - Execution kaydı bulunan günlük planı blokları silerek yeniden üretme; geçmiş item
   bağlantılarını ve snapshot bütünlüğünü koru.
 
+### Trigger davranışı
+
+- Triggerları görev tablosuna sıkıştırma; küçük eylem yaşam döngüsü ayrı kalmalıdır.
+- İş parçacığı triggerı sonlu `occurrence_target`, alışkanlık triggerı sınırsız tekrar taşır.
+- Süreler beş dakikalık grid kullanır; aralıklar en az 30 dakikadır.
+- Her tamamlanmayı `trigger_occurrence` kaydıyla koru; sayaç geçmişini silerek azaltma.
+- Tarayıcı bildirim iznini yalnız açık kullanıcı eylemiyle iste.
+
 ### Veritabanı
 
 - Uygulama `shiftarc_app` sınırlı rolüyle çalışır; PostgreSQL superuser kullanma.
@@ -271,8 +279,8 @@ docs(project): add development guidance
 
 ## Mevcut kapsam sınırı
 
-`0.1.0` içinde authentication, trigger, pomodoro ve production deployment yoktur.
+`0.1.0` içinde authentication, pomodoro ve production deployment yoktur.
 Kategori, gün tipi, haftalık şablon, görev yönetimi, temel günlük plan, görev yürütme
-ve zaman düzeltme kullanılabilir; tarih istisnaları ve takvim geçmişi özellikleri yalnız
+ve zaman düzeltmeyle trigger kuralları kullanılabilir; tarih istisnaları ve takvim geçmişi özellikleri yalnız
 tanımlanan ürün fazlarında eklenir. Kullanıcı farklı bir faz istemedikçe ileri fazları
 altyapı görevi bahanesiyle erkenden uygulama.

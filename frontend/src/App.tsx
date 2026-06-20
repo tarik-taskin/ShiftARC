@@ -31,6 +31,10 @@ const TasksPage = lazy(() =>
   import('@/pages/tasks-page').then((module) => ({ default: module.TasksPage })),
 )
 
+const TriggersPage = lazy(() =>
+  import('@/pages/triggers-page').then((module) => ({ default: module.TriggersPage })),
+)
+
 function App() {
   const location = useLocation()
 
@@ -80,6 +84,7 @@ function ProductRoutes() {
             </Suspense>
           }
         />
+        <Route path="triggers" element={<Suspense fallback={<div role="status">Triggerlar yükleniyor…</div>}><TriggersPage /></Suspense>} />
         <Route
           path="history"
           element={

@@ -526,6 +526,52 @@ paths:
             application/problem+json:
               schema:
                 $ref: "#/components/schemas/ProblemDetail"
+  /api/v1/triggers:
+    get:
+      operationId: listTriggers
+      summary: List trigger rules for the local workspace
+      tags: [Triggers]
+      responses:
+        "200":
+          description: Trigger rules ordered by due state and importance.
+          content: { application/json: { schema: { type: array, items: { $ref: "#/components/schemas/TriggerResponse" } } } }
+    post:
+      operationId: createTrigger
+      summary: Create a trigger rule
+      tags: [Triggers]
+      requestBody: { required: true, content: { application/json: { schema: { $ref: "#/components/schemas/TriggerWriteRequest" } } } }
+      responses:
+        "201": { description: Trigger created, content: { application/json: { schema: { $ref: "#/components/schemas/TriggerResponse" } } } }
+  /api/v1/triggers/{id}:
+    put:
+      operationId: updateTrigger
+      summary: Update a trigger rule
+      tags: [Triggers]
+      parameters: [{ name: id, in: path, required: true, schema: { type: string, format: uuid } }]
+      requestBody: { required: true, content: { application/json: { schema: { $ref: "#/components/schemas/TriggerWriteRequest" } } } }
+      responses:
+        "200": { description: Trigger updated, content: { application/json: { schema: { $ref: "#/components/schemas/TriggerResponse" } } } }
+  /api/v1/triggers/{id}/complete:
+    post:
+      operationId: completeTrigger
+      summary: Record a trigger occurrence
+      tags: [Triggers]
+      parameters:
+        - { name: id, in: path, required: true, schema: { type: string, format: uuid } }
+        - { $ref: "#/components/parameters/EntityVersion" }
+      responses:
+        "200": { description: Occurrence recorded, content: { application/json: { schema: { $ref: "#/components/schemas/TriggerResponse" } } } }
+  /api/v1/triggers/{id}/status/{status}:
+    post:
+      operationId: setTriggerStatus
+      summary: Archive or reactivate a trigger
+      tags: [Triggers]
+      parameters:
+        - { name: id, in: path, required: true, schema: { type: string, format: uuid } }
+        - { name: status, in: path, required: true, schema: { type: string, enum: [ACTIVE, ARCHIVED] } }
+        - { $ref: "#/components/parameters/EntityVersion" }
+      responses:
+        "200": { description: Trigger status changed, content: { application/json: { schema: { $ref: "#/components/schemas/TriggerResponse" } } } }
 components:
   parameters:
     CategoryId:
@@ -615,6 +661,31 @@ components:
       description: Another execution is active or the supplied version is stale.
       content: { application/problem+json: { schema: { $ref: "#/components/schemas/ProblemDetail" } } }
   schemas:
+    TriggerWriteRequest:
+      type: object
+      required: [type, scheduleType, title, importance, durationMinutes, categoryIds]
+      properties:
+        type: { type: string, enum: [WORK_ITEM, HABIT] }
+        scheduleType: { type: string, enum: [INTERVAL, AFTER_CATEGORY] }
+        title: { type: string, maxLength: 160 }
+        description: { type: [string, "null"], maxLength: 1000 }
+        importance: { type: integer, minimum: 1, maximum: 5 }
+        durationMinutes: { type: integer, minimum: 5 }
+        intervalMinutes: { type: [integer, "null"], minimum: 30 }
+        occurrenceTarget: { type: [integer, "null"], minimum: 1 }
+        categoryIds: { type: array, items: { type: string, format: uuid }, uniqueItems: true }
+        version: { type: [integer, "null"], minimum: 0 }
+    TriggerResponse:
+      allOf:
+        - { $ref: "#/components/schemas/TriggerWriteRequest" }
+        - type: object
+          required: [id, completedOccurrences, status, categories, version]
+          properties:
+            id: { type: string, format: uuid }
+            completedOccurrences: { type: integer, minimum: 0 }
+            nextDueAt: { type: [string, "null"], format: date-time }
+            status: { type: string, enum: [ACTIVE, COMPLETED, ARCHIVED] }
+            categories: { type: array, items: { $ref: "#/components/schemas/CategoryResponse" } }
     ExecutionStateResponse:
       type: object
       additionalProperties: false

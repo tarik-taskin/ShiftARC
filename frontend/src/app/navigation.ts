@@ -8,6 +8,7 @@ import {
   Settings2,
   Shapes,
   Tags,
+  Zap,
   type LucideIcon,
 } from 'lucide-react'
 
@@ -52,6 +53,13 @@ export const primaryNavigation: NavigationItem[] = [
     path: '/categories',
     icon: Tags,
     description: 'Görev ve zaman bloğu bağlamları',
+  },
+  {
+    label: 'Triggerlar',
+    shortLabel: 'Trigger',
+    path: '/triggers',
+    icon: Zap,
+    description: 'Kısa ve bağlamsal hatırlatıcılar',
   },
   {
     label: 'Geçmiş',

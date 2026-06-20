@@ -71,6 +71,12 @@ iş parçacığının toplam süresinden, alışkanlığın mevcut haftalık hed
 görev kartları tamamlanan ve kalan süreyi gösterir. Execution geçmişi bulunan günlük
 snapshot, bağlantıları koparacak şekilde yeniden üretilemez.
 
+`Triggerlar` sayfası görevlerden görsel ve davranışsal olarak ayrılan kısa eylemleri
+yönetir. İş parçacığı triggerları sonlu tekrar sayısıyla, alışkanlık triggerları sürekli
+olarak çalışır. Kurallar belirli dakika aralıklarına veya kategori sonrasına bağlanabilir;
+gerçekleşmeler ayrı geçmiş kayıtlarıdır. Vadesi gelen triggerlar öncelikli görünür ve
+kullanıcı izniyle tarayıcı bildirimi gönderir.
+
 ## Ön koşullar
 
 - Windows PowerShell 5.1 veya PowerShell 7+
