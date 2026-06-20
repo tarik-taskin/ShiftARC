@@ -424,6 +424,24 @@ paths:
         "200": { description: Execution transitioned., content: { application/json: { schema: { $ref: "#/components/schemas/ExecutionStateResponse" } } } }
         "404": { $ref: "#/components/responses/ExecutionNotFound" }
         "409": { $ref: "#/components/responses/ExecutionConflict" }
+  /api/v1/execution/sessions/{id}/times:
+    parameters:
+      - name: id
+        in: path
+        required: true
+        schema: { type: string, format: uuid }
+    patch:
+      operationId: correctExecutionTimes
+      summary: Correct a session's start and end time without mutating its event history
+      tags: [Execution]
+      requestBody:
+        required: true
+        content: { application/json: { schema: { $ref: "#/components/schemas/ExecutionTimesCorrectionRequest" } } }
+      responses:
+        "200": { description: Session times corrected., content: { application/json: { schema: { $ref: "#/components/schemas/ExecutionStateResponse" } } } }
+        "400": { $ref: "#/components/responses/InvalidRequest" }
+        "404": { $ref: "#/components/responses/ExecutionNotFound" }
+        "409": { $ref: "#/components/responses/ExecutionConflict" }
   /api/v1/workspace:
     get:
       operationId: getWorkspace
@@ -644,6 +662,14 @@ components:
         nextDailyPlanItemId: { type: string, format: uuid }
         occurredAt: { type: [string, "null"], format: date-time }
         version: { type: integer, format: int64, minimum: 0 }
+    ExecutionTimesCorrectionRequest:
+      type: object
+      additionalProperties: false
+      required: [startedAt, version]
+      properties:
+        startedAt: { type: string, format: date-time }
+        endedAt: { type: [string, "null"], format: date-time }
+        version: { type: integer, format: int64, minimum: 0 }
     DailyPlanResponse:
       type: object
       additionalProperties: false
@@ -710,7 +736,7 @@ components:
     TaskResponse:
       type: object
       additionalProperties: false
-      required: [id, type, title, description, importance, status, totalRequiredMinutes, deadline, weeklyTargetMinutes, categories, version, completedAt, createdAt, updatedAt]
+      required: [id, type, title, description, importance, status, totalRequiredMinutes, deadline, weeklyTargetMinutes, executedMinutes, remainingMinutes, categories, version, completedAt, createdAt, updatedAt]
       properties:
         id: { type: string, format: uuid }
         type: { $ref: "#/components/schemas/TaskType" }
@@ -721,6 +747,8 @@ components:
         totalRequiredMinutes: { type: [integer, "null"], minimum: 5 }
         deadline: { type: [string, "null"], format: date }
         weeklyTargetMinutes: { type: [integer, "null"], minimum: 5 }
+        executedMinutes: { type: integer, minimum: 0 }
+        remainingMinutes: { type: integer, minimum: 0 }
         categories: { type: array, items: { $ref: "#/components/schemas/TaskCategory" } }
         version: { type: integer, format: int64, minimum: 0 }
         completedAt: { type: [string, "null"], format: date-time }

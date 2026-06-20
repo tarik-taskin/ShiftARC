@@ -15,6 +15,8 @@ public record TaskResponse(
     Integer totalRequiredMinutes,
     LocalDate deadline,
     Integer weeklyTargetMinutes,
+    int executedMinutes,
+    int remainingMinutes,
     List<Category> categories,
     long version,
     Instant completedAt,

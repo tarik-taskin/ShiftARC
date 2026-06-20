@@ -114,10 +114,10 @@ public class DailyPlanService {
         if (task.type().equals("WORK_ITEM")) {
             long days = task.deadline() == null ? 1 : ChronoUnit.DAYS.between(date, task.deadline()) + 1;
             divisor = (int) Math.max(1, days);
-            total = task.totalMinutes();
+            total = Math.max(0, task.totalMinutes() - task.executedTotalMinutes());
         } else {
             divisor = 8 - date.getDayOfWeek().getValue();
-            total = task.weeklyMinutes();
+            total = Math.max(0, task.weeklyMinutes() - task.executedWeekMinutes());
         }
         return roundUpFive((int) Math.ceil((double) total / divisor));
     }

@@ -17,6 +17,8 @@ export const taskSchema = z.object({
   totalRequiredMinutes: z.number().int().nullable(),
   deadline: z.string().nullable(),
   weeklyTargetMinutes: z.number().int().nullable(),
+  executedMinutes: z.number().int().nonnegative(),
+  remainingMinutes: z.number().int().nonnegative(),
   categories: z.array(taskCategorySchema),
   version: z.number().int().nonnegative(),
   completedAt: z.string().nullable(),

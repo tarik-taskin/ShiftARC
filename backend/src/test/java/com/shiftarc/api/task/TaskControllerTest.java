@@ -49,6 +49,6 @@ class TaskControllerTest {
     private TaskResponse response() {
         Instant now = Instant.parse("2026-06-19T10:00:00Z");
         return new TaskResponse(UUID.randomUUID(), TaskType.WORK_ITEM, "ML Dersi", null, (short) 5,
-            TaskStatus.ACTIVE, 300, LocalDate.of(2026, 7, 1), null, List.of(), 0, null, now, now);
+            TaskStatus.ACTIVE, 300, LocalDate.of(2026, 7, 1), null, 0, 300, List.of(), 0, null, now, now);
     }
 }

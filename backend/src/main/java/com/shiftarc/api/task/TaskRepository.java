@@ -160,22 +160,51 @@ class TaskRepository {
     private TaskResponse map(ResultSet resultSet) throws SQLException {
         UUID id = resultSet.getObject("id", UUID.class);
         Date deadline = resultSet.getDate("deadline");
+        TaskType type = TaskType.valueOf(resultSet.getString("task_type"));
+        Integer totalRequired = integer(resultSet, "total_required_minutes");
+        Integer weeklyTarget = integer(resultSet, "weekly_target_minutes");
+        int executed = executedMinutes(id, type);
+        int target = type == TaskType.WORK_ITEM ? totalRequired : weeklyTarget;
         return new TaskResponse(
             id,
-            TaskType.valueOf(resultSet.getString("task_type")),
+            type,
             resultSet.getString("title"),
             resultSet.getString("description"),
             resultSet.getShort("importance"),
             TaskStatus.valueOf(resultSet.getString("status")),
-            integer(resultSet, "total_required_minutes"),
+            totalRequired,
             deadline == null ? null : deadline.toLocalDate(),
-            integer(resultSet, "weekly_target_minutes"),
+            weeklyTarget,
+            executed,
+            Math.max(0, target - executed),
             categories(id),
             resultSet.getLong("version"),
             instant(resultSet, "completed_at"),
             instant(resultSet, "created_at"),
             instant(resultSet, "updated_at")
         );
+    }
+
+    private int executedMinutes(UUID taskId, TaskType type) {
+        String period = type == TaskType.WORK_ITEM
+            ? ""
+            : """
+              AND session.started_at >= (
+                  date_trunc('week', current_timestamp AT TIME ZONE settings.timezone)
+                  AT TIME ZONE settings.timezone
+              )
+              """;
+        Integer value = jdbcTemplate.queryForObject(
+            """
+            SELECT COALESCE(floor(sum(extract(epoch FROM (session.ended_at - session.started_at))) / 60), 0)::int
+            FROM shiftarc.task_execution_session session
+            JOIN shiftarc.workspace_settings settings ON settings.workspace_id = session.workspace_id
+            WHERE session.task_id = ? AND session.ended_at IS NOT NULL
+            """ + period,
+            Integer.class,
+            taskId
+        );
+        return value == null ? 0 : value;
     }
 
     private List<TaskResponse.Category> categories(UUID taskId) {

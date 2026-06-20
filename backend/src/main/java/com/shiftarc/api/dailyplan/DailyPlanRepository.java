@@ -72,6 +72,21 @@ class DailyPlanRepository {
             """
             SELECT task.id, task.task_type, task.title, task.importance,
                    task.total_required_minutes, task.deadline, task.weekly_target_minutes,
+                   COALESCE((
+                       SELECT floor(sum(extract(epoch FROM (session.ended_at - session.started_at))) / 60)::int
+                       FROM shiftarc.task_execution_session session
+                       WHERE session.task_id = task.id AND session.ended_at IS NOT NULL
+                   ), 0) AS executed_total_minutes,
+                   COALESCE((
+                       SELECT floor(sum(extract(epoch FROM (session.ended_at - session.started_at))) / 60)::int
+                       FROM shiftarc.task_execution_session session
+                       JOIN shiftarc.workspace_settings settings ON settings.workspace_id = session.workspace_id
+                       WHERE session.task_id = task.id AND session.ended_at IS NOT NULL
+                         AND session.started_at >= (
+                             date_trunc('week', current_timestamp AT TIME ZONE settings.timezone)
+                             AT TIME ZONE settings.timezone
+                         )
+                   ), 0) AS executed_week_minutes,
                    link.category_id
             FROM shiftarc.task task
             LEFT JOIN shiftarc.task_category link ON link.task_id = task.id
@@ -135,6 +150,21 @@ class DailyPlanRepository {
         List<PlannedBlock> blocks,
         List<PlannedWarning> warnings
     ) {
+        Integer executionCount = jdbcTemplate.queryForObject(
+            """
+            SELECT count(*) FROM shiftarc.task_execution_session session
+            JOIN shiftarc.daily_plan_item item ON item.id = session.daily_plan_item_id
+            JOIN shiftarc.daily_plan_block block ON block.id = item.daily_plan_block_id
+            WHERE block.daily_plan_id = ?
+            """,
+            Integer.class,
+            planId
+        );
+        if (executionCount != null && executionCount > 0) {
+            throw new DailyPlanConflictException(
+                "A daily plan with execution history cannot be regenerated"
+            );
+        }
         int changed = jdbcTemplate.update(
             """
             UPDATE shiftarc.daily_plan SET source_day_type_id = ?, source_day_type_name = ?,
@@ -249,19 +279,19 @@ class DailyPlanRepository {
 
     private List<PlanningTask> groupTasks(ResultSet resultSet) throws SQLException {
         List<PlanningTask> tasks = new ArrayList<>();
-        UUID id = null; String type = null; String title = null; int importance = 0; Integer total = null; LocalDate deadline = null; Integer weekly = null;
+        UUID id = null; String type = null; String title = null; int importance = 0; Integer total = null; LocalDate deadline = null; Integer weekly = null; int executedTotal = 0; int executedWeek = 0;
         Set<UUID> categories = new LinkedHashSet<>();
         while (resultSet.next()) {
             UUID nextId = resultSet.getObject("id", UUID.class);
             if (id != null && !id.equals(nextId)) {
-                tasks.add(new PlanningTask(id, type, title, importance, total, deadline, weekly, Set.copyOf(categories)));
+                tasks.add(new PlanningTask(id, type, title, importance, total, deadline, weekly, executedTotal, executedWeek, Set.copyOf(categories)));
                 categories.clear();
             }
             id = nextId; type = resultSet.getString("task_type"); title = resultSet.getString("title"); importance = resultSet.getInt("importance");
             total = nullableInt(resultSet, "total_required_minutes"); Date date = resultSet.getDate("deadline"); deadline = date == null ? null : date.toLocalDate();
-            weekly = nullableInt(resultSet, "weekly_target_minutes"); UUID category = resultSet.getObject("category_id", UUID.class); if (category != null) categories.add(category);
+            weekly = nullableInt(resultSet, "weekly_target_minutes"); executedTotal = resultSet.getInt("executed_total_minutes"); executedWeek = resultSet.getInt("executed_week_minutes"); UUID category = resultSet.getObject("category_id", UUID.class); if (category != null) categories.add(category);
         }
-        if (id != null) tasks.add(new PlanningTask(id, type, title, importance, total, deadline, weekly, Set.copyOf(categories)));
+        if (id != null) tasks.add(new PlanningTask(id, type, title, importance, total, deadline, weekly, executedTotal, executedWeek, Set.copyOf(categories)));
         return tasks;
     }
 
@@ -269,7 +299,7 @@ class DailyPlanRepository {
 
     record DayTypeSource(UUID id, String name) {}
     record SourceBlock(UUID id, String name, int startMinute, int endMinute, Set<UUID> categoryIds) {}
-    record PlanningTask(UUID id, String type, String title, int importance, Integer totalMinutes, LocalDate deadline, Integer weeklyMinutes, Set<UUID> categoryIds) {}
+    record PlanningTask(UUID id, String type, String title, int importance, Integer totalMinutes, LocalDate deadline, Integer weeklyMinutes, int executedTotalMinutes, int executedWeekMinutes, Set<UUID> categoryIds) {}
     record PlannedBlock(UUID id, UUID sourceId, String name, int startMinute, int endMinute, List<PlannedItem> items) {}
     record PlannedItem(UUID id, UUID taskId, String taskTitle, int startMinute, int endMinute) {}
     record PlannedWarning(UUID taskId, String reasonCode, int minutes, String detail) {}

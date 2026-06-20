@@ -41,8 +41,8 @@ class DailyPlanServiceTest {
             new SourceBlock(UUID.randomUUID(), "İş", 480, 1020, Set.of(category))
         ));
         when(repository.activeTasks(LocalWorkspace.ID)).thenReturn(List.of(
-            new PlanningTask(UUID.randomUUID(), "WORK_ITEM", "Teslim", 5, 300, LocalDate.of(2026, 6, 28), null, Set.of(category)),
-            new PlanningTask(UUID.randomUUID(), "HABIT", "İngilizce", 4, null, null, 360, Set.of(category))
+            new PlanningTask(UUID.randomUUID(), "WORK_ITEM", "Teslim", 5, 300, LocalDate.of(2026, 6, 28), null, 100, 0, Set.of(category)),
+            new PlanningTask(UUID.randomUUID(), "HABIT", "İngilizce", 4, null, null, 360, 0, 60, Set.of(category))
         ));
         DailyPlanResponse response = response(dayType);
         when(repository.find(eq(LocalWorkspace.ID), any())).thenReturn(null, response);
@@ -54,7 +54,7 @@ class DailyPlanServiceTest {
         verify(repository).createPlan(any(), eq(LocalWorkspace.ID), eq(LocalDate.of(2026, 6, 19)), eq("UTC"), any(), blocks.capture(), any());
         org.assertj.core.api.Assertions.assertThat(blocks.getValue().get(0).items())
             .extracting(item -> item.endMinute() - item.startMinute())
-            .containsExactly(30, 120);
+            .containsExactly(20, 100);
     }
 
     private DailyPlanResponse response(UUID dayType) {

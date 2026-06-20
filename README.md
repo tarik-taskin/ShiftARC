@@ -64,6 +64,13 @@ başlatır. Workspace genelinde yalnız bir aktif çalışma oturumu bulunabilir
 bitiş ve geçişler değiştirilemeyen execution event kayıtlarıyla denetlenebilir biçimde
 saklanır; plan öğeleri yürütme durumuna göre görsel olarak ayrılır.
 
+Bugün tamamlanan oturumların başlangıç ve bitiş zamanları sonradan düzeltilebilir.
+Düzeltme başka bir oturumla çakışamaz, oturumu yeniden açıp kapatamaz ve önceki
+değerleri `TIMES_CORRECTED` olayıyla append-only geçmişte korur. Gerçekleşen dakikalar
+iş parçacığının toplam süresinden, alışkanlığın mevcut haftalık hedefinden düşülür;
+görev kartları tamamlanan ve kalan süreyi gösterir. Execution geçmişi bulunan günlük
+snapshot, bağlantıları koparacak şekilde yeniden üretilemez.
+
 ## Ön koşullar
 
 - Windows PowerShell 5.1 veya PowerShell 7+
@@ -279,6 +286,7 @@ Mevcut ürün endpoint'leri:
 - `POST /api/v1/execution/start`
 - `POST /api/v1/execution/finish`
 - `POST /api/v1/execution/transition`
+- `PATCH /api/v1/execution/sessions/{sessionId}/times`
 - `GET /api/v1/system/status`
 
 Bir endpoint veya payload değiştirildiğinde önce OpenAPI sözleşmesi, ardından
@@ -321,8 +329,9 @@ JDBC exception veya bağlantı secret'ı response'a eklenmez.
 ## 0.1.0 geliştirme kapsamı dışında olanlar
 
 - Authentication ve kullanıcı hesapları
-- Görev çalıştırma oturumları, süre gerçekleşmeleri ve tarih istisnaları
-- Planlama algoritması
+- Belirli tarihlere ait gün tipi istisnaları
+- Kullanıcı ayarlı günlük öncelik ve gelişmiş planlama algoritması
+- Takvim tabanlı execution geçmişi ve ayrıntılı analiz
 - Trigger ve pomodoro akışları
 - Production deployment, container veya managed servis kurulumu
 - Ödeme ve herkese açık kayıt

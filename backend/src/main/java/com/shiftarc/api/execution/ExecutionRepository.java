@@ -136,6 +136,65 @@ class ExecutionRepository {
         return session;
     }
 
+    CorrectableSession requireSession(UUID workspaceId, UUID sessionId, long version) {
+        List<CorrectableSession> sessions = jdbcTemplate.query(
+            """
+            SELECT id, task_id, daily_plan_item_id, started_at, ended_at, version
+            FROM shiftarc.task_execution_session
+            WHERE workspace_id = ? AND id = ?
+            """,
+            (resultSet, rowNumber) -> {
+                Timestamp ended = resultSet.getTimestamp("ended_at");
+                return new CorrectableSession(
+                    resultSet.getObject("id", UUID.class), resultSet.getObject("task_id", UUID.class),
+                    resultSet.getObject("daily_plan_item_id", UUID.class),
+                    resultSet.getTimestamp("started_at").toInstant(),
+                    ended == null ? null : ended.toInstant(), resultSet.getLong("version")
+                );
+            },
+            workspaceId,
+            sessionId
+        );
+        if (sessions.isEmpty()) throw new ExecutionNotFoundException("The execution session was not found");
+        CorrectableSession session = sessions.get(0);
+        if (session.version() != version) throw new ExecutionConflictException("Execution session is stale; refresh before correcting it");
+        return session;
+    }
+
+    void correctTimes(UUID workspaceId, CorrectableSession session, Instant startedAt, Instant endedAt, Instant occurredAt) {
+        Integer overlap = jdbcTemplate.queryForObject(
+            """
+            SELECT count(*) FROM shiftarc.task_execution_session other
+            WHERE other.workspace_id = ? AND other.id <> ?
+              AND other.started_at < COALESCE(CAST(? AS timestamptz), 'infinity'::timestamptz)
+              AND COALESCE(other.ended_at, 'infinity'::timestamptz) > ?
+            """,
+            Integer.class,
+            workspaceId,
+            session.id(),
+            endedAt == null ? null : Timestamp.from(endedAt),
+            Timestamp.from(startedAt)
+        );
+        if (overlap != null && overlap > 0) {
+            throw new ExecutionConflictException("Corrected execution times overlap another session");
+        }
+        int changed = jdbcTemplate.update(
+            """
+            UPDATE shiftarc.task_execution_session
+            SET started_at = ?, ended_at = ?, version = version + 1, updated_at = current_timestamp
+            WHERE id = ? AND workspace_id = ? AND version = ?
+            """,
+            Timestamp.from(startedAt), endedAt == null ? null : Timestamp.from(endedAt),
+            session.id(), workspaceId, session.version()
+        );
+        if (changed != 1) throw new ExecutionConflictException("Execution session changed before correction");
+        String payload = "{\"previousStartedAt\":\"" + session.startedAt()
+            + "\",\"previousEndedAt\":" + jsonInstant(session.endedAt())
+            + ",\"correctedStartedAt\":\"" + startedAt
+            + "\",\"correctedEndedAt\":" + jsonInstant(endedAt) + "}";
+        event(workspaceId, session.id(), "TIMES_CORRECTED", occurredAt, payload);
+    }
+
     void finish(UUID workspaceId, SessionTarget session, Instant endedAt, String eventType, UUID nextItemId) {
         int changed = jdbcTemplate.update(
             """
@@ -173,6 +232,11 @@ class ExecutionRepository {
         );
     }
 
+    private String jsonInstant(Instant value) {
+        return value == null ? "null" : "\"" + value + "\"";
+    }
+
     record ItemTarget(UUID id, UUID taskId, String taskTitle, String status) {}
     record SessionTarget(UUID id, UUID taskId, UUID itemId, Instant startedAt, long version) {}
+    record CorrectableSession(UUID id, UUID taskId, UUID itemId, Instant startedAt, Instant endedAt, long version) {}
 }

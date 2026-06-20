@@ -173,6 +173,12 @@ edilir.
 - `STARTED`, `FINISHED` ve `TRANSITIONED` olayları append-only tabloya eklenir;
   uygulanmış execution event'i güncelleme veya silme.
 - İstemciden gelen zaman gelecekte olamaz; bitiş başlangıçtan kesinlikle sonra olmalıdır.
+- Zaman düzeltmesi oturumun açık/kapalı durumunu değiştiremez, başka oturumla
+  çakışamaz ve önceki/yeni değerleri `TIMES_CORRECTED` olayıyla kaydetmelidir.
+- Gerçekleşen dakika iş parçacıklarında tüm bitmiş oturumlardan, alışkanlıklarda
+  workspace saat dilimine göre mevcut haftanın bitmiş oturumlarından hesaplanır.
+- Execution kaydı bulunan günlük planı blokları silerek yeniden üretme; geçmiş item
+  bağlantılarını ve snapshot bütünlüğünü koru.
 
 ### Veritabanı
 
@@ -266,7 +272,7 @@ docs(project): add development guidance
 ## Mevcut kapsam sınırı
 
 `0.1.0` içinde authentication, trigger, pomodoro ve production deployment yoktur.
-Kategori, gün tipi, haftalık şablon, görev yönetimi ve temel günlük plan kullanılabilir;
-süre gerçekleşmeleri, tarih istisnaları ve geçmiş özellikleri yalnız
+Kategori, gün tipi, haftalık şablon, görev yönetimi, temel günlük plan, görev yürütme
+ve zaman düzeltme kullanılabilir; tarih istisnaları ve takvim geçmişi özellikleri yalnız
 tanımlanan ürün fazlarında eklenir. Kullanıcı farklı bir faz istemedikçe ileri fazları
 altyapı görevi bahanesiyle erkenden uygulama.

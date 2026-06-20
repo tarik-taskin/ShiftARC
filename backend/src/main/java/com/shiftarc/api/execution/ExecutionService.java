@@ -8,6 +8,7 @@ import java.util.UUID;
 
 import com.shiftarc.api.execution.ExecutionRepository.ItemTarget;
 import com.shiftarc.api.execution.ExecutionRepository.SessionTarget;
+import com.shiftarc.api.execution.ExecutionRepository.CorrectableSession;
 import com.shiftarc.api.workspace.LocalWorkspace;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -61,6 +62,30 @@ public class ExecutionService {
         ItemTarget next = repository.requireStartableTodayItem(LocalWorkspace.ID, request.nextDailyPlanItemId(), context.date());
         repository.finish(LocalWorkspace.ID, current, occurredAt, "TRANSITIONED", next.id());
         repository.start(LocalWorkspace.ID, next, occurredAt);
+        return repository.state(LocalWorkspace.ID, context.date(), context.timezone(), Instant.now(clock));
+    }
+
+    @Transactional
+    public ExecutionStateResponse correct(UUID sessionId, ExecutionRequests.CorrectTimes request) {
+        Context context = context();
+        CorrectableSession session = repository.requireSession(LocalWorkspace.ID, sessionId, request.version());
+        if ((session.endedAt() == null) != (request.endedAt() == null)) {
+            throw new ExecutionValidationException("Time correction cannot reopen or close a session");
+        }
+        validateNotFuture(request.startedAt());
+        if (request.endedAt() != null) {
+            validateNotFuture(request.endedAt());
+            if (!request.endedAt().isAfter(request.startedAt())) {
+                throw new ExecutionValidationException("Corrected end must be after corrected start");
+            }
+        }
+        LocalDate correctedDate = request.startedAt().atZone(ZoneId.of(context.timezone())).toLocalDate();
+        if (!correctedDate.equals(context.date())) {
+            throw new ExecutionValidationException("Today's execution can only be corrected within today");
+        }
+        repository.correctTimes(
+            LocalWorkspace.ID, session, request.startedAt(), request.endedAt(), Instant.now(clock)
+        );
         return repository.state(LocalWorkspace.ID, context.date(), context.timezone(), Instant.now(clock));
     }
 

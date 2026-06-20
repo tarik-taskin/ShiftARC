@@ -35,6 +35,7 @@ for (const path of [
   '/api/v1/execution/start',
   '/api/v1/execution/finish',
   '/api/v1/execution/transition',
+  '/api/v1/execution/sessions/{id}/times',
   '/api/v1/workspace',
   '/api/v1/workspace/settings',
   '/api/v1/onboarding',

@@ -17,6 +17,7 @@ const {
   mockUseStartExecution,
   mockUseFinishExecution,
   mockUseTransitionExecution,
+  mockUseCorrectExecutionTimes,
 } = vi.hoisted(() => ({
   mockUseSystemStatus: vi.fn(),
   mockUseWorkspace: vi.fn(),
@@ -28,6 +29,7 @@ const {
   mockUseStartExecution: vi.fn(),
   mockUseFinishExecution: vi.fn(),
   mockUseTransitionExecution: vi.fn(),
+  mockUseCorrectExecutionTimes: vi.fn(),
 }))
 
 vi.mock('./api/system-status/useSystemStatus', () => ({
@@ -50,6 +52,7 @@ vi.mock('./api/execution/queries', () => ({
   useStartExecution: mockUseStartExecution,
   useFinishExecution: mockUseFinishExecution,
   useTransitionExecution: mockUseTransitionExecution,
+  useCorrectExecutionTimes: mockUseCorrectExecutionTimes,
 }))
 
 describe('foundation status screen', () => {
@@ -204,6 +207,7 @@ describe('product application shell', () => {
     mockUseStartExecution.mockReturnValue({ mutate: vi.fn(), isPending: false })
     mockUseFinishExecution.mockReturnValue({ mutate: vi.fn(), isPending: false })
     mockUseTransitionExecution.mockReturnValue({ mutate: vi.fn(), isPending: false })
+    mockUseCorrectExecutionTimes.mockReturnValue({ mutateAsync: vi.fn(), isPending: false })
   })
 
   afterEach(() => {
@@ -287,6 +291,35 @@ describe('product application shell', () => {
 
     expect(screen.getByText('Aktif çalışma')).toBeInTheDocument()
     expect(screen.getByRole('button', { name: 'Bitir' })).toBeInTheDocument()
+  })
+
+  it('opens time correction for a completed execution', async () => {
+    mockUseExecutionState.mockReturnValue({
+      data: {
+        activeSession: null,
+        sessions: [{
+          id: '81000000-0000-0000-0000-000000000001',
+          taskId: '61000000-0000-0000-0000-000000000001',
+          taskTitle: 'ML Dersi',
+          dailyPlanItemId: '73000000-0000-0000-0000-000000000001',
+          startedAt: '2026-06-19T10:00:00Z',
+          endedAt: '2026-06-19T10:30:00Z',
+          version: 0,
+          durationSeconds: 1_800,
+        }],
+      },
+    })
+    window.history.pushState({}, '', '/')
+    const user = userEvent.setup()
+
+    renderApp()
+    await user.click(
+      screen.getByRole('button', { name: 'ML Dersi zamanını düzelt' }),
+    )
+
+    expect(
+      screen.getByRole('dialog', { name: 'Çalışma zamanını düzelt' }),
+    ).toBeInTheDocument()
   })
 })
 

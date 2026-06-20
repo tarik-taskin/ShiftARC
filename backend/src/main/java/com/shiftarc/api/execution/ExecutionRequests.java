@@ -17,4 +17,5 @@ final class ExecutionRequests {
         Instant occurredAt,
         @PositiveOrZero long version
     ) {}
+    record CorrectTimes(@NotNull Instant startedAt, Instant endedAt, @PositiveOrZero long version) {}
 }
