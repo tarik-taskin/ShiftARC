@@ -13,6 +13,10 @@ const {
   mockUseUpdateWorkspaceSettings,
   mockUseTodayPlan,
   mockUseRegenerateTodayPlan,
+  mockUseExecutionState,
+  mockUseStartExecution,
+  mockUseFinishExecution,
+  mockUseTransitionExecution,
 } = vi.hoisted(() => ({
   mockUseSystemStatus: vi.fn(),
   mockUseWorkspace: vi.fn(),
@@ -20,6 +24,10 @@ const {
   mockUseUpdateWorkspaceSettings: vi.fn(),
   mockUseTodayPlan: vi.fn(),
   mockUseRegenerateTodayPlan: vi.fn(),
+  mockUseExecutionState: vi.fn(),
+  mockUseStartExecution: vi.fn(),
+  mockUseFinishExecution: vi.fn(),
+  mockUseTransitionExecution: vi.fn(),
 }))
 
 vi.mock('./api/system-status/useSystemStatus', () => ({
@@ -35,6 +43,13 @@ vi.mock('./api/workspace/queries', () => ({
 vi.mock('./api/daily-plan/queries', () => ({
   useTodayPlan: mockUseTodayPlan,
   useRegenerateTodayPlan: mockUseRegenerateTodayPlan,
+}))
+
+vi.mock('./api/execution/queries', () => ({
+  useExecutionState: mockUseExecutionState,
+  useStartExecution: mockUseStartExecution,
+  useFinishExecution: mockUseFinishExecution,
+  useTransitionExecution: mockUseTransitionExecution,
 }))
 
 describe('foundation status screen', () => {
@@ -185,6 +200,10 @@ describe('product application shell', () => {
     })
     mockUseTodayPlan.mockReturnValue({ data: dailyPlanFixture(), isPending: false, isError: false })
     mockUseRegenerateTodayPlan.mockReturnValue({ mutate: vi.fn(), isPending: false })
+    mockUseExecutionState.mockReturnValue({ data: { activeSession: null, sessions: [] } })
+    mockUseStartExecution.mockReturnValue({ mutate: vi.fn(), isPending: false })
+    mockUseFinishExecution.mockReturnValue({ mutate: vi.fn(), isPending: false })
+    mockUseTransitionExecution.mockReturnValue({ mutate: vi.fn(), isPending: false })
   })
 
   afterEach(() => {
@@ -244,6 +263,30 @@ describe('product application shell', () => {
         name: 'Arc Midnight: Derin yeşil, sakin ve yüksek odaklı.',
       }),
     ).toHaveAttribute('aria-pressed', 'true')
+  })
+
+  it('shows controls for an active task execution', () => {
+    mockUseExecutionState.mockReturnValue({
+      data: {
+        activeSession: {
+          id: '81000000-0000-0000-0000-000000000001',
+          taskId: '61000000-0000-0000-0000-000000000001',
+          taskTitle: 'ML Dersi',
+          dailyPlanItemId: '73000000-0000-0000-0000-000000000001',
+          startedAt: new Date(Date.now() - 60_000).toISOString(),
+          endedAt: null,
+          version: 0,
+          durationSeconds: 60,
+        },
+        sessions: [],
+      },
+    })
+    window.history.pushState({}, '', '/')
+
+    renderApp()
+
+    expect(screen.getByText('Aktif çalışma')).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'Bitir' })).toBeInTheDocument()
   })
 })
 

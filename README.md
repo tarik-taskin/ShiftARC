@@ -58,6 +58,12 @@ böler. Beş dakikalık günlük hedefler uygun bloklara yerleştirilir, sığma
 silinmek yerine açık bir plan uyarısı olarak saklanır. Aynı güne yapılan normal GET
 mevcut snapshot'ı korur; kullanıcı isterse sürüm kontrollü yeniden üretim yapabilir.
 
+Planlanan görevler ana sayfadan başlatılabilir ve bitirilebilir. `Sıradaki görev`
+eylemi mevcut oturumu bitirip bir sonraki plan öğesini aynı transaction içinde
+başlatır. Workspace genelinde yalnız bir aktif çalışma oturumu bulunabilir. Başlama,
+bitiş ve geçişler değiştirilemeyen execution event kayıtlarıyla denetlenebilir biçimde
+saklanır; plan öğeleri yürütme durumuna göre görsel olarak ayrılır.
+
 ## Ön koşullar
 
 - Windows PowerShell 5.1 veya PowerShell 7+
@@ -269,6 +275,10 @@ Mevcut ürün endpoint'leri:
 - `POST /api/v1/tasks/{taskId}/status/{status}`
 - `GET /api/v1/daily-plan/today`
 - `POST /api/v1/daily-plan/today/regenerate`
+- `GET /api/v1/execution/today`
+- `POST /api/v1/execution/start`
+- `POST /api/v1/execution/finish`
+- `POST /api/v1/execution/transition`
 - `GET /api/v1/system/status`
 
 Bir endpoint veya payload değiştirildiğinde önce OpenAPI sözleşmesi, ardından

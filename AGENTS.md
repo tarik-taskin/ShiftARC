@@ -164,6 +164,16 @@ edilir.
   kullanıcı ayarlı öncelik ve daha gelişmiş dağıtım sonraki fazlarda eklenmelidir.
 - Yeniden üretim yalnız aktif plan ve doğru optimistic-lock sürümüyle yapılmalıdır.
 
+### Görev yürütme davranışı
+
+- Workspace başına en fazla bir açık `task_execution_session` bulunabilir.
+- Başlatma yalnız bugünün aktif planındaki `PLANNED` öğeyi `ACTIVE` yapar.
+- Bitirme oturumu kapatıp bağlı plan öğesini `COMPLETED` yapmalıdır.
+- Sıradaki göreve geçiş mevcut bitiş ve yeni başlangıcı tek transaction içinde yapar.
+- `STARTED`, `FINISHED` ve `TRANSITIONED` olayları append-only tabloya eklenir;
+  uygulanmış execution event'i güncelleme veya silme.
+- İstemciden gelen zaman gelecekte olamaz; bitiş başlangıçtan kesinlikle sonra olmalıdır.
+
 ### Veritabanı
 
 - Uygulama `shiftarc_app` sınırlı rolüyle çalışır; PostgreSQL superuser kullanma.

@@ -379,6 +379,51 @@ paths:
           content:
             application/json: { schema: { $ref: "#/components/schemas/DailyPlanResponse" } }
         "409": { $ref: "#/components/responses/DailyPlanConflict" }
+  /api/v1/execution/today:
+    get:
+      operationId: getTodayExecution
+      summary: Get today's active and completed execution sessions
+      tags: [Execution]
+      responses:
+        "200":
+          description: Today's execution state.
+          content: { application/json: { schema: { $ref: "#/components/schemas/ExecutionStateResponse" } } }
+  /api/v1/execution/start:
+    post:
+      operationId: startExecution
+      summary: Start a planned daily item
+      tags: [Execution]
+      requestBody:
+        required: true
+        content: { application/json: { schema: { $ref: "#/components/schemas/ExecutionStartRequest" } } }
+      responses:
+        "200": { description: Execution started., content: { application/json: { schema: { $ref: "#/components/schemas/ExecutionStateResponse" } } } }
+        "404": { $ref: "#/components/responses/ExecutionNotFound" }
+        "409": { $ref: "#/components/responses/ExecutionConflict" }
+  /api/v1/execution/finish:
+    post:
+      operationId: finishExecution
+      summary: Finish the active execution
+      tags: [Execution]
+      requestBody:
+        required: true
+        content: { application/json: { schema: { $ref: "#/components/schemas/ExecutionFinishRequest" } } }
+      responses:
+        "200": { description: Execution finished., content: { application/json: { schema: { $ref: "#/components/schemas/ExecutionStateResponse" } } } }
+        "404": { $ref: "#/components/responses/ExecutionNotFound" }
+        "409": { $ref: "#/components/responses/ExecutionConflict" }
+  /api/v1/execution/transition:
+    post:
+      operationId: transitionExecution
+      summary: Finish the active execution and start the next planned item atomically
+      tags: [Execution]
+      requestBody:
+        required: true
+        content: { application/json: { schema: { $ref: "#/components/schemas/ExecutionTransitionRequest" } } }
+      responses:
+        "200": { description: Execution transitioned., content: { application/json: { schema: { $ref: "#/components/schemas/ExecutionStateResponse" } } } }
+        "404": { $ref: "#/components/responses/ExecutionNotFound" }
+        "409": { $ref: "#/components/responses/ExecutionConflict" }
   /api/v1/workspace:
     get:
       operationId: getWorkspace
@@ -545,7 +590,60 @@ components:
     DailyPlanConflict:
       description: The weekday has no day type or the plan version is stale.
       content: { application/problem+json: { schema: { $ref: "#/components/schemas/ProblemDetail" } } }
+    ExecutionNotFound:
+      description: The execution session or daily item does not exist.
+      content: { application/problem+json: { schema: { $ref: "#/components/schemas/ProblemDetail" } } }
+    ExecutionConflict:
+      description: Another execution is active or the supplied version is stale.
+      content: { application/problem+json: { schema: { $ref: "#/components/schemas/ProblemDetail" } } }
   schemas:
+    ExecutionStateResponse:
+      type: object
+      additionalProperties: false
+      required: [date, timezone, activeSession, sessions]
+      properties:
+        date: { type: string, format: date }
+        timezone: { type: string }
+        activeSession:
+          oneOf: [{ $ref: "#/components/schemas/ExecutionSession" }, { type: "null" }]
+        sessions: { type: array, items: { $ref: "#/components/schemas/ExecutionSession" } }
+    ExecutionSession:
+      type: object
+      additionalProperties: false
+      required: [id, taskId, taskTitle, dailyPlanItemId, startedAt, endedAt, version, durationSeconds]
+      properties:
+        id: { type: string, format: uuid }
+        taskId: { type: string, format: uuid }
+        taskTitle: { type: string }
+        dailyPlanItemId: { type: [string, "null"], format: uuid }
+        startedAt: { type: string, format: date-time }
+        endedAt: { type: [string, "null"], format: date-time }
+        version: { type: integer, format: int64, minimum: 0 }
+        durationSeconds: { type: integer, format: int64, minimum: 0 }
+    ExecutionStartRequest:
+      type: object
+      additionalProperties: false
+      required: [dailyPlanItemId]
+      properties:
+        dailyPlanItemId: { type: string, format: uuid }
+        startedAt: { type: [string, "null"], format: date-time }
+    ExecutionFinishRequest:
+      type: object
+      additionalProperties: false
+      required: [sessionId, version]
+      properties:
+        sessionId: { type: string, format: uuid }
+        endedAt: { type: [string, "null"], format: date-time }
+        version: { type: integer, format: int64, minimum: 0 }
+    ExecutionTransitionRequest:
+      type: object
+      additionalProperties: false
+      required: [sessionId, nextDailyPlanItemId, version]
+      properties:
+        sessionId: { type: string, format: uuid }
+        nextDailyPlanItemId: { type: string, format: uuid }
+        occurredAt: { type: [string, "null"], format: date-time }
+        version: { type: integer, format: int64, minimum: 0 }
     DailyPlanResponse:
       type: object
       additionalProperties: false
