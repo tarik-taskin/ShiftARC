@@ -188,6 +188,14 @@ edilir.
 - Her tamamlanmayı `trigger_occurrence` kaydıyla koru; sayaç geçmişini silerek azaltma.
 - Tarayıcı bildirim iznini yalnız açık kullanıcı eylemiyle iste.
 
+### Pomodoro davranışı
+
+- Workspace başına veritabanı constraint'iyle en fazla bir aktif pomodoro oturumu tut.
+- Sayaç doğruluğunu tarayıcı interval sayısına değil, kalıcı `planned_end_at` anına bağla.
+- Odak oturumu yalnız aynı workspace içindeki aktif bir göreve bağlanabilir.
+- Tamamlanan ve iptal edilen oturumları silme; analiz için durumlarıyla sakla.
+- Ayar güncellemelerinde optimistic-lock sürümünü koru.
+
 ### Veritabanı
 
 - Uygulama `shiftarc_app` sınırlı rolüyle çalışır; PostgreSQL superuser kullanma.
@@ -279,8 +287,8 @@ docs(project): add development guidance
 
 ## Mevcut kapsam sınırı
 
-`0.1.0` içinde authentication, pomodoro ve production deployment yoktur.
+`0.1.0` içinde authentication ve production deployment yoktur.
 Kategori, gün tipi, haftalık şablon, görev yönetimi, temel günlük plan, görev yürütme
-ve zaman düzeltmeyle trigger kuralları kullanılabilir; tarih istisnaları ve takvim geçmişi özellikleri yalnız
+ve zaman düzeltmeyle trigger kuralları ve pomodoro kullanılabilir; tarih istisnaları ve takvim geçmişi özellikleri yalnız
 tanımlanan ürün fazlarında eklenir. Kullanıcı farklı bir faz istemedikçe ileri fazları
 altyapı görevi bahanesiyle erkenden uygulama.

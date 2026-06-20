@@ -77,6 +77,12 @@ olarak çalışır. Kurallar belirli dakika aralıklarına veya kategori sonras�
 gerçekleşmeler ayrı geçmiş kayıtlarıdır. Vadesi gelen triggerlar öncelikli görünür ve
 kullanıcı izniyle tarayıcı bildirimi gönderir.
 
+`Odak` sayfası 25/5/15 dakika varsayılanlı pomodoro akışını sunar. Odak, kısa mola
+ve uzun mola sayaçları backend üzerinde kalıcı oturum olarak tutulur; tarayıcı
+yenilendiğinde kalan süre sunucudaki bitiş anından yeniden hesaplanır. Aynı workspace
+içinde yalnız bir sayaç aktif olabilir. Odak oturumu isteğe bağlı olarak aktif bir
+göreve bağlanabilir; süreler ve uzun mola döngüsü kullanıcı tarafından ayarlanabilir.
+
 ## Ön koşullar
 
 - Windows PowerShell 5.1 veya PowerShell 7+

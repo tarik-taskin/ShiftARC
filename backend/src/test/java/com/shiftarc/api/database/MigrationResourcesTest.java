@@ -23,7 +23,7 @@ class MigrationResourcesTest {
         Resource[] migrations = new PathMatchingResourcePatternResolver()
             .getResources("classpath*:db/migration/*.sql");
 
-        assertEquals(4, migrations.length);
+        assertEquals(5, migrations.length);
         for (Resource migration : migrations) {
             assertTrue(VERSIONED_MIGRATION_NAME.matcher(migration.getFilename()).matches());
         }
@@ -57,6 +57,7 @@ class MigrationResourcesTest {
         assertTrue(executionHistory.contains("task_execution_single_active_session"));
         assertTrue(executionHistory.contains("task_execution_event_append_only"));
         assertTrue(migrationSql("V4__create_trigger_domain.sql").contains("CREATE TABLE shiftarc.trigger_rule"));
+        assertTrue(migrationSql("V5__create_pomodoro_domain.sql").contains("pomodoro_single_active_session"));
     }
 
     private String migrationSql(String filename) throws IOException {

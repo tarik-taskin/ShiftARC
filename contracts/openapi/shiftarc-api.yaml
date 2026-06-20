@@ -572,6 +572,45 @@ paths:
         - { $ref: "#/components/parameters/EntityVersion" }
       responses:
         "200": { description: Trigger status changed, content: { application/json: { schema: { $ref: "#/components/schemas/TriggerResponse" } } } }
+  /api/v1/pomodoro:
+    get:
+      operationId: getPomodoroState
+      summary: Read persisted pomodoro settings, active timer and recent sessions
+      tags: [Pomodoro]
+      responses:
+        "200": { description: Pomodoro state, content: { application/json: { schema: { $ref: "#/components/schemas/PomodoroStateResponse" } } } }
+  /api/v1/pomodoro/start:
+    post:
+      operationId: startPomodoro
+      summary: Start a focus or break timer
+      tags: [Pomodoro]
+      requestBody: { required: true, content: { application/json: { schema: { $ref: "#/components/schemas/PomodoroStartRequest" } } } }
+      responses:
+        "200": { description: Timer started, content: { application/json: { schema: { $ref: "#/components/schemas/PomodoroStateResponse" } } } }
+  /api/v1/pomodoro/complete:
+    post:
+      operationId: completePomodoro
+      summary: Complete the active timer
+      tags: [Pomodoro]
+      requestBody: { required: true, content: { application/json: { schema: { $ref: "#/components/schemas/PomodoroFinishRequest" } } } }
+      responses:
+        "200": { description: Timer completed, content: { application/json: { schema: { $ref: "#/components/schemas/PomodoroStateResponse" } } } }
+  /api/v1/pomodoro/cancel:
+    post:
+      operationId: cancelPomodoro
+      summary: Cancel the active timer
+      tags: [Pomodoro]
+      requestBody: { required: true, content: { application/json: { schema: { $ref: "#/components/schemas/PomodoroFinishRequest" } } } }
+      responses:
+        "200": { description: Timer cancelled, content: { application/json: { schema: { $ref: "#/components/schemas/PomodoroStateResponse" } } } }
+  /api/v1/pomodoro/settings:
+    put:
+      operationId: updatePomodoroSettings
+      summary: Update workspace pomodoro durations
+      tags: [Pomodoro]
+      requestBody: { required: true, content: { application/json: { schema: { $ref: "#/components/schemas/PomodoroSettings" } } } }
+      responses:
+        "200": { description: Settings updated, content: { application/json: { schema: { $ref: "#/components/schemas/PomodoroStateResponse" } } } }
 components:
   parameters:
     CategoryId:
@@ -661,6 +700,35 @@ components:
       description: Another execution is active or the supplied version is stale.
       content: { application/problem+json: { schema: { $ref: "#/components/schemas/ProblemDetail" } } }
   schemas:
+    PomodoroStartRequest:
+      type: object
+      required: [phase]
+      properties:
+        phase: { type: string, enum: [FOCUS, SHORT_BREAK, LONG_BREAK] }
+        taskId: { type: [string, "null"], format: uuid }
+    PomodoroFinishRequest:
+      type: object
+      required: [sessionId, version]
+      properties:
+        sessionId: { type: string, format: uuid }
+        version: { type: integer, minimum: 0 }
+    PomodoroSettings:
+      type: object
+      required: [focusMinutes, shortBreakMinutes, longBreakMinutes, cyclesBeforeLongBreak, version]
+      properties:
+        focusMinutes: { type: integer, minimum: 5, maximum: 120 }
+        shortBreakMinutes: { type: integer, minimum: 1, maximum: 30 }
+        longBreakMinutes: { type: integer, minimum: 5, maximum: 60 }
+        cyclesBeforeLongBreak: { type: integer, minimum: 2, maximum: 8 }
+        version: { type: integer, minimum: 0 }
+    PomodoroStateResponse:
+      type: object
+      required: [settings, activeSession, recentSessions, focusCyclesToday]
+      properties:
+        settings: { $ref: "#/components/schemas/PomodoroSettings" }
+        activeSession: { type: [object, "null"] }
+        recentSessions: { type: array, items: { type: object } }
+        focusCyclesToday: { type: integer, minimum: 0 }
     TriggerWriteRequest:
       type: object
       required: [type, scheduleType, title, importance, durationMinutes, categoryIds]

@@ -35,6 +35,10 @@ const TriggersPage = lazy(() =>
   import('@/pages/triggers-page').then((module) => ({ default: module.TriggersPage })),
 )
 
+const FocusPage = lazy(() =>
+  import('@/pages/focus-page').then((module) => ({ default: module.FocusPage })),
+)
+
 function App() {
   const location = useLocation()
 
@@ -85,6 +89,7 @@ function ProductRoutes() {
           }
         />
         <Route path="triggers" element={<Suspense fallback={<div role="status">Triggerlar yükleniyor…</div>}><TriggersPage /></Suspense>} />
+        <Route path="focus" element={<Suspense fallback={<div role="status">Odak sayacı yükleniyor…</div>}><FocusPage /></Suspense>} />
         <Route
           path="history"
           element={
