@@ -215,6 +215,22 @@ class ExecutionRepository {
                 session.itemId()
             );
         }
+        jdbcTemplate.update(
+            """
+            UPDATE shiftarc.trigger_rule rule
+            SET next_due_at = ?, version = version + 1, updated_at = current_timestamp
+            WHERE rule.workspace_id = ? AND rule.status = 'ACTIVE'
+              AND rule.schedule_type = 'AFTER_CATEGORY' AND rule.next_due_at IS NULL
+              AND EXISTS (
+                  SELECT 1 FROM shiftarc.trigger_rule_category trigger_category
+                  JOIN shiftarc.task_category task_category
+                    ON task_category.category_id = trigger_category.category_id
+                  WHERE trigger_category.trigger_rule_id = rule.id
+                    AND task_category.task_id = ?
+              )
+            """,
+            Timestamp.from(endedAt), workspaceId, session.taskId()
+        );
         String payload = nextItemId == null
             ? "{}"
             : "{\"nextDailyPlanItemId\":\"" + nextItemId + "\"}";
