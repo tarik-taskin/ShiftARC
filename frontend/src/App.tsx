@@ -4,7 +4,6 @@ import { useLocation } from 'react-router-dom'
 
 import { ProductShell } from '@/app/product-shell'
 import { WorkspaceGate } from '@/app/workspace-gate'
-import { FeaturePage } from '@/pages/feature-page'
 import { TodayPage } from '@/pages/today-page'
 import { SystemStatusPage } from '@/pages/system-status-page'
 import { WorkspacePreferencesPage } from '@/pages/workspace-preferences-page'
@@ -37,6 +36,10 @@ const TriggersPage = lazy(() =>
 
 const FocusPage = lazy(() =>
   import('@/pages/focus-page').then((module) => ({ default: module.FocusPage })),
+)
+
+const HistoryPage = lazy(() =>
+  import('@/pages/history-page').then((module) => ({ default: module.HistoryPage })),
 )
 
 function App() {
@@ -92,14 +95,7 @@ function ProductRoutes() {
         <Route path="focus" element={<Suspense fallback={<div role="status">Odak sayacı yükleniyor…</div>}><FocusPage /></Suspense>} />
         <Route
           path="history"
-          element={
-            <FeaturePage
-              eyebrow="Gerçekleşen zaman"
-              title="Plan ile gerçeği yan yana gör."
-              description="Günlük snapshot'lar, gerçekleşen çalışma süreleri ve düzeltmeler takvim üzerinde incelenecek."
-              nextStep="Takvim ve olay geçmişi Faz 13'te eklenecek."
-            />
-          }
+          element={<Suspense fallback={<div role="status">Geçmiş yükleniyor…</div>}><HistoryPage /></Suspense>}
         />
         <Route path="settings/preferences" element={<WorkspacePreferencesPage />} />
         <Route path="settings/system" element={<SystemStatusPage />} />

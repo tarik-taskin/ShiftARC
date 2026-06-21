@@ -65,6 +65,11 @@ public class DailyPlanService {
         return repository.find(LocalWorkspace.ID, context.date());
     }
 
+    @Transactional(readOnly = true)
+    public DailyPlanResponse findSnapshot(LocalDate date) {
+        return repository.find(LocalWorkspace.ID, date);
+    }
+
     private PlanContext context() {
         String timezone = repository.timezone(LocalWorkspace.ID);
         LocalDate date = LocalDate.now(clock.withZone(ZoneId.of(timezone)));

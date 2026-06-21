@@ -611,6 +611,27 @@ paths:
       requestBody: { required: true, content: { application/json: { schema: { $ref: "#/components/schemas/PomodoroSettings" } } } }
       responses:
         "200": { description: Settings updated, content: { application/json: { schema: { $ref: "#/components/schemas/PomodoroStateResponse" } } } }
+  /api/v1/history:
+    get:
+      operationId: listHistoryDays
+      summary: List daily snapshot metrics in a bounded date range
+      tags: [History]
+      parameters:
+        - { name: from, in: query, required: true, schema: { type: string, format: date } }
+        - { name: to, in: query, required: true, schema: { type: string, format: date } }
+      responses:
+        "200": { description: Calendar summaries, content: { application/json: { schema: { type: array, items: { $ref: "#/components/schemas/HistoryDay" } } } } }
+        "400": { $ref: "#/components/responses/InvalidRequest" }
+  /api/v1/history/{date}:
+    get:
+      operationId: getHistoryDay
+      summary: Read a daily snapshot with execution sessions and audit events
+      tags: [History]
+      parameters:
+        - { name: date, in: path, required: true, schema: { type: string, format: date } }
+      responses:
+        "200": { description: Snapshot detail, content: { application/json: { schema: { $ref: "#/components/schemas/HistoryDetail" } } } }
+        "404": { description: No snapshot exists for the date }
 components:
   parameters:
     CategoryId:
@@ -700,6 +721,27 @@ components:
       description: Another execution is active or the supplied version is stale.
       content: { application/problem+json: { schema: { $ref: "#/components/schemas/ProblemDetail" } } }
   schemas:
+    HistoryDay:
+      type: object
+      required: [date, planId, dayTypeName, status, plannedMinutes, executedMinutes, completedItems, totalItems, sessionCount]
+      properties:
+        date: { type: string, format: date }
+        planId: { type: string, format: uuid }
+        dayTypeName: { type: string }
+        status: { type: string, enum: [ACTIVE, COMPLETED] }
+        plannedMinutes: { type: integer, minimum: 0 }
+        executedMinutes: { type: integer, minimum: 0 }
+        completedItems: { type: integer, minimum: 0 }
+        totalItems: { type: integer, minimum: 0 }
+        sessionCount: { type: integer, minimum: 0 }
+    HistoryDetail:
+      type: object
+      required: [summary, plan, sessions, events]
+      properties:
+        summary: { $ref: "#/components/schemas/HistoryDay" }
+        plan: { $ref: "#/components/schemas/DailyPlanResponse" }
+        sessions: { type: array, items: { type: object } }
+        events: { type: array, items: { type: object } }
     PomodoroStartRequest:
       type: object
       required: [phase]

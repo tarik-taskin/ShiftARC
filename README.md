@@ -83,6 +83,11 @@ yenilendiğinde kalan süre sunucudaki bitiş anından yeniden hesaplanır. Ayn�
 içinde yalnız bir sayaç aktif olabilir. Odak oturumu isteğe bağlı olarak aktif bir
 göreve bağlanabilir; süreler ve uzun mola döngüsü kullanıcı tarafından ayarlanabilir.
 
+`Geçmiş` sayfası günlük plan snapshot'larını aylık takvimde listeler. Her gün planlanan
+ve gerçekleşen dakika oranını gösterir; seçilen günün blokları, çalışma oturumları ve
+append-only execution olayları birlikte incelenebilir. API tarih aralığını en fazla
+63 günle sınırlar.
+
 ## Ön koşullar
 
 - Windows PowerShell 5.1 veya PowerShell 7+

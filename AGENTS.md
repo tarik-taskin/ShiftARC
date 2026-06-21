@@ -196,6 +196,14 @@ edilir.
 - Tamamlanan ve iptal edilen oturumları silme; analiz için durumlarıyla sakla.
 - Ayar güncellemelerinde optimistic-lock sürümünü koru.
 
+### Takvim geçmişi
+
+- Geçmiş ekranı yeni plan üretmemeli; yalnız var olan günlük snapshot'ları okumalıdır.
+- Planlanan süre snapshot item'larından, gerçekleşen süre bitmiş execution oturumlarından hesaplanır.
+- Takvim sorgularını en fazla 63 günlük aralıkla sınırla.
+- Zamanları günlere ayırırken workspace IANA saat dilimini kullan.
+- Execution event payload'ını değiştirme; düzeltme geçmişini append-only kaynaktan göster.
+
 ### Veritabanı
 
 - Uygulama `shiftarc_app` sınırlı rolüyle çalışır; PostgreSQL superuser kullanma.
@@ -289,6 +297,6 @@ docs(project): add development guidance
 
 `0.1.0` içinde authentication ve production deployment yoktur.
 Kategori, gün tipi, haftalık şablon, görev yönetimi, temel günlük plan, görev yürütme
-ve zaman düzeltmeyle trigger kuralları ve pomodoro kullanılabilir; tarih istisnaları ve takvim geçmişi özellikleri yalnız
+ve zaman düzeltmeyle trigger kuralları, pomodoro ve takvim geçmişi kullanılabilir; tarih istisnaları yalnız
 tanımlanan ürün fazlarında eklenir. Kullanıcı farklı bir faz istemedikçe ileri fazları
 altyapı görevi bahanesiyle erkenden uygulama.
