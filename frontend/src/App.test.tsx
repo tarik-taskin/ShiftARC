@@ -13,6 +13,7 @@ const {
   mockUseUpdateWorkspaceSettings,
   mockUseTodayPlan,
   mockUseRegenerateTodayPlan,
+  mockUseAdjustTodayPlanItem,
   mockUseExecutionState,
   mockUseStartExecution,
   mockUseFinishExecution,
@@ -25,6 +26,7 @@ const {
   mockUseUpdateWorkspaceSettings: vi.fn(),
   mockUseTodayPlan: vi.fn(),
   mockUseRegenerateTodayPlan: vi.fn(),
+  mockUseAdjustTodayPlanItem: vi.fn(),
   mockUseExecutionState: vi.fn(),
   mockUseStartExecution: vi.fn(),
   mockUseFinishExecution: vi.fn(),
@@ -45,6 +47,7 @@ vi.mock('./api/workspace/queries', () => ({
 vi.mock('./api/daily-plan/queries', () => ({
   useTodayPlan: mockUseTodayPlan,
   useRegenerateTodayPlan: mockUseRegenerateTodayPlan,
+  useAdjustTodayPlanItem: mockUseAdjustTodayPlanItem,
 }))
 
 vi.mock('./api/execution/queries', () => ({
@@ -203,6 +206,7 @@ describe('product application shell', () => {
     })
     mockUseTodayPlan.mockReturnValue({ data: dailyPlanFixture(), isPending: false, isError: false })
     mockUseRegenerateTodayPlan.mockReturnValue({ mutate: vi.fn(), isPending: false })
+    mockUseAdjustTodayPlanItem.mockReturnValue({ mutateAsync: vi.fn(), isPending: false, error: null })
     mockUseExecutionState.mockReturnValue({ data: { activeSession: null, sessions: [] } })
     mockUseStartExecution.mockReturnValue({ mutate: vi.fn(), isPending: false })
     mockUseFinishExecution.mockReturnValue({ mutate: vi.fn(), isPending: false })
@@ -321,6 +325,17 @@ describe('product application shell', () => {
       screen.getByRole('dialog', { name: 'Çalışma zamanını düzelt' }),
     ).toBeInTheDocument()
   })
+
+  it('opens the daily duration and priority adjustment', async () => {
+    window.history.pushState({}, '', '/')
+    const user = userEvent.setup()
+    renderApp()
+
+    await user.click(screen.getByRole('button', { name: 'ML Dersi günlük planını ayarla' }))
+
+    expect(screen.getByRole('dialog', { name: 'Günlük görevi ayarla' })).toBeInTheDocument()
+    expect(screen.getByRole('spinbutton', { name: 'Süre (dakika)' })).toHaveValue(1440)
+  })
 })
 
 function workspaceFixture(overrides: { onboardingCompleted: boolean }) {
@@ -342,7 +357,7 @@ function dailyPlanFixture() {
     sourceDayTypeId: '51000000-0000-0000-0000-000000000001', sourceDayTypeName: 'İş Günü', status: 'ACTIVE' as const,
     version: 0, generatedAt: '2026-06-19T10:00:00Z', warnings: [], blocks: [{
       id: '72000000-0000-0000-0000-000000000001', name: 'İş', startMinute: 0, endMinute: 1440,
-      items: [{ id: '73000000-0000-0000-0000-000000000001', taskId: '61000000-0000-0000-0000-000000000001', taskTitle: 'ML Dersi', taskType: 'WORK_ITEM' as const, importance: 5, plannedStartMinute: 0, plannedEndMinute: 1440, status: 'PLANNED' as const }],
+      items: [{ id: '73000000-0000-0000-0000-000000000001', taskId: '61000000-0000-0000-0000-000000000001', taskTitle: 'ML Dersi', taskType: 'WORK_ITEM' as const, importance: 5, plannedStartMinute: 0, plannedEndMinute: 1440, status: 'PLANNED' as const, version: 0 }],
     }],
   }
 }

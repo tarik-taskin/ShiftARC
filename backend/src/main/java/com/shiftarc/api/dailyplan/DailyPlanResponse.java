@@ -28,7 +28,8 @@ public record DailyPlanResponse(
         int importance,
         int plannedStartMinute,
         int plannedEndMinute,
-        String status
+        String status,
+        long version
     ) {
     }
 

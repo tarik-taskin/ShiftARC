@@ -71,6 +71,11 @@ iş parçacığının toplam süresinden, alışkanlığın mevcut haftalık hed
 görev kartları tamamlanan ve kalan süreyi gösterir. Execution geçmişi bulunan günlük
 snapshot, bağlantıları koparacak şekilde yeniden üretilemez.
 
+Bugünün planındaki henüz başlamamış görevlerin süre ve öncelikleri görev kartındaki
+ayar eyleminden değiştirilebilir. Süreler beş dakikalık adımlarla düzenlenir; kalan
+görevler yeni önceliğe göre aynı zaman bloğu içinde yeniden sıralanır. Başlamış veya
+tamamlanmış işler ve blok kapasitesini aşan düzenlemeler kabul edilmez.
+
 `Triggerlar` sayfası görevlerden görsel ve davranışsal olarak ayrılan kısa eylemleri
 yönetir. İş parçacığı triggerları sonlu tekrar sayısıyla, alışkanlık triggerları sürekli
 olarak çalışır. Kurallar belirli dakika aralıklarına veya kategori sonrasına bağlanabilir;
@@ -351,7 +356,6 @@ JDBC exception veya bağlantı secret'ı response'a eklenmez.
 ## 0.1.0 geliştirme kapsamı dışında olanlar
 
 - Authentication ve kullanıcı hesapları
-- Kullanıcı ayarlı günlük öncelik ve gelişmiş planlama algoritması
 - Takvim tabanlı execution geçmişi ve ayrıntılı analiz
 - Trigger ve pomodoro akışları
 - Production deployment, container veya managed servis kurulumu

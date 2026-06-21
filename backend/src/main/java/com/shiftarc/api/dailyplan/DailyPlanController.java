@@ -6,6 +6,11 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PatchMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import jakarta.validation.Valid;
+import java.util.UUID;
 import org.springframework.web.bind.annotation.RestController;
 
 @Validated
@@ -26,5 +31,13 @@ public class DailyPlanController {
     @PostMapping("/regenerate")
     DailyPlanResponse regenerate(@RequestParam @PositiveOrZero long version) {
         return service.regenerate(version);
+    }
+
+    @PatchMapping("/items/{itemId}")
+    DailyPlanResponse adjustItem(
+        @PathVariable UUID itemId,
+        @Valid @RequestBody DailyPlanItemAdjustmentRequest request
+    ) {
+        return service.adjustItem(itemId, request);
     }
 }

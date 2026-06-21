@@ -31,6 +31,7 @@ for (const path of [
   '/api/v1/tasks/{id}/status/{status}',
   '/api/v1/daily-plan/today',
   '/api/v1/daily-plan/today/regenerate',
+  '/api/v1/daily-plan/today/items/{itemId}',
   '/api/v1/execution/today',
   '/api/v1/execution/start',
   '/api/v1/execution/finish',

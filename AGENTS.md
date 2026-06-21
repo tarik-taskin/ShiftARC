@@ -163,6 +163,11 @@ edilir.
 - Algoritma şimdilik deterministik başlangıç yaklaşımıdır; gerçekleşen süreyi düşme,
   kullanıcı ayarlı öncelik ve daha gelişmiş dağıtım sonraki fazlarda eklenmelidir.
 - Yeniden üretim yalnız aktif plan ve doğru optimistic-lock sürümüyle yapılmalıdır.
+- Günlük item süre ve öncelik ayarı yalnız kalan `PLANNED` kuyrukta yapılabilir.
+- Süre değişiklikleri beş dakikalık grid'i ve kaynak zaman bloğu kapasitesini aşmamalıdır.
+- Öncelik değişikliğinde yalnız başlamamış kuyruk yeniden sıralanmalı; tamamlanan veya
+  aktif item'ların konumu ve execution bağlantıları korunmalıdır.
+- Snapshot'a özgü önceliği global görev önem puanına geri yazma.
 
 ### Görev yürütme davranışı
 

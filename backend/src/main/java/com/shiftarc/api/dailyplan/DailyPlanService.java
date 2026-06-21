@@ -70,6 +70,19 @@ public class DailyPlanService {
         return repository.find(LocalWorkspace.ID, date);
     }
 
+    @Transactional
+    public DailyPlanResponse adjustItem(UUID itemId, DailyPlanItemAdjustmentRequest request) {
+        if (request.durationMinutes() % 5 != 0) {
+            throw new DailyPlanValidationException("Duration must use five-minute increments");
+        }
+        String timezone = repository.timezone(LocalWorkspace.ID);
+        LocalDate date = LocalDate.now(clock.withZone(ZoneId.of(timezone)));
+        DailyPlanResponse plan = repository.find(LocalWorkspace.ID, date);
+        if (plan == null) throw new DailyPlanUnavailableException("Today's daily plan has not been generated");
+        repository.adjustItem(LocalWorkspace.ID, date, itemId, request);
+        return repository.find(LocalWorkspace.ID, date);
+    }
+
     private PlanContext context() {
         String timezone = repository.timezone(LocalWorkspace.ID);
         LocalDate date = LocalDate.now(clock.withZone(ZoneId.of(timezone)));

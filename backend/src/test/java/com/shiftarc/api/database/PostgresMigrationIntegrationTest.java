@@ -45,7 +45,7 @@ class PostgresMigrationIntegrationTest {
         MigrateResult result = flyway.migrate();
 
         assertTrue(result.success);
-        assertEquals(6, result.migrationsExecuted);
+        assertEquals(7, result.migrationsExecuted);
         try (Connection connection = DriverManager.getConnection(jdbcUrl, username, password)) {
             assertEquals(21, queryCount(connection, """
                 SELECT count(*)

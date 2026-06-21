@@ -379,6 +379,22 @@ paths:
           content:
             application/json: { schema: { $ref: "#/components/schemas/DailyPlanResponse" } }
         "409": { $ref: "#/components/responses/DailyPlanConflict" }
+  /api/v1/daily-plan/today/items/{itemId}:
+    patch:
+      operationId: adjustTodayPlanItem
+      summary: Adjust duration and priority for an unstarted item in today's snapshot
+      tags: [Daily plan]
+      parameters:
+        - { name: itemId, in: path, required: true, schema: { type: string, format: uuid } }
+      requestBody:
+        required: true
+        content: { application/json: { schema: { $ref: "#/components/schemas/DailyPlanItemAdjustmentRequest" } } }
+      responses:
+        "200":
+          description: Updated and reordered daily plan.
+          content: { application/json: { schema: { $ref: "#/components/schemas/DailyPlanResponse" } } }
+        "400": { $ref: "#/components/responses/InvalidRequest" }
+        "409": { $ref: "#/components/responses/DailyPlanConflict" }
   /api/v1/execution/today:
     get:
       operationId: getTodayExecution
@@ -923,7 +939,7 @@ components:
     DailyPlanItem:
       type: object
       additionalProperties: false
-      required: [id, taskId, taskTitle, taskType, importance, plannedStartMinute, plannedEndMinute, status]
+      required: [id, taskId, taskTitle, taskType, importance, plannedStartMinute, plannedEndMinute, status, version]
       properties:
         id: { type: string, format: uuid }
         taskId: { type: string, format: uuid }
@@ -933,6 +949,15 @@ components:
         plannedStartMinute: { type: integer }
         plannedEndMinute: { type: integer }
         status: { type: string, enum: [PLANNED, ACTIVE, COMPLETED, SKIPPED] }
+        version: { type: integer, format: int64, minimum: 0 }
+    DailyPlanItemAdjustmentRequest:
+      type: object
+      additionalProperties: false
+      required: [durationMinutes, priority, version]
+      properties:
+        durationMinutes: { type: integer, minimum: 5, maximum: 1440, multipleOf: 5 }
+        priority: { type: integer, minimum: 1, maximum: 5 }
+        version: { type: integer, format: int64, minimum: 0 }
     DailyPlanWarning:
       type: object
       additionalProperties: false

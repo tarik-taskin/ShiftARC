@@ -20,6 +20,11 @@ class DailyPlanApiExceptionHandler {
         return problem(HttpStatus.CONFLICT, "daily-plan-conflict", "Daily plan conflict", exception, request);
     }
 
+    @ExceptionHandler(DailyPlanValidationException.class)
+    ProblemDetail invalid(DailyPlanValidationException exception, HttpServletRequest request) {
+        return problem(HttpStatus.BAD_REQUEST, "daily-plan-invalid", "Daily plan request invalid", exception, request);
+    }
+
     private ProblemDetail problem(HttpStatus status, String type, String title, RuntimeException exception, HttpServletRequest request) {
         ProblemDetail problem = ProblemDetail.forStatusAndDetail(status, exception.getMessage());
         problem.setType(URI.create("/problems/" + type)); problem.setTitle(title); problem.setInstance(URI.create(request.getRequestURI()));

@@ -7,6 +7,7 @@ import java.sql.Timestamp;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
@@ -186,6 +187,73 @@ class DailyPlanRepository {
         insertStructure(planId, blocks, warnings);
     }
 
+    void adjustItem(UUID workspaceId, LocalDate date, UUID itemId, DailyPlanItemAdjustmentRequest request) {
+        List<AdjustmentItem> items = jdbcTemplate.query(
+            """
+            SELECT item.id, item.position, item.status, item.planned_start_minute,
+                   item.planned_end_minute, item.user_priority, item.version,
+                   task.importance, block.id AS block_id, block.end_minute AS block_end
+            FROM shiftarc.daily_plan_item item
+            JOIN shiftarc.daily_plan_block block ON block.id = item.daily_plan_block_id
+            JOIN shiftarc.daily_plan plan ON plan.id = block.daily_plan_id
+            LEFT JOIN shiftarc.task task ON task.id = item.task_id
+            WHERE plan.workspace_id = ? AND plan.plan_date = ?
+              AND block.id = (SELECT selected.daily_plan_block_id
+                              FROM shiftarc.daily_plan_item selected WHERE selected.id = ?)
+            ORDER BY item.position
+            """,
+            (rs, row) -> new AdjustmentItem(
+                rs.getObject("id", UUID.class), rs.getInt("position"), rs.getString("status"),
+                rs.getInt("planned_start_minute"), rs.getInt("planned_end_minute"),
+                nullableInt(rs, "user_priority"), rs.getLong("version"), rs.getInt("importance"),
+                rs.getObject("block_id", UUID.class), rs.getInt("block_end")
+            ), workspaceId, Date.valueOf(date), itemId
+        );
+        if (items.isEmpty()) throw new DailyPlanConflictException("Daily plan item was not found for today");
+        int selectedIndex = -1;
+        int adjustableStart = 0;
+        for (int index = 0; index < items.size(); index++) {
+            AdjustmentItem item = items.get(index);
+            if (!item.status().equals("PLANNED")) adjustableStart = index + 1;
+            if (item.id().equals(itemId)) selectedIndex = index;
+        }
+        if (selectedIndex < adjustableStart || !items.get(selectedIndex).status().equals("PLANNED")) {
+            throw new DailyPlanConflictException("Only an unstarted item in the remaining plan can be adjusted");
+        }
+        AdjustmentItem selected = items.get(selectedIndex);
+        if (selected.version() != request.version()) {
+            throw new DailyPlanConflictException("Daily plan item changed; refresh before editing");
+        }
+        List<AdjustmentItem> adjustable = new ArrayList<>(items.subList(adjustableStart, items.size()));
+        adjustable.replaceAll(item -> item.id().equals(itemId)
+            ? item.withAdjustment(request.durationMinutes(), request.priority()) : item);
+        adjustable.sort(Comparator.comparingInt(AdjustmentItem::effectivePriority).reversed()
+            .thenComparingInt(AdjustmentItem::position));
+        int cursor = items.get(adjustableStart).startMinute();
+        int required = adjustable.stream().mapToInt(AdjustmentItem::duration).sum();
+        if (cursor + required > selected.blockEnd()) {
+            throw new DailyPlanConflictException("Adjusted durations do not fit inside the time block");
+        }
+        jdbcTemplate.update(
+            "UPDATE shiftarc.daily_plan_item SET position = position + 100 WHERE daily_plan_block_id = ? AND position >= ?",
+            selected.blockId(), adjustableStart
+        );
+        for (int index = 0; index < adjustable.size(); index++) {
+            AdjustmentItem item = adjustable.get(index);
+            int changed = jdbcTemplate.update(
+                """
+                UPDATE shiftarc.daily_plan_item SET position = ?, planned_start_minute = ?,
+                    planned_end_minute = ?, user_priority = ?, version = version + 1,
+                    updated_at = current_timestamp WHERE id = ? AND version = ?
+                """,
+                adjustableStart + index, cursor, cursor + item.duration(), item.userPriority(),
+                item.id(), item.version()
+            );
+            if (changed != 1) throw new DailyPlanConflictException("Daily plan item changed during adjustment");
+            cursor += item.duration();
+        }
+    }
+
     private void insertStructure(UUID planId, List<PlannedBlock> blocks, List<PlannedWarning> warnings) {
         for (int position = 0; position < blocks.size(); position++) {
             PlannedBlock block = blocks.get(position);
@@ -240,7 +308,7 @@ class DailyPlanRepository {
     private List<DailyPlanResponse.Item> planItems(UUID blockId) {
         return jdbcTemplate.query(
             """
-            SELECT item.*, task.task_type, task.importance
+            SELECT item.*, task.task_type, COALESCE(item.user_priority, task.importance) AS effective_importance
             FROM shiftarc.daily_plan_item item
             LEFT JOIN shiftarc.task task ON task.id = item.task_id
             WHERE item.daily_plan_block_id = ? ORDER BY item.position
@@ -248,8 +316,9 @@ class DailyPlanRepository {
             (resultSet, rowNumber) -> new DailyPlanResponse.Item(
                 resultSet.getObject("id", UUID.class), resultSet.getObject("task_id", UUID.class),
                 resultSet.getString("task_title"), resultSet.getString("task_type"),
-                resultSet.getInt("importance"), resultSet.getInt("planned_start_minute"),
-                resultSet.getInt("planned_end_minute"), resultSet.getString("status")
+                resultSet.getInt("effective_importance"), resultSet.getInt("planned_start_minute"),
+                resultSet.getInt("planned_end_minute"), resultSet.getString("status"),
+                resultSet.getLong("version")
             ),
             blockId
         );
@@ -302,6 +371,18 @@ class DailyPlanRepository {
     }
 
     private Integer nullableInt(ResultSet resultSet, String column) throws SQLException { int value = resultSet.getInt(column); return resultSet.wasNull() ? null : value; }
+
+    private record AdjustmentItem(
+        UUID id, int position, String status, int startMinute, int endMinute,
+        Integer userPriority, long version, int taskPriority, UUID blockId, int blockEnd
+    ) {
+        int duration() { return endMinute - startMinute; }
+        int effectivePriority() { return userPriority == null ? taskPriority : userPriority; }
+        AdjustmentItem withAdjustment(int duration, int priority) {
+            return new AdjustmentItem(id, position, status, startMinute, startMinute + duration,
+                priority, version, taskPriority, blockId, blockEnd);
+        }
+    }
 
     record DayTypeSource(UUID id, String name) {}
     record SourceBlock(UUID id, String name, int startMinute, int endMinute, Set<UUID> categoryIds) {}
