@@ -88,6 +88,11 @@ ve gerçekleşen dakika oranını gösterir; seçilen günün blokları, çalı�
 append-only execution olayları birlikte incelenebilir. API tarih aralığını en fazla
 63 günle sınırlar.
 
+`Planlama takvimi` gelecekteki tarihler için haftalık şablondan farklı gün tipi
+seçilmesini sağlar. İstisna günlük snapshot ilk kez üretilirken önceliklidir. Geçmiş
+tarihler ve snapshot'ı oluşmuş günler değiştirilemez; istisna kaldırıldığında tarih
+yeniden haftalık şablonu kullanır.
+
 ## Ön koşullar
 
 - Windows PowerShell 5.1 veya PowerShell 7+
@@ -346,7 +351,6 @@ JDBC exception veya bağlantı secret'ı response'a eklenmez.
 ## 0.1.0 geliştirme kapsamı dışında olanlar
 
 - Authentication ve kullanıcı hesapları
-- Belirli tarihlere ait gün tipi istisnaları
 - Kullanıcı ayarlı günlük öncelik ve gelişmiş planlama algoritması
 - Takvim tabanlı execution geçmişi ve ayrıntılı analiz
 - Trigger ve pomodoro akışları

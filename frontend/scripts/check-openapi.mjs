@@ -47,6 +47,8 @@ for (const path of [
   '/api/v1/pomodoro/settings',
   '/api/v1/history',
   '/api/v1/history/{date}',
+  '/api/v1/calendar/overrides',
+  '/api/v1/calendar/overrides/{date}',
   '/api/v1/workspace',
   '/api/v1/workspace/settings',
   '/api/v1/onboarding',

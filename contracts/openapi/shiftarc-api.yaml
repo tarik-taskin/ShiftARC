@@ -632,6 +632,35 @@ paths:
       responses:
         "200": { description: Snapshot detail, content: { application/json: { schema: { $ref: "#/components/schemas/HistoryDetail" } } } }
         "404": { description: No snapshot exists for the date }
+  /api/v1/calendar/overrides:
+    get:
+      operationId: listCalendarOverrides
+      summary: List date-specific day type overrides
+      tags: [Calendar]
+      parameters:
+        - { name: from, in: query, required: true, schema: { type: string, format: date } }
+        - { name: to, in: query, required: true, schema: { type: string, format: date } }
+      responses:
+        "200": { description: Overrides, content: { application/json: { schema: { type: array, items: { $ref: "#/components/schemas/CalendarOverrideResponse" } } } } }
+  /api/v1/calendar/overrides/{date}:
+    parameters:
+      - { name: date, in: path, required: true, schema: { type: string, format: date } }
+    put:
+      operationId: saveCalendarOverride
+      summary: Create or update a future day type override
+      tags: [Calendar]
+      requestBody: { required: true, content: { application/json: { schema: { $ref: "#/components/schemas/CalendarOverrideRequest" } } } }
+      responses:
+        "200": { description: Override saved, content: { application/json: { schema: { $ref: "#/components/schemas/CalendarOverrideResponse" } } } }
+        "409": { description: The date already has an immutable daily snapshot }
+    delete:
+      operationId: deleteCalendarOverride
+      summary: Return a future date to its weekly template
+      tags: [Calendar]
+      parameters:
+        - { $ref: "#/components/parameters/EntityVersion" }
+      responses:
+        "204": { description: Override deleted }
 components:
   parameters:
     CategoryId:
@@ -721,6 +750,21 @@ components:
       description: Another execution is active or the supplied version is stale.
       content: { application/problem+json: { schema: { $ref: "#/components/schemas/ProblemDetail" } } }
   schemas:
+    CalendarOverrideRequest:
+      type: object
+      required: [dayTypeId]
+      properties:
+        dayTypeId: { type: string, format: uuid }
+        version: { type: [integer, "null"], minimum: 0 }
+    CalendarOverrideResponse:
+      type: object
+      required: [date, dayTypeId, dayTypeName, dayTypeColor, version]
+      properties:
+        date: { type: string, format: date }
+        dayTypeId: { type: string, format: uuid }
+        dayTypeName: { type: string }
+        dayTypeColor: { type: string, pattern: '^#[0-9A-Fa-f]{6}$' }
+        version: { type: integer, minimum: 0 }
     HistoryDay:
       type: object
       required: [date, planId, dayTypeName, status, plannedMinutes, executedMinutes, completedItems, totalItems, sessionCount]

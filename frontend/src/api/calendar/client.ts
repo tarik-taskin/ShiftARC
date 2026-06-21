@@ -1,0 +1,6 @@
+import { calendarOverrideListSchema, calendarOverrideSchema } from './types'
+const endpoint = '/api/v1/calendar/overrides'
+export async function listCalendarOverrides(from: string, to: string, signal?: AbortSignal) { const response = await fetch(`${endpoint}?${new URLSearchParams({ from, to })}`, { signal }); return parse(response, calendarOverrideListSchema) }
+export async function saveCalendarOverride(input: { date: string; dayTypeId: string; version: number | null }) { const response = await fetch(`${endpoint}/${input.date}`, { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ dayTypeId: input.dayTypeId, version: input.version }) }); return parse(response, calendarOverrideSchema) }
+export async function deleteCalendarOverride(input: { date: string; version: number }) { const response = await fetch(`${endpoint}/${input.date}?version=${input.version}`, { method: 'DELETE' }); if (!response.ok) throw new Error(`Takvim API HTTP ${response.status}`) }
+async function parse<T>(response: Response, schema: { parse: (value: unknown) => T }) { if (!response.ok) { const value: unknown = await response.json().catch(() => null); throw new Error(typeof value === 'object' && value && 'detail' in value ? String(value.detail) : `Takvim API HTTP ${response.status}`) } return schema.parse(await response.json()) }

@@ -36,7 +36,7 @@ class DailyPlanServiceTest {
         Clock clock = Clock.fixed(Instant.parse("2026-06-19T09:00:00Z"), ZoneOffset.UTC);
         DailyPlanService service = new DailyPlanService(repository, clock);
         when(repository.timezone(LocalWorkspace.ID)).thenReturn("UTC");
-        when(repository.assignedDayType(LocalWorkspace.ID, 5)).thenReturn(new DayTypeSource(dayType, "İş Günü"));
+        when(repository.assignedDayType(LocalWorkspace.ID, LocalDate.of(2026, 6, 19))).thenReturn(new DayTypeSource(dayType, "İş Günü"));
         when(repository.sourceBlocks(dayType)).thenReturn(List.of(
             new SourceBlock(UUID.randomUUID(), "İş", 480, 1020, Set.of(category))
         ));

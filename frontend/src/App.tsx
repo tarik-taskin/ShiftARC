@@ -42,6 +42,10 @@ const HistoryPage = lazy(() =>
   import('@/pages/history-page').then((module) => ({ default: module.HistoryPage })),
 )
 
+const CalendarPage = lazy(() =>
+  import('@/pages/calendar-page').then((module) => ({ default: module.CalendarPage })),
+)
+
 function App() {
   const location = useLocation()
 
@@ -93,6 +97,7 @@ function ProductRoutes() {
         />
         <Route path="triggers" element={<Suspense fallback={<div role="status">Triggerlar yükleniyor…</div>}><TriggersPage /></Suspense>} />
         <Route path="focus" element={<Suspense fallback={<div role="status">Odak sayacı yükleniyor…</div>}><FocusPage /></Suspense>} />
+        <Route path="calendar" element={<Suspense fallback={<div role="status">Planlama takvimi yükleniyor…</div>}><CalendarPage /></Suspense>} />
         <Route
           path="history"
           element={<Suspense fallback={<div role="status">Geçmiş yükleniyor…</div>}><HistoryPage /></Suspense>}

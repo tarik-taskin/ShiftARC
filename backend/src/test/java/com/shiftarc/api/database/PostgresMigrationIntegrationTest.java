@@ -45,9 +45,9 @@ class PostgresMigrationIntegrationTest {
         MigrateResult result = flyway.migrate();
 
         assertTrue(result.success);
-        assertEquals(5, result.migrationsExecuted);
+        assertEquals(6, result.migrationsExecuted);
         try (Connection connection = DriverManager.getConnection(jdbcUrl, username, password)) {
-            assertEquals(20, queryCount(connection, """
+            assertEquals(21, queryCount(connection, """
                 SELECT count(*)
                 FROM information_schema.tables
                 WHERE table_schema = 'shiftarc'

@@ -10,6 +10,7 @@ import {
   Tags,
   Zap,
   Timer,
+  CalendarCog,
   type LucideIcon,
 } from 'lucide-react'
 
@@ -67,6 +68,12 @@ export const primaryNavigation: NavigationItem[] = [
     path: '/focus',
     icon: Timer,
     description: 'Pomodoro odak ve mola sayacı',
+  },
+  {
+    label: 'Takvim',
+    path: '/calendar',
+    icon: CalendarCog,
+    description: 'Tarih bazlı gün tipi istisnaları',
   },
   {
     label: 'Geçmiş',

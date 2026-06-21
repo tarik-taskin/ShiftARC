@@ -32,22 +32,28 @@ class DailyPlanRepository {
         );
     }
 
-    DayTypeSource assignedDayType(UUID workspaceId, int dayOfWeek) {
+    DayTypeSource assignedDayType(UUID workspaceId, LocalDate date) {
         List<DayTypeSource> sources = jdbcTemplate.query(
             """
             SELECT day_type.id, day_type.name
-            FROM shiftarc.weekly_day_assignment assignment
-            JOIN shiftarc.day_type day_type ON day_type.id = assignment.day_type_id
-            WHERE assignment.workspace_id = ? AND assignment.day_of_week = ?
+            FROM shiftarc.day_type day_type
+            WHERE day_type.id = COALESCE(
+                (SELECT override.day_type_id FROM shiftarc.calendar_day_override override
+                 WHERE override.workspace_id = ? AND override.override_date = ?),
+                (SELECT assignment.day_type_id FROM shiftarc.weekly_day_assignment assignment
+                 WHERE assignment.workspace_id = ? AND assignment.day_of_week = ?)
+            )
             """,
             (resultSet, rowNumber) -> new DayTypeSource(
                 resultSet.getObject("id", UUID.class), resultSet.getString("name")
             ),
             workspaceId,
-            dayOfWeek
+            Date.valueOf(date),
+            workspaceId,
+            date.getDayOfWeek().getValue()
         );
         if (sources.isEmpty()) {
-            throw new DailyPlanUnavailableException("No day type is assigned to this weekday");
+            throw new DailyPlanUnavailableException("No day type is assigned to this date");
         }
         return sources.get(0);
     }

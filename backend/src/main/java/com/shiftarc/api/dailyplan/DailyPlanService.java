@@ -73,7 +73,7 @@ public class DailyPlanService {
     private PlanContext context() {
         String timezone = repository.timezone(LocalWorkspace.ID);
         LocalDate date = LocalDate.now(clock.withZone(ZoneId.of(timezone)));
-        DayTypeSource dayType = repository.assignedDayType(LocalWorkspace.ID, date.getDayOfWeek().getValue());
+        DayTypeSource dayType = repository.assignedDayType(LocalWorkspace.ID, date);
         return new PlanContext(date, timezone, dayType);
     }
 

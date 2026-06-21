@@ -204,6 +204,14 @@ edilir.
 - Zamanları günlere ayırırken workspace IANA saat dilimini kullan.
 - Execution event payload'ını değiştirme; düzeltme geçmişini append-only kaynaktan göster.
 
+### Tarih istisnaları
+
+- Gün tipi çözümlemesinde tarih istisnası haftalık şablondan önce değerlendirilmelidir.
+- Geçmiş tarihler veya günlük snapshot'ı üretilmiş tarihler değiştirilemez.
+- Yalnız aktif ve aynı workspace'e ait gün tipleri seçilebilir.
+- Güncelleme ve silmede optimistic-lock sürümünü zorunlu tut.
+- İstisna kaldırıldığında haftalık atamayı kopyalama; fallback davranışını koru.
+
 ### Veritabanı
 
 - Uygulama `shiftarc_app` sınırlı rolüyle çalışır; PostgreSQL superuser kullanma.
@@ -297,6 +305,6 @@ docs(project): add development guidance
 
 `0.1.0` içinde authentication ve production deployment yoktur.
 Kategori, gün tipi, haftalık şablon, görev yönetimi, temel günlük plan, görev yürütme
-ve zaman düzeltmeyle trigger kuralları, pomodoro ve takvim geçmişi kullanılabilir; tarih istisnaları yalnız
+ve zaman düzeltmeyle trigger kuralları, pomodoro, takvim geçmişi ve tarih istisnaları kullanılabilir. İleri özellikler yalnız
 tanımlanan ürün fazlarında eklenir. Kullanıcı farklı bir faz istemedikçe ileri fazları
 altyapı görevi bahanesiyle erkenden uygulama.
