@@ -124,6 +124,8 @@ edilir.
   tamamen kapsamalıdır.
 - Blok sınırları beş dakikalık ızgaraya uymalı; sıralama istemciden gelse bile
   backend bütün çizelgeyi yeniden doğrulamalıdır.
+- Zaman çizelgesi sınırları sürükleme yanında klavyeyle de değiştirilebilir kalmalı;
+  dar blokların metinleri üst üste bindirilmemeli ve ayrıntıları ayrı listede erişilebilir olmalıdır.
 - Zaman blokları yalnız aynı çalışma alanındaki aktif kategorileri kabul eder.
 - Gün tipi silme fiziksel silme değildir; arşivleme ve optimistic-lock sürümünü koru.
 - Haftalık gün atamalarını gün tipi editörüne ekleme; bu davranış ayrı ürün fazıdır.

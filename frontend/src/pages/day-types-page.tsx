@@ -1,10 +1,9 @@
 import { AnimatePresence, motion, useReducedMotion } from 'motion/react'
-import { Archive, ArchiveRestore, Clock3, Pencil, Plus, Shapes } from 'lucide-react'
-import { useState, type MouseEvent } from 'react'
+import { ArchiveRestore, Clock3, Pencil, Plus, Shapes, Trash2 } from 'lucide-react'
+import { useState } from 'react'
 
 import { useCategories } from '@/api/categories/queries'
 import {
-  useArchiveDayType,
   useDayTypes,
   useReplaceDayTypeBlocks,
   useRestoreDayType,
@@ -12,7 +11,9 @@ import {
 import type { DayType, DayTypeBlock } from '@/api/day-types/types'
 import { Button } from '@/components/ui/button'
 import { DayTypeDialog } from '@/features/day-types/day-type-dialog'
-import { formatTime } from '@/features/day-types/time'
+import { DayTypeDeleteDialog } from '@/features/day-types/day-type-delete-dialog'
+import { DayTypeTimeline } from '@/features/day-types/day-type-timeline'
+import { colorForBlock, formatTime } from '@/features/day-types/time'
 import { TimeBlockDialog } from '@/features/day-types/time-block-dialog'
 
 export function DayTypesPage() {
@@ -22,10 +23,11 @@ export function DayTypesPage() {
   const [editingDayType, setEditingDayType] = useState<DayType | null>(null)
   const [candidateBlocks, setCandidateBlocks] = useState<DayTypeBlock[] | null>(null)
   const [editingBlockIndex, setEditingBlockIndex] = useState<number | null>(null)
+  const [timelineDraft, setTimelineDraft] = useState<{ dayTypeId: string; blocks: DayTypeBlock[] } | null>(null)
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false)
   const dayTypes = useDayTypes(includeArchived)
   const categories = useCategories(false, '')
   const replaceBlocks = useReplaceDayTypeBlocks()
-  const archive = useArchiveDayType()
   const restore = useRestoreDayType()
   const reduceMotion = useReducedMotion()
 
@@ -34,6 +36,9 @@ export function DayTypesPage() {
     ?? null
   const effectiveSelectedId = selected?.id ?? null
   const editingBlock = editingBlockIndex === null ? null : candidateBlocks?.[editingBlockIndex] ?? null
+  const timelineBlocks = timelineDraft && timelineDraft.dayTypeId === selected?.id
+    ? timelineDraft.blocks
+    : selected?.blocks ?? []
 
   const openCreate = () => {
     setEditingDayType(null)
@@ -50,17 +55,15 @@ export function DayTypesPage() {
     setEditingBlockIndex(index)
   }
 
-  const splitTimeline = (event: MouseEvent<HTMLDivElement>) => {
+  const splitTimeline = (rawMinute: number) => {
     if (!selected || selected.archived) return
-    const rect = event.currentTarget.getBoundingClientRect()
-    const rawMinute = ((event.clientX - rect.left) / rect.width) * 1440
     const splitMinute = Math.max(5, Math.min(1435, Math.round(rawMinute / 5) * 5))
-    const index = selected.blocks.findIndex(
+    const index = timelineBlocks.findIndex(
       (block) => splitMinute > block.startMinute && splitMinute < block.endMinute,
     )
     if (index < 0) return
-    const original = selected.blocks[index]
-    const blocks = [...selected.blocks]
+    const original = timelineBlocks[index]
+    const blocks = [...timelineBlocks]
     blocks.splice(
       index,
       1,
@@ -76,21 +79,25 @@ export function DayTypesPage() {
     beginBlockEdit(blocks, index)
   }
 
-  const saveBlock = async (name: string, categoryIds: string[]) => {
-    if (!selected || candidateBlocks === null || editingBlockIndex === null) return
-    const blocks = candidateBlocks.map((block, index) =>
-      index === editingBlockIndex ? { ...block, name, categoryIds } : block,
-    )
+  const persistBlocks = async (blocks: DayTypeBlock[]) => {
+    if (!selected) return
     await replaceBlocks.mutateAsync({
       id: selected.id,
       version: selected.version,
-      blocks: blocks.map(({ name: blockName, startMinute, endMinute, categoryIds: ids }) => ({
-        name: blockName,
-        startMinute,
-        endMinute,
-        categoryIds: ids,
-      })),
+      blocks: blocks.map(({ name, startMinute, endMinute, categoryIds }) => ({ name, startMinute, endMinute, categoryIds })),
     })
+    setTimelineDraft(null)
+  }
+
+  const saveBlock = async (name: string, categoryIds: string[], startMinute: number, endMinute: number) => {
+    if (!selected || candidateBlocks === null || editingBlockIndex === null) return
+    const blocks = candidateBlocks.map((block, index) => {
+      if (index === editingBlockIndex) return { ...block, name, categoryIds, startMinute, endMinute }
+      if (index === editingBlockIndex - 1) return { ...block, endMinute: startMinute }
+      if (index === editingBlockIndex + 1) return { ...block, startMinute: endMinute }
+      return block
+    })
+    await persistBlocks(blocks)
     closeBlockDialog()
   }
 
@@ -106,11 +113,7 @@ export function DayTypesPage() {
       const next = blocks[1]
       blocks.splice(0, 2, { ...next, startMinute: current.startMinute })
     }
-    await replaceBlocks.mutateAsync({
-      id: selected.id,
-      version: selected.version,
-      blocks: blocks.map(({ name, startMinute, endMinute, categoryIds }) => ({ name, startMinute, endMinute, categoryIds })),
-    })
+    await persistBlocks(blocks)
     closeBlockDialog()
   }
 
@@ -130,8 +133,8 @@ export function DayTypesPage() {
         <Button onClick={openCreate}><Plus className="size-4" aria-hidden="true" />Yeni gün tipi</Button>
       </section>
 
-      <div className="grid gap-6 xl:grid-cols-[280px_minmax(0,1fr)]">
-        <aside className="rounded-3xl border border-border/75 bg-card/60 p-4">
+      <div className="grid gap-6 2xl:grid-cols-[300px_minmax(0,1fr)]">
+        <aside className="self-start rounded-3xl border border-border/75 bg-card/60 p-4 2xl:sticky 2xl:top-24">
           <div className="flex items-center justify-between gap-3 px-1 pb-4">
             <h2 className="font-semibold">Gün düzenleri</h2>
             <label className="flex items-center gap-2 text-xs text-muted-foreground">
@@ -140,12 +143,12 @@ export function DayTypesPage() {
           </div>
           {dayTypes.isPending ? <p role="status" className="p-4 text-sm text-muted-foreground">Gün tipleri yükleniyor…</p> : null}
           {dayTypes.isError ? <Button variant="outline" onClick={() => dayTypes.refetch()}>Yeniden dene</Button> : null}
-          <div className="space-y-2">
+          <div className="grid gap-2 md:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-1">
             {dayTypes.data?.map((dayType) => (
               <button
                 key={dayType.id}
                 type="button"
-                onClick={() => setSelectedId(dayType.id)}
+                onClick={() => { setSelectedId(dayType.id); setTimelineDraft(null) }}
                 className="flex w-full items-center gap-3 rounded-2xl border p-3 text-left transition-colors"
                 style={{ borderColor: effectiveSelectedId === dayType.id ? dayType.color : undefined, backgroundColor: effectiveSelectedId === dayType.id ? `${dayType.color}12` : undefined }}
                 aria-pressed={effectiveSelectedId === dayType.id}
@@ -167,7 +170,7 @@ export function DayTypesPage() {
           ) : null}
         </aside>
 
-        <main className="min-w-0 rounded-3xl border border-border/75 bg-card/60 p-5 sm:p-7">
+        <main className="min-w-0 rounded-3xl border border-border/75 bg-card/60 p-5 sm:p-7 xl:p-8">
           <AnimatePresence mode="wait">
             {selected ? (
               <motion.div key={selected.id} initial={reduceMotion ? false : { opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} exit={reduceMotion ? undefined : { opacity: 0 }}>
@@ -177,48 +180,32 @@ export function DayTypesPage() {
                     <h2 className="mt-2 text-2xl font-semibold">{selected.name}</h2>
                     <p className="mt-2 text-sm text-muted-foreground">Çizelgeye tıklayarak bulunduğun noktadan yeni bir blok sınırı oluştur.</p>
                   </div>
-                  <div className="flex gap-2">
+                  <div className="flex flex-wrap gap-2">
                     {!selected.archived ? <Button size="sm" variant="outline" onClick={() => openEdit(selected)}><Pencil className="size-3.5" />Düzenle</Button> : null}
-                    {!selected.archived ? (
-                      <Button size="sm" variant="ghost" onClick={() => archive.mutate({ id: selected.id, version: selected.version })}><Archive className="size-3.5" />Arşivle</Button>
-                    ) : (
+                    {selected.archived ? (
                       <Button size="sm" variant="ghost" onClick={() => restore.mutate({ id: selected.id, version: selected.version })}><ArchiveRestore className="size-3.5" />Geri yükle</Button>
+                    ) : (
+                      <Button size="sm" variant="ghost" className="text-destructive hover:text-destructive" onClick={() => setDeleteDialogOpen(true)}><Trash2 className="size-3.5" />Sil</Button>
                     )}
                   </div>
                 </div>
 
-                <div className="mt-8 overflow-x-auto pb-3">
-                  <div className="min-w-[760px]">
-                    <div className="mb-2 grid grid-cols-7 text-[10px] font-mono text-muted-foreground">
-                      {[0, 4, 8, 12, 16, 20, 24].map((hour) => <span key={hour} className={hour === 24 ? 'text-right' : ''}>{String(hour).padStart(2, '0')}:00</span>)}
-                    </div>
-                    <div
-                      className="flex h-40 cursor-crosshair overflow-hidden rounded-2xl border-2 bg-background/50"
-                      style={{ borderColor: `${selected.color}66` }}
-                      onClick={splitTimeline}
-                      aria-label={`${selected.name} zaman çizelgesi`}
-                    >
-                      {selected.blocks.map((block, index) => (
-                        <div
-                          key={block.id}
-                          className="group relative flex min-w-0 flex-col justify-between border-r border-background/40 p-3 text-left text-white last:border-r-0"
-                          style={{ width: `${((block.endMinute - block.startMinute) / 1440) * 100}%`, backgroundColor: block.name === 'Plansız' ? `${selected.color}55` : selected.color }}
-                        >
-                          <div className="min-w-0">
-                            <p className="truncate text-sm font-semibold">{block.name}</p>
-                            <p className="mt-1 font-mono text-[10px] opacity-80">{formatTime(block.startMinute)}–{formatTime(block.endMinute)}</p>
-                          </div>
-                          <button type="button" className="self-start rounded-lg bg-black/20 px-2 py-1 text-[10px] font-semibold hover:bg-black/30" onClick={(event) => { event.stopPropagation(); beginBlockEdit(selected.blocks, index) }}>Düzenle</button>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
+                <div className="mt-8">
+                  <DayTypeTimeline
+                    dayType={selected}
+                    blocks={timelineBlocks}
+                    disabled={selected.archived || replaceBlocks.isPending}
+                    onBlocksChange={(blocks) => setTimelineDraft({ dayTypeId: selected.id, blocks })}
+                    onCommit={persistBlocks}
+                    onEdit={(index) => beginBlockEdit(timelineBlocks, index)}
+                    onSplit={splitTimeline}
+                  />
                 </div>
 
-                <div className="mt-6 grid gap-3 md:grid-cols-2">
-                  {selected.blocks.map((block, index) => (
-                    <button key={block.id} type="button" onClick={() => beginBlockEdit(selected.blocks, index)} className="flex items-center gap-3 rounded-2xl border border-border/70 bg-background/30 p-4 text-left">
-                      <Clock3 className="size-4 text-muted-foreground" />
+                <div className="mt-6 grid gap-3 md:grid-cols-2 2xl:grid-cols-3">
+                  {timelineBlocks.map((block, index) => (
+                    <button key={block.id} type="button" onClick={() => beginBlockEdit(timelineBlocks, index)} className="flex items-center gap-3 rounded-2xl border border-border/70 bg-background/30 p-4 text-left transition-colors hover:border-primary/35 hover:bg-background/50">
+                      <span className="grid size-9 shrink-0 place-items-center rounded-xl text-white" style={{ backgroundColor: colorForBlock(index, block.name === 'Plansız') }}><Clock3 className="size-4" /></span>
                       <span className="min-w-0 flex-1"><span className="block truncate text-sm font-semibold">{block.name}</span><span className="text-xs text-muted-foreground">{formatTime(block.startMinute)}–{formatTime(block.endMinute)} · {block.categoryIds.length} kategori</span></span>
                     </button>
                   ))}
@@ -235,12 +222,15 @@ export function DayTypesPage() {
       </div>
 
       <DayTypeDialog open={dayTypeDialogOpen} onOpenChange={setDayTypeDialogOpen} dayType={editingDayType} />
+      {selected ? <DayTypeDeleteDialog dayType={selected} open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen} onDeleted={() => { setSelectedId(null); setTimelineDraft(null) }} /> : null}
       <TimeBlockDialog
         key={editingBlock?.id ?? 'closed-block-dialog'}
         block={editingBlock}
         categories={categories.data ?? []}
         open={editingBlock !== null}
         canDelete={(candidateBlocks?.length ?? 0) > 1}
+        minimumStart={editingBlockIndex !== null && editingBlockIndex > 0 ? (candidateBlocks?.[editingBlockIndex - 1]?.startMinute ?? 0) + 5 : null}
+        maximumEnd={editingBlockIndex !== null && candidateBlocks && editingBlockIndex < candidateBlocks.length - 1 ? candidateBlocks[editingBlockIndex + 1].endMinute - 5 : null}
         onOpenChange={(open) => { if (!open) closeBlockDialog() }}
         onSave={saveBlock}
         onDelete={deleteBlock}

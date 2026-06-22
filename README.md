@@ -34,10 +34,12 @@ arşivlenebilir ve veri kaybı olmadan geri yüklenebilir. Aynı çalışma alan
 adları büyük-küçük harf ayrımından bağımsız olarak benzersizdir.
 
 `Gün tipleri` sayfası 00:00–24:00 arasını kesintisiz zaman blokları halinde tasarlar.
-Yeni bir gün tipi tam günü kaplayan `Plansız` blokla başlar. Çizelgeye tıklanan nokta
-en yakın beş dakikaya yuvarlanarak yeni blok sınırı oluşturur; bloklara birden fazla
-aktif kategori atanabilir, bloklar düzenlenebilir veya komşusuyla birleştirilebilir.
-Gün tipleri geçmiş bağlantıları silmeden arşivlenip geri yüklenebilir.
+Yeni bir gün tipi tam günü kaplayan `Plansız` blokla başlar. Geniş, yatay kaydırılabilir
+çizelgeye tıklanan nokta en yakın beş dakikaya yuvarlanarak yeni blok sınırı oluşturur.
+Blok saatleri dialogdan yazılabilir; ortak sınırlar fareyle sürüklenebilir veya ok
+tuşlarıyla değiştirilebilir. Bloklara birden fazla aktif kategori atanabilir ve bir
+blok silindiğinde komşusuyla birleştirilir. Gün tipi silme veri kaybı oluşturmaz;
+arşivlenen gün tipleri görünür yapılarak geri yüklenebilir.
 
 `Haftalık plan` sayfası pazartesiden pazara yedi sabit gün yuvasına aktif gün
 tiplerini atar. Plan eksik günlerle taslak olarak kaydedilebilir; yedi günün tamamı

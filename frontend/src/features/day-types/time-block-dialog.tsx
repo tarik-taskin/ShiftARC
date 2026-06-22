@@ -18,6 +18,8 @@ export function TimeBlockDialog({
   categories,
   open,
   canDelete,
+  minimumStart,
+  maximumEnd,
   onOpenChange,
   onSave,
   onDelete,
@@ -27,11 +29,15 @@ export function TimeBlockDialog({
   open: boolean
   canDelete: boolean
   onOpenChange: (open: boolean) => void
-  onSave: (name: string, categoryIds: string[]) => void
+  onSave: (name: string, categoryIds: string[], startMinute: number, endMinute: number) => void
   onDelete: () => void
+  minimumStart: number | null
+  maximumEnd: number | null
 }) {
   const [name, setName] = useState(block?.name === 'Plansız' ? '' : block?.name ?? '')
   const [categoryIds, setCategoryIds] = useState<string[]>(block?.categoryIds ?? [])
+  const [startMinute, setStartMinute] = useState(block?.startMinute ?? 0)
+  const [endMinute, setEndMinute] = useState(block?.endMinute ?? 1440)
 
   if (!block) return null
 
@@ -39,14 +45,51 @@ export function TimeBlockDialog({
     setCategoryIds((current) => current.includes(id) ? current.filter((value) => value !== id) : [...current, id])
   }
 
+  const validRange = startMinute >= 0
+    && endMinute <= 1440
+    && startMinute < endMinute
+    && startMinute % 5 === 0
+    && endMinute % 5 === 0
+    && (minimumStart === null || startMinute >= minimumStart)
+    && (maximumEnd === null || endMinute <= maximumEnd)
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent>
+        <DialogContent className="max-w-2xl">
         <DialogHeader>
           <DialogTitle>Zaman bloğunu düzenle</DialogTitle>
           <DialogDescription>{formatTime(block.startMinute)}–{formatTime(block.endMinute)} aralığının görev bağlamını belirle.</DialogDescription>
         </DialogHeader>
         <div className="mt-6 space-y-5">
+          <div className="grid gap-4 sm:grid-cols-2">
+            <label className="block text-sm font-semibold">
+              Başlangıç
+              <input
+                type="time"
+                step={300}
+                disabled={minimumStart === null}
+                min={minimumStart === null ? undefined : formatTime(minimumStart)}
+                max={formatTime(endMinute - 5)}
+                value={formatTime(startMinute)}
+                onChange={(event) => setStartMinute(timeToMinute(event.target.value))}
+                className="mt-2 h-11 w-full rounded-xl border border-input bg-background/60 px-3 disabled:opacity-60"
+              />
+            </label>
+            <label className="block text-sm font-semibold">
+              Bitiş
+              <input
+                type="time"
+                step={300}
+                disabled={maximumEnd === null}
+                min={formatTime(startMinute + 5)}
+                max={maximumEnd === null ? undefined : formatTime(maximumEnd)}
+                value={endMinute === 1440 ? '23:59' : formatTime(endMinute)}
+                onChange={(event) => setEndMinute(timeToMinute(event.target.value))}
+                className="mt-2 h-11 w-full rounded-xl border border-input bg-background/60 px-3 disabled:opacity-60"
+              />
+              {endMinute === 1440 ? <span className="mt-1 block text-xs font-normal text-muted-foreground">Gün sonu: 24:00</span> : null}
+            </label>
+          </div>
           <label className="block text-sm font-semibold">
             Blok adı
             <input autoFocus value={name} onChange={(event) => setName(event.target.value)} placeholder="Örn. Derin çalışma" className="mt-2 h-11 w-full rounded-xl border border-input bg-background/60 px-3" />
@@ -66,13 +109,18 @@ export function TimeBlockDialog({
           </fieldset>
         </div>
         <DialogFooter className="sm:justify-between">
-          {canDelete ? <Button type="button" variant="ghost" onClick={onDelete}>Bloğu birleştir</Button> : <span />}
+          {canDelete ? <Button type="button" variant="ghost" className="text-destructive hover:text-destructive" onClick={onDelete}>Zaman bloğunu sil</Button> : <span />}
           <div className="flex gap-2">
             <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>Vazgeç</Button>
-            <Button type="button" disabled={!name.trim()} onClick={() => onSave(name.trim(), categoryIds)}>Bloğu kaydet</Button>
+            <Button type="button" disabled={!name.trim() || !validRange} onClick={() => onSave(name.trim(), categoryIds, startMinute, endMinute)}>Bloğu kaydet</Button>
           </div>
         </DialogFooter>
       </DialogContent>
     </Dialog>
   )
+}
+
+function timeToMinute(value: string) {
+  const [hour, minute] = value.split(':').map(Number)
+  return hour * 60 + minute
 }

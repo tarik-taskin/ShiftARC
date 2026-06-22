@@ -84,6 +84,11 @@ body {
   background: var(--background);
 }
 
+.timeline-scrollbar {
+  scrollbar-color: color-mix(in srgb, var(--primary) 45%, transparent) transparent;
+  scrollbar-width: thin;
+}
+
 h1,
 h2,
 h3 {
