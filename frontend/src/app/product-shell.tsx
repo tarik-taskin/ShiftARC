@@ -33,7 +33,7 @@ export function ProductShell() {
         İçeriğe geç
       </a>
 
-      <div className="mx-auto grid min-h-svh w-full max-w-[1600px] lg:grid-cols-[272px_minmax(0,1fr)]">
+      <div className="grid min-h-svh w-full lg:grid-cols-[248px_minmax(0,1fr)] xl:grid-cols-[264px_minmax(0,1fr)]">
         <aside className="sticky top-0 hidden h-svh flex-col border-r border-border/70 bg-sidebar/82 px-5 py-6 backdrop-blur-2xl lg:flex">
           <NavLink
             to="/"
@@ -118,7 +118,7 @@ export function ProductShell() {
               animate={{ opacity: 1, y: 0 }}
               exit={reduceMotion ? undefined : { opacity: 0, y: -5 }}
               transition={{ duration: reduceMotion ? 0 : 0.18, ease: 'easeOut' }}
-              className="mx-auto w-full max-w-[1280px] px-5 pt-8 pb-28 sm:px-8 sm:pt-10 lg:px-10 lg:pb-12"
+              className="w-full px-5 pt-8 pb-28 sm:px-8 sm:pt-10 lg:px-8 lg:pb-12 xl:px-12 2xl:px-16"
             >
               <Outlet />
             </motion.main>
