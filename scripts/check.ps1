@@ -30,6 +30,10 @@ function Invoke-QualityStep {
     }
 }
 
+Invoke-QualityStep -Name "Tracked secret safety" -Action {
+    & (Join-Path $PSScriptRoot "check-secrets.ps1")
+}
+
 Push-Location $frontendRoot
 try {
     Invoke-QualityStep -Name "OpenAPI contract" -Action { & npm.cmd run contract:check }

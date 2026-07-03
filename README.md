@@ -231,13 +231,24 @@ Bütün lokal kalite kapısını repo kökünden çalıştırın:
 .\scripts\check.ps1
 ```
 
+Kalite kapısı takip edilen dosyalarda özel anahtar, credential içeren bağlantı
+adresi, yaygın erişim tokenları ve `.env.local` içindeki yerel veritabanı
+parolasının yanlışlıkla commitlenmesini de denetler. Bu kontrol tek başına da
+çalıştırılabilir:
+
+```powershell
+.\scripts\check-secrets.ps1
+```
+
 Bu komut sırasıyla şunları çalıştırır:
 
-1. Frontend ESLint
-2. Frontend Vitest testleri
-3. Frontend TypeScript ve Vite production build
-4. Backend JUnit testleri
-5. Backend executable JAR build
+1. Takip edilen dosyalarda secret güvenlik kontrolü
+2. OpenAPI sözleşme kontrolü
+3. Frontend ESLint
+4. Frontend Vitest testleri
+5. Frontend TypeScript ve Vite production build
+6. Backend JUnit testleri
+7. Backend executable JAR build
 
 Modül bazlı komutlar:
 

@@ -4,11 +4,25 @@
 !.env.example
 !.env.*.example
 *.local
+.pgpass
+pgpass.conf
+credentials.json
 **/application-*-secrets.yml
 **/application-*-secrets.yaml
 secrets/
 *.pem
 *.key
+*.p12
+*.pfx
+*.jks
+*.keystore
+
+# Local database files and exports
+*.backup
+*.dump
+*.sqlite
+*.sqlite3
+*.db
 
 # Logs
 logs/

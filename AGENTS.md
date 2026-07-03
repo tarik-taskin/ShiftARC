@@ -56,6 +56,12 @@ Tam kalite kapısı:
 .\scripts\check.ps1
 ```
 
+Takip edilen dosyalarda secret kontrolü:
+
+```powershell
+.\scripts\check-secrets.ps1
+```
+
 Frontend:
 
 ```powershell
@@ -241,6 +247,8 @@ edilir.
 - Yeni dış endpoint veya actuator yüzeyi varsayılan olarak kapalı kabul edilir.
 - Dependency eklerken bakım durumu, lisans, bundle/runtime etkisi ve audit sonucu
   kontrol edilir.
+- `scripts/check-secrets.ps1` kalite kapısının parçasıdır; devre dışı bırakılmamalı,
+  yeni credential veya yerel veritabanı yedeği biçimleri oluşursa genişletilmelidir.
 
 ## Test yaklaşımı
 
