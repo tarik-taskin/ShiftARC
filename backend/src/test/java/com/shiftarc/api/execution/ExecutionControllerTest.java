@@ -1,6 +1,7 @@
 package com.shiftarc.api.execution;
 
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -42,6 +43,15 @@ class ExecutionControllerTest {
         mockMvc.perform(post("/api/v1/execution/start").contentType(MediaType.APPLICATION_JSON)
                 .content("{\"dailyPlanItemId\":\"73000000-0000-0000-0000-000000000001\"}"))
             .andExpect(status().isOk());
+    }
+
+    @Test void returnsTurkishConflictDetails() throws Exception {
+        doThrow(new ExecutionConflictException("Zaten aktif bir görev oturumu var")).when(service).start(any());
+        mockMvc.perform(post("/api/v1/execution/start").contentType(MediaType.APPLICATION_JSON)
+                .content("{\"dailyPlanItemId\":\"73000000-0000-0000-0000-000000000001\"}"))
+            .andExpect(status().isConflict())
+            .andExpect(jsonPath("$.title").value("Görev oturumu çakışması"))
+            .andExpect(jsonPath("$.detail").value("Zaten aktif bir görev oturumu var"));
     }
 
     @Test void correctsSessionTimes() throws Exception {

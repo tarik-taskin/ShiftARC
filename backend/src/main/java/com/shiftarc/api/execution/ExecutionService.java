@@ -70,18 +70,18 @@ public class ExecutionService {
         Context context = context();
         CorrectableSession session = repository.requireSession(LocalWorkspace.ID, sessionId, request.version());
         if ((session.endedAt() == null) != (request.endedAt() == null)) {
-            throw new ExecutionValidationException("Time correction cannot reopen or close a session");
+            throw new ExecutionValidationException("Zaman düzeltmesi oturumu açıp kapatamaz");
         }
         validateNotFuture(request.startedAt());
         if (request.endedAt() != null) {
             validateNotFuture(request.endedAt());
             if (!request.endedAt().isAfter(request.startedAt())) {
-                throw new ExecutionValidationException("Corrected end must be after corrected start");
+                throw new ExecutionValidationException("Düzeltilen bitiş zamanı başlangıçtan sonra olmalıdır");
             }
         }
         LocalDate correctedDate = request.startedAt().atZone(ZoneId.of(context.timezone())).toLocalDate();
         if (!correctedDate.equals(context.date())) {
-            throw new ExecutionValidationException("Today's execution can only be corrected within today");
+            throw new ExecutionValidationException("Bugünün çalışma kaydı yalnız bugünün içinde düzeltilebilir");
         }
         repository.correctTimes(
             LocalWorkspace.ID, session, request.startedAt(), request.endedAt(), Instant.now(clock)
@@ -99,7 +99,7 @@ public class ExecutionService {
     }
 
     private Instant instant(Instant requested) { return requested == null ? Instant.now(clock) : requested; }
-    private void validateNotFuture(Instant value) { if (value.isAfter(Instant.now(clock).plusSeconds(5))) throw new ExecutionValidationException("Execution time cannot be in the future"); }
-    private void validateEnd(SessionTarget session, Instant endedAt) { validateNotFuture(endedAt); if (!endedAt.isAfter(session.startedAt())) throw new ExecutionValidationException("Execution end must be after its start"); }
+    private void validateNotFuture(Instant value) { if (value.isAfter(Instant.now(clock).plusSeconds(5))) throw new ExecutionValidationException("Çalışma zamanı gelecekte olamaz"); }
+    private void validateEnd(SessionTarget session, Instant endedAt) { validateNotFuture(endedAt); if (!endedAt.isAfter(session.startedAt())) throw new ExecutionValidationException("Çalışma bitişi başlangıçtan sonra olmalıdır"); }
     private record Context(String timezone, LocalDate date) {}
 }

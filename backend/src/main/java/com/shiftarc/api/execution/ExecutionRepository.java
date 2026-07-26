@@ -27,7 +27,7 @@ class ExecutionRepository {
             FROM shiftarc.task_execution_session session
             JOIN shiftarc.task task ON task.id = session.task_id
             WHERE session.workspace_id = ?
-              AND (session.started_at AT TIME ZONE ?)::date = ?
+              AND ((session.started_at AT TIME ZONE ?)::date = ? OR session.ended_at IS NULL)
             ORDER BY session.started_at DESC
             """,
             (resultSet, rowNumber) -> {
@@ -78,10 +78,10 @@ class ExecutionRepository {
             workspaceId,
             Date.valueOf(date)
         );
-        if (items.isEmpty()) throw new ExecutionNotFoundException("The daily plan item is not startable today");
+        if (items.isEmpty()) throw new ExecutionNotFoundException("Bu günlük plan öğesi bugün başlatılamaz");
         ItemTarget item = items.get(0);
         if (!item.status().equals("PLANNED")) {
-            throw new ExecutionConflictException("Only planned items can be started");
+            throw new ExecutionConflictException("Yalnız planlanmış görevler başlatılabilir");
         }
         return item;
     }
@@ -98,7 +98,7 @@ class ExecutionRepository {
                 sessionId, workspaceId, item.taskId(), item.id(), Timestamp.from(startedAt)
             );
         } catch (DataIntegrityViolationException exception) {
-            throw new ExecutionConflictException("Another task execution session is already active");
+            throw new ExecutionConflictException("Zaten aktif bir görev oturumu var");
         }
         int itemChanged = jdbcTemplate.update(
             """
@@ -108,7 +108,7 @@ class ExecutionRepository {
             """,
             item.id()
         );
-        if (itemChanged != 1) throw new ExecutionConflictException("The plan item changed before it could start");
+        if (itemChanged != 1) throw new ExecutionConflictException("Plan öğesi başlatılmadan önce değişti");
         event(workspaceId, sessionId, "STARTED", startedAt, "{}");
         return sessionId;
     }
@@ -130,9 +130,9 @@ class ExecutionRepository {
             workspaceId,
             sessionId
         );
-        if (sessions.isEmpty()) throw new ExecutionNotFoundException("The active execution session was not found");
+        if (sessions.isEmpty()) throw new ExecutionNotFoundException("Aktif görev oturumu bulunamadı");
         SessionTarget session = sessions.get(0);
-        if (session.version() != version) throw new ExecutionConflictException("Execution session is stale; refresh before continuing");
+        if (session.version() != version) throw new ExecutionConflictException("Görev oturumu güncel değil; devam etmeden önce yenile");
         return session;
     }
 
@@ -155,9 +155,9 @@ class ExecutionRepository {
             workspaceId,
             sessionId
         );
-        if (sessions.isEmpty()) throw new ExecutionNotFoundException("The execution session was not found");
+        if (sessions.isEmpty()) throw new ExecutionNotFoundException("Görev oturumu bulunamadı");
         CorrectableSession session = sessions.get(0);
-        if (session.version() != version) throw new ExecutionConflictException("Execution session is stale; refresh before correcting it");
+        if (session.version() != version) throw new ExecutionConflictException("Görev oturumu güncel değil; düzeltmeden önce yenile");
         return session;
     }
 
@@ -176,7 +176,7 @@ class ExecutionRepository {
             Timestamp.from(startedAt)
         );
         if (overlap != null && overlap > 0) {
-            throw new ExecutionConflictException("Corrected execution times overlap another session");
+            throw new ExecutionConflictException("Düzeltilen çalışma zamanı başka bir oturumla çakışıyor");
         }
         int changed = jdbcTemplate.update(
             """
@@ -187,7 +187,7 @@ class ExecutionRepository {
             Timestamp.from(startedAt), endedAt == null ? null : Timestamp.from(endedAt),
             session.id(), workspaceId, session.version()
         );
-        if (changed != 1) throw new ExecutionConflictException("Execution session changed before correction");
+        if (changed != 1) throw new ExecutionConflictException("Görev oturumu düzeltmeden önce değişti");
         String payload = "{\"previousStartedAt\":\"" + session.startedAt()
             + "\",\"previousEndedAt\":" + jsonInstant(session.endedAt())
             + ",\"correctedStartedAt\":\"" + startedAt
@@ -204,7 +204,7 @@ class ExecutionRepository {
             """,
             Timestamp.from(endedAt), session.id(), workspaceId, session.version()
         );
-        if (changed != 1) throw new ExecutionConflictException("Execution session changed before it could finish");
+        if (changed != 1) throw new ExecutionConflictException("Görev oturumu bitirilmeden önce değişti");
         if (session.itemId() != null) {
             jdbcTemplate.update(
                 """
