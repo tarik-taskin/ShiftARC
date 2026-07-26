@@ -29,35 +29,39 @@ transaction içinde oluşturur; görev oluşturmaz. Tercihler daha sonra `Görü
 sayfasından güncellenebilir.
 
 `Kategoriler` sayfası görev ve zaman bloklarında kullanılacak planlama sözlüğünü
-yönetir. Kategoriler isim, renk ve ikonla oluşturulabilir; aranabilir, düzenlenebilir,
-arşivlenebilir ve veri kaybı olmadan geri yüklenebilir. Aynı çalışma alanında kategori
-adları büyük-küçük harf ayrımından bağımsız olarak benzersizdir.
+yönetir. Kategoriler isim, renk ve ikonla oluşturulabilir; aranabilir, düzenlenebilir
+ve onay dialoguyla silinebilir. Silme fiziksel veri kaybı oluşturmaz; kategori
+arşivlenir ve bağlı görev, gün tipi bloğu ve trigger ilişkileri kaldırılır. Aynı
+çalışma alanında kategori adları büyük-küçük harf ayrımından bağımsız olarak benzersizdir.
 
 `Gün tipleri` sayfası 00:00–24:00 arasını kesintisiz zaman blokları halinde tasarlar.
 Yeni bir gün tipi tam günü kaplayan `Plansız` blokla başlar. Geniş, yatay kaydırılabilir
 çizelgeye tıklanan nokta en yakın beş dakikaya yuvarlanarak yeni blok sınırı oluşturur.
 Blok saatleri dialogdan yazılabilir; ortak sınırlar fareyle sürüklenebilir veya ok
-tuşlarıyla değiştirilebilir. Bloklara birden fazla aktif kategori atanabilir ve bir
-blok silindiğinde komşusuyla birleştirilir. Gün tipi silme veri kaybı oluşturmaz;
-arşivlenen gün tipleri görünür yapılarak geri yüklenebilir.
+tuşlarıyla değiştirilebilir. Dar bloklar adları okunabilecek minimum görsel toleransla
+gösterilir. Bloklara birden fazla aktif kategori atanabilir ve kartlarda kategori
+adları listelenir. Gün tipleri tek tıkla kopyalanabilir; silme veri kaybı oluşturmaz.
 
 `Haftalık plan` sayfası pazartesiden pazara yedi sabit gün yuvasına aktif gün
 tiplerini atar. Plan eksik günlerle taslak olarak kaydedilebilir; yedi günün tamamı
 atandığında tamamlandı durumuna geçer. Bütün hafta tek transaction içinde yazılır ve
 workspace sürümü üzerinden eşzamanlı değişiklik çakışmaları engellenir.
 
-`Görevler` sayfası son tarih ve toplam süre taşıyan iş parçacıklarıyla haftalık süre
-hedefli alışkanlıkları yönetir. Her görev 1–5 önem derecesi ve birden fazla kategori
-taşıyabilir; önem, son tarih, oluşturulma zamanı, tip, durum ve kategoriye göre
-filtrelenebilir. Görevler tamamlanabilir, arşivlenebilir ve yeniden aktifleştirilebilir.
-Uygulama üst çubuğundaki `Yeni görev` eylemi aynı dialogu her sayfadan açar.
+`Görevler` sayfası son tarih ve toplam süre taşıyan iş parçacıkları, haftalık süre
+hedefli alışkanlıklar ve hedefsiz `Fırsat` işleri yönetir. Her görev 1–5 önem derecesi,
+opsiyonel günlük limit, sıralı aşamalar ve birden fazla kategori taşıyabilir; önem,
+son tarih, oluşturulma zamanı, tip, durum ve kategoriye göre filtrelenebilir. Görevler
+tamamlanabilir, arşivlenebilir ve yeniden aktifleştirilebilir. Uygulama üst çubuğundaki
+`Yeni görev` eylemi aynı dialogu her sayfadan açar.
 
 Ana sayfa workspace saat diliminde canlı saat ve saniyeyi, bugünün gün tipinden
 üretilmiş 24 saatlik snapshot çizelgesini ve kırmızı mevcut-zaman imlecini gösterir.
 Günlük plan üreticisi görevleri kategori uyumu ve önem sırasıyla değerlendirir; iş
 parçacığı süresini son tarihe kalan günlere, alışkanlık hedefini haftada kalan günlere
-böler. Beş dakikalık günlük hedefler uygun bloklara yerleştirilir, sığmayan kısım
-silinmek yerine açık bir plan uyarısı olarak saklanır. Aynı güne yapılan normal GET
+böler. Günlük limitler aynı görev için ayrılacak süreyi sınırlar. Fırsatlar zorunlu
+işlerden sonra kalan kategori uyumlu kapasiteye yerleştirilir. Beş dakikalık günlük
+hedefler uygun bloklara yerleştirilir, sığmayan kısım silinmek yerine açık bir plan
+uyarısı olarak saklanır. Aynı güne yapılan normal GET
 mevcut snapshot'ı korur; kullanıcı isterse sürüm kontrollü yeniden üretim yapabilir.
 
 Planlanan görevler ana sayfadan başlatılabilir ve bitirilebilir. `Sıradaki görev`
@@ -80,9 +84,10 @@ tamamlanmış işler ve blok kapasitesini aşan düzenlemeler kabul edilmez.
 
 `Triggerlar` sayfası görevlerden görsel ve davranışsal olarak ayrılan kısa eylemleri
 yönetir. İş parçacığı triggerları sonlu tekrar sayısıyla, alışkanlık triggerları sürekli
-olarak çalışır. Kurallar belirli dakika aralıklarına veya kategori sonrasına bağlanabilir;
-gerçekleşmeler ayrı geçmiş kayıtlarıdır. Vadesi gelen triggerlar öncelikli görünür ve
-kullanıcı izniyle tarayıcı bildirimi gönderir.
+olarak çalışır. Kurallar belirli dakika aralıklarına veya kategori sonrasına ve
+opsiyonel olarak belirli gün tiplerine bağlanabilir; gerçekleşmeler ayrı geçmiş
+kayıtlarıdır. Vadesi gelen triggerlar öncelikli görünür, kullanıcı izniyle tekil
+tarayıcı bildirimi gönderir ve anasayfada kullanıcı kapatana kadar duran uyarı dialogu açar.
 
 `Odak` sayfası 25/5/15 dakika varsayılanlı pomodoro akışını sunar. Odak, kısa mola
 ve uzun mola sayaçları backend üzerinde kalıcı oturum olarak tutulur; tarayıcı

@@ -38,6 +38,13 @@ export async function archiveDayType(input: DayTypeVersionInput) {
   await safeFetch(`${endpoint}/${input.id}?version=${input.version}`, { method: 'DELETE' })
 }
 
+export async function duplicateDayType(input: { id: string }) {
+  return parse(
+    await safeFetch(`${endpoint}/${input.id}/duplicate`, { method: 'POST' }),
+    dayTypeSchema,
+  )
+}
+
 export async function restoreDayType(input: DayTypeVersionInput) {
   return parse(
     await safeFetch(`${endpoint}/${input.id}/restore?version=${input.version}`, {

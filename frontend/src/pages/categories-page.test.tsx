@@ -54,11 +54,12 @@ describe('categories page', () => {
 
     expect(screen.getByRole('heading', { name: 'Ders' })).toBeInTheDocument()
     await user.click(screen.getByRole('button', { name: 'Arşivle' }))
+    await user.click(screen.getByRole('button', { name: 'Evet, sil' }))
 
     expect(archive).toHaveBeenCalledWith({
       id: '41000000-0000-0000-0000-000000000001',
       version: 3,
-    })
+    }, expect.any(Object))
   })
 
   it('opens the reusable creation dialog from the page action', async () => {

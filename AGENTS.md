@@ -117,7 +117,10 @@ edilir.
 
 ### Kategori davranışı
 
-- Kategori silme fiziksel silme değildir; arşivleme ve geri yükleme akışını koru.
+- Kategori silme fiziksel silme değildir; kullanıcı onayından sonra kategori arşivlenir
+  ve aktif görev, gün tipi bloğu ve trigger kategori bağlantıları koparılır.
+- Geri yükleme yalnız kategoriyi tekrar aktif eder; koparılan bağlantıları otomatik
+  geri kurmaz.
 - İsim benzersizliği çalışma alanı içinde ve büyük-küçük harf ayrımından bağımsızdır.
 - Güncelleme, arşivleme ve geri yüklemede istemcinin gönderdiği optimistic-lock
   sürümünü doğrula; çakışmaları standart Problem Details yanıtıyla bildir.
@@ -151,8 +154,14 @@ edilir.
 
 - `WORK_ITEM` yalnız son tarih ve beş dakikalık toplam süre; `HABIT` yalnız beş
   dakikalık haftalık hedef taşır. Tip alanlarını backend'de birlikte doğrula.
+- `OPPORTUNITY` teslim tarihi veya hedef süre taşımaz; zorunlu işler yerleştikten
+  sonra kalan kategori uyumlu kapasiteye, varsa günlük limitine uyarak yerleşir.
 - Bütün görevler 1–5 önem derecesine sahiptir ve sıfır veya daha fazla aktif
   workspace kategorisine bağlanabilir.
+- Görevlerin opsiyonel günlük limitleri beş dakikalık grid kullanır ve günlük
+  plan üretiminde aynı görev için ayrılan toplam süreyi sınırlar.
+- Görev aşamaları ayrı görev değildir; sıralı alt odak bilgisidir ve anasayfada
+  görev başlığı altında gösterilir.
 - Tamamlama `completed_at` üretmeli; yeniden aktifleştirme veya arşivleme bu alanı
   temizlemelidir. Fiziksel silme yapma.
 - Güncelleme ve durum geçişlerinde optimistic-lock sürümünü zorunlu tut.
@@ -198,8 +207,11 @@ edilir.
 - Triggerları görev tablosuna sıkıştırma; küçük eylem yaşam döngüsü ayrı kalmalıdır.
 - İş parçacığı triggerı sonlu `occurrence_target`, alışkanlık triggerı sınırsız tekrar taşır.
 - Süreler beş dakikalık grid kullanır; aralıklar en az 30 dakikadır.
+- Triggerlar opsiyonel gün tipi kapsamı taşıyabilir; kapsam boşsa her gün tipinde,
+  doluysa yalnız seçili gün tiplerinde görünür/tetiklenir.
 - Her tamamlanmayı `trigger_occurrence` kaydıyla koru; sayaç geçmişini silerek azaltma.
 - Tarayıcı bildirim iznini yalnız açık kullanıcı eylemiyle iste.
+- Aynı trigger ve aynı `nextDueAt` için istemci tekrar tekrar bildirim üretmemelidir.
 
 ### Pomodoro davranışı
 

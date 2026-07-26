@@ -19,6 +19,8 @@ const {
   mockUseFinishExecution,
   mockUseTransitionExecution,
   mockUseCorrectExecutionTimes,
+  mockUseTriggers,
+  mockUseCompleteTrigger,
 } = vi.hoisted(() => ({
   mockUseSystemStatus: vi.fn(),
   mockUseWorkspace: vi.fn(),
@@ -32,6 +34,8 @@ const {
   mockUseFinishExecution: vi.fn(),
   mockUseTransitionExecution: vi.fn(),
   mockUseCorrectExecutionTimes: vi.fn(),
+  mockUseTriggers: vi.fn(),
+  mockUseCompleteTrigger: vi.fn(),
 }))
 
 vi.mock('./api/system-status/useSystemStatus', () => ({
@@ -56,6 +60,11 @@ vi.mock('./api/execution/queries', () => ({
   useFinishExecution: mockUseFinishExecution,
   useTransitionExecution: mockUseTransitionExecution,
   useCorrectExecutionTimes: mockUseCorrectExecutionTimes,
+}))
+
+vi.mock('./api/triggers/queries', () => ({
+  useTriggers: mockUseTriggers,
+  useCompleteTrigger: mockUseCompleteTrigger,
 }))
 
 describe('foundation status screen', () => {
@@ -212,6 +221,8 @@ describe('product application shell', () => {
     mockUseFinishExecution.mockReturnValue({ mutate: vi.fn(), isPending: false })
     mockUseTransitionExecution.mockReturnValue({ mutate: vi.fn(), isPending: false })
     mockUseCorrectExecutionTimes.mockReturnValue({ mutateAsync: vi.fn(), isPending: false })
+    mockUseTriggers.mockReturnValue({ data: [], isPending: false, isError: false })
+    mockUseCompleteTrigger.mockReturnValue({ mutate: vi.fn(), isPending: false })
   })
 
   afterEach(() => {
@@ -357,7 +368,7 @@ function dailyPlanFixture() {
     sourceDayTypeId: '51000000-0000-0000-0000-000000000001', sourceDayTypeName: 'İş Günü', status: 'ACTIVE' as const,
     version: 0, generatedAt: '2026-06-19T10:00:00Z', warnings: [], blocks: [{
       id: '72000000-0000-0000-0000-000000000001', name: 'İş', startMinute: 0, endMinute: 1440,
-      items: [{ id: '73000000-0000-0000-0000-000000000001', taskId: '61000000-0000-0000-0000-000000000001', taskTitle: 'ML Dersi', taskType: 'WORK_ITEM' as const, importance: 5, plannedStartMinute: 0, plannedEndMinute: 1440, status: 'PLANNED' as const, version: 0 }],
+      items: [{ id: '73000000-0000-0000-0000-000000000001', taskId: '61000000-0000-0000-0000-000000000001', taskTitle: 'ML Dersi', taskStageTitle: null, taskType: 'WORK_ITEM' as const, importance: 5, plannedStartMinute: 0, plannedEndMinute: 1440, status: 'PLANNED' as const, version: 0 }],
     }],
   }
 }

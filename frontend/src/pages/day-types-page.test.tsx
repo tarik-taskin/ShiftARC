@@ -11,6 +11,7 @@ const mocks = vi.hoisted(() => ({
   useUpdateDayType: vi.fn(),
   useReplaceDayTypeBlocks: vi.fn(),
   useArchiveDayType: vi.fn(),
+  useDuplicateDayType: vi.fn(),
   useRestoreDayType: vi.fn(),
   replaceBlocksMutateAsync: vi.fn(),
 }))
@@ -21,6 +22,7 @@ vi.mock('@/api/day-types/queries', () => ({
   useUpdateDayType: mocks.useUpdateDayType,
   useReplaceDayTypeBlocks: mocks.useReplaceDayTypeBlocks,
   useArchiveDayType: mocks.useArchiveDayType,
+  useDuplicateDayType: mocks.useDuplicateDayType,
   useRestoreDayType: mocks.useRestoreDayType,
 }))
 
@@ -35,6 +37,7 @@ describe('day types page', () => {
     mocks.replaceBlocksMutateAsync.mockReset()
     mocks.useReplaceDayTypeBlocks.mockReturnValue({ ...mutation(), mutateAsync: mocks.replaceBlocksMutateAsync })
     mocks.useArchiveDayType.mockReturnValue(mutation())
+    mocks.useDuplicateDayType.mockReturnValue(mutation())
     mocks.useRestoreDayType.mockReturnValue(mutation())
   })
 

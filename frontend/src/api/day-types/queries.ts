@@ -3,6 +3,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import {
   archiveDayType,
   createDayType,
+  duplicateDayType,
   listDayTypes,
   replaceDayTypeBlocks,
   restoreDayType,
@@ -32,6 +33,10 @@ export function useReplaceDayTypeBlocks() {
 
 export function useArchiveDayType() {
   return useDayTypeMutation(archiveDayType)
+}
+
+export function useDuplicateDayType() {
+  return useDayTypeMutation(duplicateDayType)
 }
 
 export function useRestoreDayType() {

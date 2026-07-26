@@ -1,10 +1,14 @@
 import { z } from 'zod'
 
-export const taskTypeSchema = z.enum(['WORK_ITEM', 'HABIT'])
+export const taskTypeSchema = z.enum(['WORK_ITEM', 'HABIT', 'OPPORTUNITY'])
 export const taskStatusSchema = z.enum(['ACTIVE', 'COMPLETED', 'ARCHIVED'])
 
 const taskCategorySchema = z.object({
   id: z.string().uuid(), name: z.string(), color: z.string(), icon: z.string().nullable(), archived: z.boolean(),
+})
+
+const taskStageSchema = z.object({
+  id: z.string().uuid(), title: z.string(), position: z.number().int().nonnegative(), completed: z.boolean(),
 })
 
 export const taskSchema = z.object({
@@ -17,9 +21,11 @@ export const taskSchema = z.object({
   totalRequiredMinutes: z.number().int().nullable(),
   deadline: z.string().nullable(),
   weeklyTargetMinutes: z.number().int().nullable(),
+  dailyLimitMinutes: z.number().int().nullable(),
   executedMinutes: z.number().int().nonnegative(),
   remainingMinutes: z.number().int().nonnegative(),
   categories: z.array(taskCategorySchema),
+  stages: z.array(taskStageSchema),
   version: z.number().int().nonnegative(),
   completedAt: z.string().nullable(),
   createdAt: z.string(),
@@ -39,6 +45,8 @@ export interface TaskInput {
   totalRequiredMinutes: number | null
   deadline: string | null
   weeklyTargetMinutes: number | null
+  dailyLimitMinutes: number | null
+  stages: Array<{ title: string; completed: boolean }>
   categoryIds: string[]
   version?: number | null
 }

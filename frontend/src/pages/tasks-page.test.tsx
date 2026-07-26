@@ -34,4 +34,4 @@ describe('tasks page', () => {
 })
 
 function mutation() { return { mutate: vi.fn(), mutateAsync: vi.fn(), isPending: false, error: null } }
-function task() { return { id: '61000000-0000-0000-0000-000000000001', type: 'WORK_ITEM' as const, title: 'ML Dersi', description: null, importance: 5, status: 'ACTIVE' as const, totalRequiredMinutes: 300, deadline: '2026-07-01', weeklyTargetMinutes: null, executedMinutes: 0, remainingMinutes: 300, categories: [], version: 0, completedAt: null, createdAt: '2026-06-19T10:00:00Z', updatedAt: '2026-06-19T10:00:00Z' } }
+function task() { return { id: '61000000-0000-0000-0000-000000000001', type: 'WORK_ITEM' as const, title: 'ML Dersi', description: null, importance: 5, status: 'ACTIVE' as const, totalRequiredMinutes: 300, deadline: '2026-07-01', weeklyTargetMinutes: null, dailyLimitMinutes: null, executedMinutes: 0, remainingMinutes: 300, categories: [], stages: [], version: 0, completedAt: null, createdAt: '2026-06-19T10:00:00Z', updatedAt: '2026-06-19T10:00:00Z' } }

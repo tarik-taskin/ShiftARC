@@ -99,7 +99,7 @@ export function DayTypeTimeline({
         </div>
         <div
           ref={timelineRef}
-          className={`relative flex h-56 overflow-hidden rounded-xl border-2 ${disabled ? 'cursor-default' : 'cursor-crosshair'}`}
+          className={`relative flex h-56 overflow-visible rounded-xl border-2 ${disabled ? 'cursor-default' : 'cursor-crosshair'}`}
           style={{ borderColor: `${dayType.color}80` }}
           aria-label={`${dayType.name} zaman çizelgesi`}
         >
@@ -111,24 +111,18 @@ export function DayTypeTimeline({
               <div
                 key={block.id}
                 className="group relative min-w-0 shrink-0 border-r border-black/25 p-3 text-white last:border-r-0"
-                style={{ width: `${(duration / 1440) * 100}%`, backgroundColor: color }}
+                style={{ width: `${(duration / 1440) * 100}%`, minWidth: '7.5rem', backgroundColor: color }}
                 title={`${block.name} · ${formatTime(block.startMinute)}–${formatTime(block.endMinute)}`}
                 onClick={(event) => {
                   if (!disabled) onSplit(minuteAtPointer(event.clientX))
                 }}
               >
                 <div className="pointer-events-none relative z-20 flex h-full w-full flex-col items-start text-left">
-                  {duration >= 45 ? (
-                    <>
-                      <span className="max-w-full truncate text-sm font-bold">{block.name}</span>
-                      <span className="mt-1 whitespace-nowrap font-mono text-[10px] text-white/80">
-                        {formatTime(block.startMinute)}–{formatTime(block.endMinute)}
-                      </span>
-                    </>
-                  ) : (
-                    <span className="sr-only">{block.name}</span>
-                  )}
-                  {duration >= 90 ? (
+                  <span className="max-w-full truncate text-sm font-bold">{block.name}</span>
+                  <span className="mt-1 whitespace-nowrap font-mono text-[10px] text-white/80">
+                    {formatTime(block.startMinute)}–{formatTime(block.endMinute)}
+                  </span>
+                  {duration >= 60 ? (
                     <Button
                       type="button"
                       size="sm"

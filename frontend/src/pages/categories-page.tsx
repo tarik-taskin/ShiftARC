@@ -25,6 +25,7 @@ import {
 } from '@/api/categories/queries'
 import type { Category } from '@/api/categories/types'
 import { Button } from '@/components/ui/button'
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { CategoryDialog } from '@/features/categories/category-dialog'
 
 const icons: Record<string, LucideIcon> = {
@@ -43,6 +44,7 @@ export function CategoriesPage() {
   const [includeArchived, setIncludeArchived] = useState(false)
   const [dialogOpen, setDialogOpen] = useState(false)
   const [editingCategory, setEditingCategory] = useState<Category | null>(null)
+  const [deletingCategory, setDeletingCategory] = useState<Category | null>(null)
   const deferredSearch = useDeferredValue(search.trim())
   const categories = useCategories(includeArchived, deferredSearch)
   const archiveCategory = useArchiveCategory()
@@ -107,9 +109,7 @@ export function CategoriesPage() {
           isError={categories.isError}
           onRetry={() => categories.refetch()}
           onEdit={openEditDialog}
-          onArchive={(category) =>
-            archiveCategory.mutate({ id: category.id, version: category.version })
-          }
+          onArchive={setDeletingCategory}
           onRestore={(category) =>
             restoreCategory.mutate({ id: category.id, version: category.version })
           }
@@ -122,6 +122,32 @@ export function CategoriesPage() {
         onOpenChange={setDialogOpen}
         category={editingCategory}
       />
+      <Dialog open={Boolean(deletingCategory)} onOpenChange={(open) => { if (!open) setDeletingCategory(null) }}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Kategoriyi sil?</DialogTitle>
+            <DialogDescription>
+              Bu kategori arşivlenecek ve bağlı görev, gün tipi bloğu ve trigger ilişkileri kaldırılacak. Geçmiş kayıtlar korunur.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setDeletingCategory(null)}>Vazgeç</Button>
+            <Button
+              className="bg-destructive text-white hover:bg-destructive/90"
+              disabled={archiveCategory.isPending}
+              onClick={() => {
+                if (!deletingCategory) return
+                archiveCategory.mutate(
+                  { id: deletingCategory.id, version: deletingCategory.version },
+                  { onSuccess: () => setDeletingCategory(null) },
+                )
+              }}
+            >
+              Evet, sil
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   )
 }

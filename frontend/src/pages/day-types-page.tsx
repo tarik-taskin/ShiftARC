@@ -1,10 +1,11 @@
 import { AnimatePresence, motion, useReducedMotion } from 'motion/react'
-import { ArchiveRestore, Clock3, Pencil, Plus, Shapes, Trash2 } from 'lucide-react'
+import { ArchiveRestore, Clock3, Copy, Pencil, Plus, Shapes, Trash2 } from 'lucide-react'
 import { useState } from 'react'
 
 import { useCategories } from '@/api/categories/queries'
 import {
   useDayTypes,
+  useDuplicateDayType,
   useReplaceDayTypeBlocks,
   useRestoreDayType,
 } from '@/api/day-types/queries'
@@ -28,6 +29,7 @@ export function DayTypesPage() {
   const dayTypes = useDayTypes(includeArchived)
   const categories = useCategories(false, '')
   const replaceBlocks = useReplaceDayTypeBlocks()
+  const duplicate = useDuplicateDayType()
   const restore = useRestoreDayType()
   const reduceMotion = useReducedMotion()
 
@@ -39,6 +41,7 @@ export function DayTypesPage() {
   const timelineBlocks = timelineDraft && timelineDraft.dayTypeId === selected?.id
     ? timelineDraft.blocks
     : selected?.blocks ?? []
+  const categoryNames = new Map((categories.data ?? []).map((category) => [category.id, category.name]))
 
   const openCreate = () => {
     setEditingDayType(null)
@@ -182,6 +185,7 @@ export function DayTypesPage() {
                   </div>
                   <div className="flex flex-wrap gap-2">
                     {!selected.archived ? <Button size="sm" variant="outline" onClick={() => openEdit(selected)}><Pencil className="size-3.5" />Düzenle</Button> : null}
+                    <Button size="sm" variant="outline" onClick={() => duplicate.mutate({ id: selected.id })} disabled={duplicate.isPending}><Copy className="size-3.5" />Kopyala</Button>
                     {selected.archived ? (
                       <Button size="sm" variant="ghost" onClick={() => restore.mutate({ id: selected.id, version: selected.version })}><ArchiveRestore className="size-3.5" />Geri yükle</Button>
                     ) : (
@@ -206,7 +210,7 @@ export function DayTypesPage() {
                   {timelineBlocks.map((block, index) => (
                     <button key={block.id} type="button" onClick={() => beginBlockEdit(timelineBlocks, index)} className="flex items-center gap-3 rounded-2xl border border-border/70 bg-background/30 p-4 text-left transition-colors hover:border-primary/35 hover:bg-background/50">
                       <span className="grid size-9 shrink-0 place-items-center rounded-xl text-white" style={{ backgroundColor: colorForBlock(index, block.name === 'Plansız') }}><Clock3 className="size-4" /></span>
-                      <span className="min-w-0 flex-1"><span className="block truncate text-sm font-semibold">{block.name}</span><span className="text-xs text-muted-foreground">{formatTime(block.startMinute)}–{formatTime(block.endMinute)} · {block.categoryIds.length} kategori</span></span>
+                      <span className="min-w-0 flex-1"><span className="block truncate text-sm font-semibold">{block.name}</span><span className="line-clamp-2 text-xs text-muted-foreground">{formatTime(block.startMinute)}–{formatTime(block.endMinute)} · {block.categoryIds.map((id) => categoryNames.get(id)).filter(Boolean).join(', ') || 'Kategori yok'}</span></span>
                     </button>
                   ))}
                 </div>
