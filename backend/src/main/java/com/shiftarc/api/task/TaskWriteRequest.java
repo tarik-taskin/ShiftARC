@@ -20,7 +20,14 @@ public record TaskWriteRequest(
     @Positive Integer totalRequiredMinutes,
     LocalDate deadline,
     @Positive Integer weeklyTargetMinutes,
+    @Positive Integer dailyLimitMinutes,
+    @NotNull @Size(max = 48) List<Stage> stages,
     @NotNull @Size(max = 64) List<@NotNull UUID> categoryIds,
     @PositiveOrZero Long version
 ) {
+    public record Stage(
+        @NotBlank @Size(max = 160) String title,
+        boolean completed
+    ) {
+    }
 }

@@ -15,14 +15,19 @@ public record TaskResponse(
     Integer totalRequiredMinutes,
     LocalDate deadline,
     Integer weeklyTargetMinutes,
+    Integer dailyLimitMinutes,
     int executedMinutes,
     int remainingMinutes,
     List<Category> categories,
+    List<Stage> stages,
     long version,
     Instant completedAt,
     Instant createdAt,
     Instant updatedAt
 ) {
     public record Category(UUID id, String name, String color, String icon, boolean archived) {
+    }
+
+    public record Stage(UUID id, String title, int position, boolean completed) {
     }
 }

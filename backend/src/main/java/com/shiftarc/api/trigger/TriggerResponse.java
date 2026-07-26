@@ -18,7 +18,9 @@ public record TriggerResponse(
     Instant nextDueAt,
     TriggerStatus status,
     List<Category> categories,
+    List<DayType> dayTypes,
     long version
 ) {
     public record Category(UUID id, String name, String color) {}
+    public record DayType(UUID id, String name, String color) {}
 }

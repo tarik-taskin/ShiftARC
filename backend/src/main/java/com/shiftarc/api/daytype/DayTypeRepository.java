@@ -96,6 +96,56 @@ class DayTypeRepository {
         return find(workspaceId, id);
     }
 
+    DayTypeResponse duplicate(UUID workspaceId, UUID sourceId, String name, String color) {
+        UUID id = UUID.randomUUID();
+        jdbcTemplate.update(
+            "INSERT INTO shiftarc.day_type (id, workspace_id, name, color) VALUES (?, ?, ?, ?)",
+            id,
+            workspaceId,
+            name,
+            color
+        );
+        List<DayTypeResponse.Block> blocks = findBlocks(sourceId);
+        for (int position = 0; position < blocks.size(); position++) {
+            DayTypeResponse.Block block = blocks.get(position);
+            UUID blockId = UUID.randomUUID();
+            jdbcTemplate.update(
+                """
+                INSERT INTO shiftarc.day_type_block
+                    (id, day_type_id, name, start_minute, end_minute, position)
+                VALUES (?, ?, ?, ?, ?, ?)
+                """,
+                blockId,
+                id,
+                block.name(),
+                block.startMinute(),
+                block.endMinute(),
+                position
+            );
+            for (UUID categoryId : block.categoryIds()) {
+                jdbcTemplate.update(
+                    "INSERT INTO shiftarc.day_type_block_category (day_type_block_id, category_id) VALUES (?, ?)",
+                    blockId,
+                    categoryId
+                );
+            }
+        }
+        return find(workspaceId, id);
+    }
+
+    boolean activeNameExists(UUID workspaceId, String name) {
+        Integer count = jdbcTemplate.queryForObject(
+            """
+            SELECT count(*) FROM shiftarc.day_type
+            WHERE workspace_id = ? AND archived = false AND lower(btrim(name)) = lower(btrim(?))
+            """,
+            Integer.class,
+            workspaceId,
+            name
+        );
+        return count != null && count > 0;
+    }
+
     void setArchived(UUID workspaceId, UUID id, boolean archived, long version) {
         int changed = jdbcTemplate.update(
             """

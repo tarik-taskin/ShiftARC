@@ -19,5 +19,6 @@ public record TriggerWriteRequest(
     Integer intervalMinutes,
     Integer occurrenceTarget,
     @NotNull List<UUID> categoryIds,
+    @NotNull List<UUID> dayTypeIds,
     Long version
 ) {}

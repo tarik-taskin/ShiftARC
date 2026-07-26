@@ -24,6 +24,7 @@ public record DailyPlanResponse(
         UUID id,
         UUID taskId,
         String taskTitle,
+        String taskStageTitle,
         String taskType,
         int importance,
         int plannedStartMinute,

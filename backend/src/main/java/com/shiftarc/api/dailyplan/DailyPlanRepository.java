@@ -79,6 +79,14 @@ class DailyPlanRepository {
             """
             SELECT task.id, task.task_type, task.title, task.importance,
                    task.total_required_minutes, task.deadline, task.weekly_target_minutes,
+                   task.daily_limit_minutes,
+                   (
+                       SELECT stage.title
+                       FROM shiftarc.task_stage stage
+                       WHERE stage.task_id = task.id AND stage.completed = false
+                       ORDER BY stage.position
+                       LIMIT 1
+                   ) AS task_stage_title,
                    COALESCE((
                        SELECT floor(sum(extract(epoch FROM (session.ended_at - session.started_at))) / 60)::int
                        FROM shiftarc.task_execution_session session
@@ -98,7 +106,8 @@ class DailyPlanRepository {
             FROM shiftarc.task task
             LEFT JOIN shiftarc.task_category link ON link.task_id = task.id
             WHERE task.workspace_id = ? AND task.status = 'ACTIVE'
-            ORDER BY task.importance DESC, task.deadline ASC NULLS LAST, task.created_at, link.category_id
+            ORDER BY CASE WHEN task.task_type = 'OPPORTUNITY' THEN 1 ELSE 0 END,
+                     task.importance DESC, task.deadline ASC NULLS LAST, task.created_at, link.category_id
             """,
             (org.springframework.jdbc.core.ResultSetExtractor<List<PlanningTask>>) this::groupTasks,
             workspaceId
@@ -270,11 +279,11 @@ class DailyPlanRepository {
                 jdbcTemplate.update(
                     """
                     INSERT INTO shiftarc.daily_plan_item
-                        (id, daily_plan_block_id, task_id, task_title,
+                        (id, daily_plan_block_id, task_id, task_title, task_stage_title,
                          planned_start_minute, planned_end_minute, position)
-                    VALUES (?, ?, ?, ?, ?, ?, ?)
+                    VALUES (?, ?, ?, ?, ?, ?, ?, ?)
                     """,
-                    item.id(), block.id(), item.taskId(), item.taskTitle(),
+                    item.id(), block.id(), item.taskId(), item.taskTitle(), item.taskStageTitle(),
                     item.startMinute(), item.endMinute(), itemPosition
                 );
             }
@@ -315,7 +324,8 @@ class DailyPlanRepository {
             """,
             (resultSet, rowNumber) -> new DailyPlanResponse.Item(
                 resultSet.getObject("id", UUID.class), resultSet.getObject("task_id", UUID.class),
-                resultSet.getString("task_title"), resultSet.getString("task_type"),
+                resultSet.getString("task_title"), resultSet.getString("task_stage_title"),
+                resultSet.getString("task_type"),
                 resultSet.getInt("effective_importance"), resultSet.getInt("planned_start_minute"),
                 resultSet.getInt("planned_end_minute"), resultSet.getString("status"),
                 resultSet.getLong("version")
@@ -354,19 +364,20 @@ class DailyPlanRepository {
 
     private List<PlanningTask> groupTasks(ResultSet resultSet) throws SQLException {
         List<PlanningTask> tasks = new ArrayList<>();
-        UUID id = null; String type = null; String title = null; int importance = 0; Integer total = null; LocalDate deadline = null; Integer weekly = null; int executedTotal = 0; int executedWeek = 0;
+        UUID id = null; String type = null; String title = null; String stageTitle = null; int importance = 0; Integer total = null; LocalDate deadline = null; Integer weekly = null; Integer dailyLimit = null; int executedTotal = 0; int executedWeek = 0;
         Set<UUID> categories = new LinkedHashSet<>();
         while (resultSet.next()) {
             UUID nextId = resultSet.getObject("id", UUID.class);
             if (id != null && !id.equals(nextId)) {
-                tasks.add(new PlanningTask(id, type, title, importance, total, deadline, weekly, executedTotal, executedWeek, Set.copyOf(categories)));
+                tasks.add(new PlanningTask(id, type, title, stageTitle, importance, total, deadline, weekly, dailyLimit, executedTotal, executedWeek, Set.copyOf(categories)));
                 categories.clear();
             }
             id = nextId; type = resultSet.getString("task_type"); title = resultSet.getString("title"); importance = resultSet.getInt("importance");
+            stageTitle = resultSet.getString("task_stage_title");
             total = nullableInt(resultSet, "total_required_minutes"); Date date = resultSet.getDate("deadline"); deadline = date == null ? null : date.toLocalDate();
-            weekly = nullableInt(resultSet, "weekly_target_minutes"); executedTotal = resultSet.getInt("executed_total_minutes"); executedWeek = resultSet.getInt("executed_week_minutes"); UUID category = resultSet.getObject("category_id", UUID.class); if (category != null) categories.add(category);
+            weekly = nullableInt(resultSet, "weekly_target_minutes"); dailyLimit = nullableInt(resultSet, "daily_limit_minutes"); executedTotal = resultSet.getInt("executed_total_minutes"); executedWeek = resultSet.getInt("executed_week_minutes"); UUID category = resultSet.getObject("category_id", UUID.class); if (category != null) categories.add(category);
         }
-        if (id != null) tasks.add(new PlanningTask(id, type, title, importance, total, deadline, weekly, executedTotal, executedWeek, Set.copyOf(categories)));
+        if (id != null) tasks.add(new PlanningTask(id, type, title, stageTitle, importance, total, deadline, weekly, dailyLimit, executedTotal, executedWeek, Set.copyOf(categories)));
         return tasks;
     }
 
@@ -386,9 +397,9 @@ class DailyPlanRepository {
 
     record DayTypeSource(UUID id, String name) {}
     record SourceBlock(UUID id, String name, int startMinute, int endMinute, Set<UUID> categoryIds) {}
-    record PlanningTask(UUID id, String type, String title, int importance, Integer totalMinutes, LocalDate deadline, Integer weeklyMinutes, int executedTotalMinutes, int executedWeekMinutes, Set<UUID> categoryIds) {}
+    record PlanningTask(UUID id, String type, String title, String stageTitle, int importance, Integer totalMinutes, LocalDate deadline, Integer weeklyMinutes, Integer dailyLimitMinutes, int executedTotalMinutes, int executedWeekMinutes, Set<UUID> categoryIds) {}
     record PlannedBlock(UUID id, UUID sourceId, String name, int startMinute, int endMinute, List<PlannedItem> items) {}
-    record PlannedItem(UUID id, UUID taskId, String taskTitle, int startMinute, int endMinute) {}
+    record PlannedItem(UUID id, UUID taskId, String taskTitle, String taskStageTitle, int startMinute, int endMinute) {}
     record PlannedWarning(UUID taskId, String reasonCode, int minutes, String detail) {}
     private record PlanHeader(UUID id, UUID dayTypeId, String dayTypeName, String timezone, String status, long version, Instant generatedAt) {}
     private record BlockHeader(UUID id, String name, int start, int end) {}

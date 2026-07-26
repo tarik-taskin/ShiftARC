@@ -28,11 +28,11 @@ class TriggerControllerTest {
     @Test void createsAnIntervalHabitTrigger() throws Exception {
         when(service.create(any())).thenReturn(new TriggerResponse(UUID.randomUUID(), TriggerType.HABIT,
             TriggerScheduleType.INTERVAL, "Odayı havalandır", null, 4, 5, 120, null, 0,
-            Instant.parse("2026-06-20T10:00:00Z"), TriggerStatus.ACTIVE, List.of(), 0));
+            Instant.parse("2026-06-20T10:00:00Z"), TriggerStatus.ACTIVE, List.of(), List.of(), 0));
         mockMvc.perform(post("/api/v1/triggers").contentType(MediaType.APPLICATION_JSON).content("""
             {"type":"HABIT","scheduleType":"INTERVAL","title":"Odayı havalandır",
              "importance":4,"durationMinutes":5,"intervalMinutes":120,
-             "occurrenceTarget":null,"categoryIds":[]}
+             "occurrenceTarget":null,"categoryIds":[],"dayTypeIds":[]}
             """))
             .andExpect(status().isCreated())
             .andExpect(jsonPath("$.scheduleType").value("INTERVAL"))
@@ -42,7 +42,8 @@ class TriggerControllerTest {
     @Test void rejectsInvalidDuration() throws Exception {
         mockMvc.perform(post("/api/v1/triggers").contentType(MediaType.APPLICATION_JSON).content("""
             {"type":"HABIT","scheduleType":"INTERVAL","title":"Ara ver",
-             "importance":3,"durationMinutes":0,"intervalMinutes":120,"categoryIds":[]}
+             "importance":3,"durationMinutes":0,"intervalMinutes":120,
+             "categoryIds":[],"dayTypeIds":[]}
             """))
             .andExpect(status().isBadRequest());
     }

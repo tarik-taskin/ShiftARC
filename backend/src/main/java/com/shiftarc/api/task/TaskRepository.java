@@ -77,8 +77,8 @@ class TaskRepository {
             """
             INSERT INTO shiftarc.task
                 (id, workspace_id, task_type, title, description, importance,
-                 total_required_minutes, deadline, weekly_target_minutes)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+                 total_required_minutes, deadline, weekly_target_minutes, daily_limit_minutes)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
             """,
             id,
             workspaceId,
@@ -88,9 +88,11 @@ class TaskRepository {
             request.importance(),
             request.totalRequiredMinutes(),
             request.deadline() == null ? null : Date.valueOf(request.deadline()),
-            request.weeklyTargetMinutes()
+            request.weeklyTargetMinutes(),
+            request.dailyLimitMinutes()
         );
         replaceCategories(id, request.categoryIds());
+        replaceStages(id, request.stages());
         return find(workspaceId, id);
     }
 
@@ -98,7 +100,7 @@ class TaskRepository {
         int changed = jdbcTemplate.update(
             """
             UPDATE shiftarc.task SET task_type = ?, title = ?, description = ?, importance = ?,
-                total_required_minutes = ?, deadline = ?, weekly_target_minutes = ?,
+                total_required_minutes = ?, deadline = ?, weekly_target_minutes = ?, daily_limit_minutes = ?,
                 version = version + 1, updated_at = current_timestamp
             WHERE workspace_id = ? AND id = ? AND version = ?
             """,
@@ -109,12 +111,14 @@ class TaskRepository {
             request.totalRequiredMinutes(),
             request.deadline() == null ? null : Date.valueOf(request.deadline()),
             request.weeklyTargetMinutes(),
+            request.dailyLimitMinutes(),
             workspaceId,
             id,
             request.version()
         );
         requireChanged(workspaceId, id, changed);
         replaceCategories(id, request.categoryIds());
+        replaceStages(id, request.stages());
         return find(workspaceId, id);
     }
 
@@ -163,8 +167,9 @@ class TaskRepository {
         TaskType type = TaskType.valueOf(resultSet.getString("task_type"));
         Integer totalRequired = integer(resultSet, "total_required_minutes");
         Integer weeklyTarget = integer(resultSet, "weekly_target_minutes");
+        Integer dailyLimit = integer(resultSet, "daily_limit_minutes");
         int executed = executedMinutes(id, type);
-        int target = type == TaskType.WORK_ITEM ? totalRequired : weeklyTarget;
+        int target = type == TaskType.WORK_ITEM ? totalRequired : type == TaskType.HABIT ? weeklyTarget : executed;
         return new TaskResponse(
             id,
             type,
@@ -175,14 +180,34 @@ class TaskRepository {
             totalRequired,
             deadline == null ? null : deadline.toLocalDate(),
             weeklyTarget,
+            dailyLimit,
             executed,
             Math.max(0, target - executed),
             categories(id),
+            stages(id),
             resultSet.getLong("version"),
             instant(resultSet, "completed_at"),
             instant(resultSet, "created_at"),
             instant(resultSet, "updated_at")
         );
+    }
+
+    private void replaceStages(UUID taskId, List<TaskWriteRequest.Stage> stages) {
+        jdbcTemplate.update("DELETE FROM shiftarc.task_stage WHERE task_id = ?", taskId);
+        for (int position = 0; position < stages.size(); position++) {
+            TaskWriteRequest.Stage stage = stages.get(position);
+            jdbcTemplate.update(
+                """
+                INSERT INTO shiftarc.task_stage (task_id, title, position, completed, completed_at)
+                VALUES (?, ?, ?, ?, CASE WHEN ? THEN current_timestamp ELSE NULL END)
+                """,
+                taskId,
+                stage.title(),
+                position,
+                stage.completed(),
+                stage.completed()
+            );
+        }
     }
 
     private int executedMinutes(UUID taskId, TaskType type) {
@@ -221,6 +246,23 @@ class TaskRepository {
                 resultSet.getString("color"),
                 resultSet.getString("icon"),
                 resultSet.getBoolean("archived")
+            ),
+            taskId
+        );
+    }
+
+    private List<TaskResponse.Stage> stages(UUID taskId) {
+        return jdbcTemplate.query(
+            """
+            SELECT id, title, position, completed
+            FROM shiftarc.task_stage
+            WHERE task_id = ? ORDER BY position
+            """,
+            (resultSet, rowNumber) -> new TaskResponse.Stage(
+                resultSet.getObject("id", UUID.class),
+                resultSet.getString("title"),
+                resultSet.getInt("position"),
+                resultSet.getBoolean("completed")
             ),
             taskId
         );

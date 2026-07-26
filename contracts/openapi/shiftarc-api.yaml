@@ -218,6 +218,24 @@ paths:
           $ref: "#/components/responses/DayTypeNotFound"
         "409":
           $ref: "#/components/responses/DayTypeConflict"
+  /api/v1/day-types/{id}/duplicate:
+    parameters:
+      - $ref: "#/components/parameters/DayTypeId"
+    post:
+      operationId: duplicateDayType
+      summary: Duplicate a day type as "<name> kopya" with the same timeline
+      tags: [Day types]
+      responses:
+        "201":
+          description: Day type duplicated.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DayTypeResponse"
+        "404":
+          $ref: "#/components/responses/DayTypeNotFound"
+        "409":
+          $ref: "#/components/responses/DayTypeConflict"
   /api/v1/day-types/{id}/blocks:
     parameters:
       - $ref: "#/components/parameters/DayTypeId"
@@ -833,7 +851,7 @@ components:
         focusCyclesToday: { type: integer, minimum: 0 }
     TriggerWriteRequest:
       type: object
-      required: [type, scheduleType, title, importance, durationMinutes, categoryIds]
+      required: [type, scheduleType, title, importance, durationMinutes, categoryIds, dayTypeIds]
       properties:
         type: { type: string, enum: [WORK_ITEM, HABIT] }
         scheduleType: { type: string, enum: [INTERVAL, AFTER_CATEGORY] }
@@ -844,18 +862,20 @@ components:
         intervalMinutes: { type: [integer, "null"], minimum: 30 }
         occurrenceTarget: { type: [integer, "null"], minimum: 1 }
         categoryIds: { type: array, items: { type: string, format: uuid }, uniqueItems: true }
+        dayTypeIds: { type: array, items: { type: string, format: uuid }, uniqueItems: true }
         version: { type: [integer, "null"], minimum: 0 }
     TriggerResponse:
       allOf:
         - { $ref: "#/components/schemas/TriggerWriteRequest" }
         - type: object
-          required: [id, completedOccurrences, status, categories, version]
+          required: [id, completedOccurrences, status, categories, dayTypes, version]
           properties:
             id: { type: string, format: uuid }
             completedOccurrences: { type: integer, minimum: 0 }
             nextDueAt: { type: [string, "null"], format: date-time }
             status: { type: string, enum: [ACTIVE, COMPLETED, ARCHIVED] }
             categories: { type: array, items: { $ref: "#/components/schemas/CategoryResponse" } }
+            dayTypes: { type: array, items: { $ref: "#/components/schemas/DayTypeSummary" } }
     ExecutionStateResponse:
       type: object
       additionalProperties: false
@@ -939,11 +959,12 @@ components:
     DailyPlanItem:
       type: object
       additionalProperties: false
-      required: [id, taskId, taskTitle, taskType, importance, plannedStartMinute, plannedEndMinute, status, version]
+      required: [id, taskId, taskTitle, taskStageTitle, taskType, importance, plannedStartMinute, plannedEndMinute, status, version]
       properties:
         id: { type: string, format: uuid }
         taskId: { type: string, format: uuid }
         taskTitle: { type: string }
+        taskStageTitle: { type: [string, "null"] }
         taskType: { $ref: "#/components/schemas/TaskType" }
         importance: { type: integer, minimum: 1, maximum: 5 }
         plannedStartMinute: { type: integer }
@@ -969,7 +990,7 @@ components:
         detail: { type: string }
     TaskType:
       type: string
-      enum: [WORK_ITEM, HABIT]
+      enum: [WORK_ITEM, HABIT, OPPORTUNITY]
     TaskStatus:
       type: string
       enum: [ACTIVE, COMPLETED, ARCHIVED]
@@ -986,7 +1007,7 @@ components:
     TaskResponse:
       type: object
       additionalProperties: false
-      required: [id, type, title, description, importance, status, totalRequiredMinutes, deadline, weeklyTargetMinutes, executedMinutes, remainingMinutes, categories, version, completedAt, createdAt, updatedAt]
+      required: [id, type, title, description, importance, status, totalRequiredMinutes, deadline, weeklyTargetMinutes, dailyLimitMinutes, executedMinutes, remainingMinutes, categories, stages, version, completedAt, createdAt, updatedAt]
       properties:
         id: { type: string, format: uuid }
         type: { $ref: "#/components/schemas/TaskType" }
@@ -997,9 +1018,11 @@ components:
         totalRequiredMinutes: { type: [integer, "null"], minimum: 5 }
         deadline: { type: [string, "null"], format: date }
         weeklyTargetMinutes: { type: [integer, "null"], minimum: 5 }
+        dailyLimitMinutes: { type: [integer, "null"], minimum: 5, multipleOf: 5 }
         executedMinutes: { type: integer, minimum: 0 }
         remainingMinutes: { type: integer, minimum: 0 }
         categories: { type: array, items: { $ref: "#/components/schemas/TaskCategory" } }
+        stages: { type: array, items: { $ref: "#/components/schemas/TaskStage" } }
         version: { type: integer, format: int64, minimum: 0 }
         completedAt: { type: [string, "null"], format: date-time }
         createdAt: { type: string, format: date-time }
@@ -1007,7 +1030,7 @@ components:
     TaskWriteRequest:
       type: object
       additionalProperties: false
-      required: [type, title, importance, categoryIds]
+      required: [type, title, importance, stages, categoryIds]
       properties:
         type: { $ref: "#/components/schemas/TaskType" }
         title: { type: string, minLength: 1, maxLength: 160 }
@@ -1016,8 +1039,36 @@ components:
         totalRequiredMinutes: { type: [integer, "null"], minimum: 5 }
         deadline: { type: [string, "null"], format: date }
         weeklyTargetMinutes: { type: [integer, "null"], minimum: 5 }
+        dailyLimitMinutes: { type: [integer, "null"], minimum: 5, multipleOf: 5 }
+        stages:
+          type: array
+          maxItems: 48
+          items:
+            type: object
+            additionalProperties: false
+            required: [title, completed]
+            properties:
+              title: { type: string, minLength: 1, maxLength: 160 }
+              completed: { type: boolean }
         categoryIds: { type: array, maxItems: 64, uniqueItems: true, items: { type: string, format: uuid } }
         version: { type: [integer, "null"], format: int64, minimum: 0 }
+    TaskStage:
+      type: object
+      additionalProperties: false
+      required: [id, title, position, completed]
+      properties:
+        id: { type: string, format: uuid }
+        title: { type: string }
+        position: { type: integer, minimum: 0 }
+        completed: { type: boolean }
+    DayTypeSummary:
+      type: object
+      additionalProperties: false
+      required: [id, name, color]
+      properties:
+        id: { type: string, format: uuid }
+        name: { type: string }
+        color: { type: string }
     WeeklyPlanResponse:
       type: object
       additionalProperties: false

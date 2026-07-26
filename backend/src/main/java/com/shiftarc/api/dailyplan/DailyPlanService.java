@@ -95,22 +95,15 @@ public class DailyPlanService {
         List<PlanningTask> tasks = repository.activeTasks(LocalWorkspace.ID);
         Map<UUID, Integer> remaining = new HashMap<>();
         for (PlanningTask task : tasks) remaining.put(task.id(), requestedMinutes(task, context.date()));
+        Map<UUID, Integer> plannedToday = new HashMap<>();
+        for (PlanningTask task : tasks) plannedToday.put(task.id(), 0);
 
         List<PlannedBlock> blocks = new ArrayList<>();
         for (SourceBlock source : sourceBlocks) {
             int cursor = source.startMinute();
             List<PlannedItem> items = new ArrayList<>();
-            for (PlanningTask task : tasks) {
-                int taskRemaining = remaining.get(task.id());
-                if (taskRemaining <= 0 || !matches(task.categoryIds(), source.categoryIds())) continue;
-                int allocation = Math.min(taskRemaining, source.endMinute() - cursor);
-                allocation -= allocation % 5;
-                if (allocation < 5) continue;
-                items.add(new PlannedItem(UUID.randomUUID(), task.id(), task.title(), cursor, cursor + allocation));
-                cursor += allocation;
-                remaining.put(task.id(), taskRemaining - allocation);
-                if (cursor >= source.endMinute()) break;
-            }
+            cursor = allocate(source, tasks.stream().filter(task -> !task.type().equals("OPPORTUNITY")).toList(), remaining, plannedToday, cursor, items);
+            allocate(source, tasks.stream().filter(task -> task.type().equals("OPPORTUNITY")).toList(), remaining, plannedToday, cursor, items);
             blocks.add(new PlannedBlock(
                 UUID.randomUUID(), source.id(), source.name(), source.startMinute(), source.endMinute(), List.copyOf(items)
             ));
@@ -118,6 +111,7 @@ public class DailyPlanService {
 
         List<PlannedWarning> warnings = tasks.stream()
             .filter(task -> remaining.get(task.id()) > 0)
+            .filter(task -> !task.type().equals("OPPORTUNITY"))
             .map(task -> new PlannedWarning(
                 task.id(), "INSUFFICIENT_MATCHING_CAPACITY", remaining.get(task.id()),
                 task.title() + " için kategori uyumlu zaman bloklarında yeterli kapasite yok."
@@ -126,9 +120,45 @@ public class DailyPlanService {
         return new GeneratedStructure(List.copyOf(blocks), warnings);
     }
 
+    private int allocate(
+        SourceBlock source,
+        List<PlanningTask> tasks,
+        Map<UUID, Integer> remaining,
+        Map<UUID, Integer> plannedToday,
+        int cursor,
+        List<PlannedItem> items
+    ) {
+        for (PlanningTask task : tasks) {
+            int taskRemaining = remaining.get(task.id());
+            if (taskRemaining <= 0 || !matches(task.categoryIds(), source.categoryIds())) continue;
+            int dailyAllowance = task.dailyLimitMinutes() == null
+                ? taskRemaining
+                : Math.max(0, task.dailyLimitMinutes() - plannedToday.get(task.id()));
+            int allocation = Math.min(Math.min(taskRemaining, dailyAllowance), source.endMinute() - cursor);
+            allocation -= allocation % 5;
+            if (allocation < 5) continue;
+            items.add(new PlannedItem(
+                UUID.randomUUID(),
+                task.id(),
+                task.title(),
+                task.stageTitle(),
+                cursor,
+                cursor + allocation
+            ));
+            cursor += allocation;
+            plannedToday.put(task.id(), plannedToday.get(task.id()) + allocation);
+            remaining.put(task.id(), taskRemaining - allocation);
+            if (cursor >= source.endMinute()) break;
+        }
+        return cursor;
+    }
+
     private int requestedMinutes(PlanningTask task, LocalDate date) {
         int divisor;
         int total;
+        if (task.type().equals("OPPORTUNITY")) {
+            return task.dailyLimitMinutes() == null ? 1440 : task.dailyLimitMinutes();
+        }
         if (task.type().equals("WORK_ITEM")) {
             long days = task.deadline() == null ? 1 : ChronoUnit.DAYS.between(date, task.deadline()) + 1;
             divisor = (int) Math.max(1, days);
@@ -137,7 +167,8 @@ public class DailyPlanService {
             divisor = 8 - date.getDayOfWeek().getValue();
             total = Math.max(0, task.weeklyMinutes() - task.executedWeekMinutes());
         }
-        return roundUpFive((int) Math.ceil((double) total / divisor));
+        int requested = roundUpFive((int) Math.ceil((double) total / divisor));
+        return task.dailyLimitMinutes() == null ? requested : Math.min(requested, task.dailyLimitMinutes());
     }
 
     private boolean matches(Set<UUID> taskCategories, Set<UUID> blockCategories) {

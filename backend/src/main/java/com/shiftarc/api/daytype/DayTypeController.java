@@ -56,6 +56,12 @@ public class DayTypeController {
         return service.restore(id, version);
     }
 
+    @PostMapping("/{id}/duplicate")
+    @ResponseStatus(HttpStatus.CREATED)
+    DayTypeResponse duplicate(@PathVariable UUID id) {
+        return service.duplicate(id);
+    }
+
     @PutMapping("/{id}/blocks")
     DayTypeResponse replaceBlocks(
         @PathVariable UUID id,

@@ -6,6 +6,7 @@ import java.util.UUID;
 import com.shiftarc.api.workspace.LocalWorkspace;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.dao.OptimisticLockingFailureException;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -13,9 +14,11 @@ import org.springframework.transaction.annotation.Transactional;
 public class CategoryService {
 
     private final CategoryRepository categoryRepository;
+    private final JdbcTemplate jdbcTemplate;
 
-    CategoryService(CategoryRepository categoryRepository) {
+    CategoryService(CategoryRepository categoryRepository, JdbcTemplate jdbcTemplate) {
         this.categoryRepository = categoryRepository;
+        this.jdbcTemplate = jdbcTemplate;
     }
 
     @Transactional(readOnly = true)
@@ -58,6 +61,7 @@ public class CategoryService {
         if (category.archived()) {
             return;
         }
+        unlinkActivePlanningReferences(id);
         category.archive();
         save(category);
     }
@@ -110,5 +114,11 @@ public class CategoryService {
 
     private String normalizeIcon(String icon) {
         return icon == null || icon.isBlank() ? null : icon.strip();
+    }
+
+    private void unlinkActivePlanningReferences(UUID categoryId) {
+        jdbcTemplate.update("DELETE FROM shiftarc.task_category WHERE category_id = ?", categoryId);
+        jdbcTemplate.update("DELETE FROM shiftarc.day_type_block_category WHERE category_id = ?", categoryId);
+        jdbcTemplate.update("DELETE FROM shiftarc.trigger_rule_category WHERE category_id = ?", categoryId);
     }
 }

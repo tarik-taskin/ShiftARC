@@ -58,6 +58,19 @@ public class DayTypeService {
     }
 
     @Transactional
+    public DayTypeResponse duplicate(UUID id) {
+        DayTypeResponse source = repository.find(LocalWorkspace.ID, id);
+        String baseName = source.name() + " kopya";
+        String candidate = baseName;
+        int suffix = 2;
+        while (repository.activeNameExists(LocalWorkspace.ID, candidate)) {
+            candidate = baseName + " " + suffix;
+            suffix++;
+        }
+        return repository.duplicate(LocalWorkspace.ID, id, candidate, source.color());
+    }
+
+    @Transactional
     public DayTypeResponse replaceBlocks(UUID id, DayTypeBlocksUpdateRequest request) {
         validateTimeline(request.blocks());
         List<DayTypeBlocksUpdateRequest.Block> normalized = request.blocks().stream()

@@ -23,7 +23,7 @@ class MigrationResourcesTest {
         Resource[] migrations = new PathMatchingResourcePatternResolver()
             .getResources("classpath*:db/migration/*.sql");
 
-        assertEquals(7, migrations.length);
+        assertEquals(8, migrations.length);
         for (Resource migration : migrations) {
             assertTrue(VERSIONED_MIGRATION_NAME.matcher(migration.getFilename()).matches());
         }
@@ -60,6 +60,8 @@ class MigrationResourcesTest {
         assertTrue(migrationSql("V5__create_pomodoro_domain.sql").contains("pomodoro_single_active_session"));
         assertTrue(migrationSql("V6__create_calendar_day_overrides.sql").contains("calendar_day_override"));
         assertTrue(migrationSql("V7__add_daily_plan_item_adjustments.sql").contains("user_priority"));
+        assertTrue(migrationSql("V8__add_opportunity_tasks_stages_and_trigger_day_types.sql").contains("OPPORTUNITY"));
+        assertTrue(migrationSql("V8__add_opportunity_tasks_stages_and_trigger_day_types.sql").contains("task_stage"));
     }
 
     private String migrationSql(String filename) throws IOException {

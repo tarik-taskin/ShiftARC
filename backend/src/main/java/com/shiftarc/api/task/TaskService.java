@@ -61,11 +61,16 @@ public class TaskService {
             if (request.deadline() == null || request.weeklyTargetMinutes() != null) {
                 throw new TaskValidationException("Work items require a deadline and total time only");
             }
-        } else {
+        } else if (request.type() == TaskType.HABIT) {
             validateMinutes(request.weeklyTargetMinutes(), "Weekly target time");
             if (request.deadline() != null || request.totalRequiredMinutes() != null) {
                 throw new TaskValidationException("Habits require a weekly target only");
             }
+        } else if (request.deadline() != null || request.totalRequiredMinutes() != null || request.weeklyTargetMinutes() != null) {
+            throw new TaskValidationException("Opportunities cannot have deadlines or required target time");
+        }
+        if (request.dailyLimitMinutes() != null) {
+            validateMinutes(request.dailyLimitMinutes(), "Daily limit");
         }
         for (UUID categoryId : new HashSet<>(request.categoryIds())) {
             if (!repository.isActiveCategory(LocalWorkspace.ID, categoryId)) {
@@ -83,6 +88,12 @@ public class TaskService {
             request.totalRequiredMinutes(),
             request.deadline(),
             request.weeklyTargetMinutes(),
+            request.dailyLimitMinutes(),
+            request.stages().stream()
+                .map(stage -> new TaskWriteRequest.Stage(stage.title().strip().replaceAll("\\s+", " "), stage.completed()))
+                .filter(stage -> !stage.title().isBlank())
+                .distinct()
+                .toList(),
             request.categoryIds().stream().distinct().toList(),
             request.version()
         );

@@ -44,6 +44,7 @@ class TriggerRepository {
             request.title(), request.description(), request.importance(), request.durationMinutes(),
             request.intervalMinutes(), request.occurrenceTarget(), request.scheduleType().name());
         replaceCategories(id, request.categoryIds());
+        replaceDayTypes(id, request.dayTypeIds());
         return find(workspaceId, id);
     }
 
@@ -61,6 +62,7 @@ class TriggerRepository {
             request.scheduleType().name(), workspaceId, id, request.version());
         requireChanged(workspaceId, id, changed);
         replaceCategories(id, request.categoryIds());
+        replaceDayTypes(id, request.dayTypeIds());
         return find(workspaceId, id);
     }
 
@@ -107,6 +109,13 @@ class TriggerRepository {
         return count != null && count == 1;
     }
 
+    boolean activeDayType(UUID workspaceId, UUID id) {
+        Integer count = jdbc.queryForObject(
+            "SELECT count(*) FROM shiftarc.day_type WHERE workspace_id = ? AND id = ? AND archived = false",
+            Integer.class, workspaceId, id);
+        return count != null && count == 1;
+    }
+
     private TriggerResponse map(ResultSet rs) throws SQLException {
         UUID id = rs.getObject("id", UUID.class);
         return new TriggerResponse(id, TriggerType.valueOf(rs.getString("trigger_type")),
@@ -114,7 +123,7 @@ class TriggerRepository {
             rs.getString("description"), rs.getInt("importance"), rs.getInt("duration_minutes"),
             integer(rs, "interval_minutes"), integer(rs, "occurrence_target"),
             rs.getInt("completed_occurrences"), instant(rs, "next_due_at"),
-            TriggerStatus.valueOf(rs.getString("status")), categories(id), rs.getLong("version"));
+            TriggerStatus.valueOf(rs.getString("status")), categories(id), dayTypes(id), rs.getLong("version"));
     }
 
     private List<TriggerResponse.Category> categories(UUID id) {
@@ -130,6 +139,21 @@ class TriggerRepository {
         jdbc.update("DELETE FROM shiftarc.trigger_rule_category WHERE trigger_rule_id = ?", id);
         categories.stream().distinct().forEach(category -> jdbc.update(
             "INSERT INTO shiftarc.trigger_rule_category (trigger_rule_id, category_id) VALUES (?, ?)", id, category));
+    }
+
+    private List<TriggerResponse.DayType> dayTypes(UUID id) {
+        return jdbc.query("""
+            SELECT d.id, d.name, d.color FROM shiftarc.trigger_rule_day_type link
+            JOIN shiftarc.day_type d ON d.id = link.day_type_id
+            WHERE link.trigger_rule_id = ? ORDER BY lower(d.name)
+            """, (rs, row) -> new TriggerResponse.DayType(rs.getObject("id", UUID.class),
+            rs.getString("name"), rs.getString("color")), id);
+    }
+
+    private void replaceDayTypes(UUID id, List<UUID> dayTypes) {
+        jdbc.update("DELETE FROM shiftarc.trigger_rule_day_type WHERE trigger_rule_id = ?", id);
+        dayTypes.stream().distinct().forEach(dayType -> jdbc.update(
+            "INSERT INTO shiftarc.trigger_rule_day_type (trigger_rule_id, day_type_id) VALUES (?, ?)", id, dayType));
     }
 
     private void requireChanged(UUID workspaceId, UUID id, int changed) {

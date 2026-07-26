@@ -31,7 +31,8 @@ class TaskControllerTest {
         when(service.create(any())).thenReturn(response());
         mockMvc.perform(post("/api/v1/tasks").contentType(MediaType.APPLICATION_JSON).content("""
             {"type":"WORK_ITEM","title":"ML Dersi","importance":5,"totalRequiredMinutes":300,
-             "deadline":"2026-07-01","weeklyTargetMinutes":null,"categoryIds":[]}
+             "deadline":"2026-07-01","weeklyTargetMinutes":null,"dailyLimitMinutes":null,
+             "stages":[],"categoryIds":[]}
             """))
             .andExpect(status().isCreated())
             .andExpect(jsonPath("$.type").value("WORK_ITEM"))
@@ -41,7 +42,8 @@ class TaskControllerTest {
     @Test
     void validatesImportance() throws Exception {
         mockMvc.perform(post("/api/v1/tasks").contentType(MediaType.APPLICATION_JSON).content("""
-            {"type":"HABIT","title":"İngilizce","importance":8,"weeklyTargetMinutes":60,"categoryIds":[]}
+            {"type":"HABIT","title":"İngilizce","importance":8,"weeklyTargetMinutes":60,
+             "dailyLimitMinutes":null,"stages":[],"categoryIds":[]}
             """))
             .andExpect(status().isBadRequest());
     }
@@ -49,6 +51,7 @@ class TaskControllerTest {
     private TaskResponse response() {
         Instant now = Instant.parse("2026-06-19T10:00:00Z");
         return new TaskResponse(UUID.randomUUID(), TaskType.WORK_ITEM, "ML Dersi", null, (short) 5,
-            TaskStatus.ACTIVE, 300, LocalDate.of(2026, 7, 1), null, 0, 300, List.of(), 0, null, now, now);
+            TaskStatus.ACTIVE, 300, LocalDate.of(2026, 7, 1), null, null, 0, 300,
+            List.of(), List.of(), 0, null, now, now);
     }
 }

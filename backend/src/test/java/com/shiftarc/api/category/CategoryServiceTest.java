@@ -3,9 +3,9 @@ package com.shiftarc.api.category;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-import static org.mockito.Mockito.times;
 
 import java.util.List;
 import java.util.Optional;
@@ -17,18 +17,18 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.jdbc.core.JdbcTemplate;
 
 @ExtendWith(MockitoExtension.class)
 class CategoryServiceTest {
 
-    @Mock
-    private CategoryRepository repository;
-
+    @Mock private CategoryRepository repository;
+    @Mock private JdbcTemplate jdbcTemplate;
     private CategoryService service;
 
     @BeforeEach
     void setUp() {
-        service = new CategoryService(repository);
+        service = new CategoryService(repository, jdbcTemplate);
     }
 
     @Test
@@ -90,7 +90,7 @@ class CategoryServiceTest {
     }
 
     @Test
-    void archivesAndRestoresWithoutDeletingTheCategory() {
+    void archivesAndUnlinksPlanningReferencesWithoutDeletingTheCategory() {
         CategoryEntity category = new CategoryEntity(
             LocalWorkspace.ID,
             "Dinlenme",
@@ -101,9 +101,29 @@ class CategoryServiceTest {
         when(repository.saveAndFlush(category)).thenReturn(category);
 
         service.archive(category.id(), 0);
+
         assertEquals(true, category.archived());
+        verify(jdbcTemplate).update("DELETE FROM shiftarc.task_category WHERE category_id = ?", category.id());
+        verify(jdbcTemplate).update("DELETE FROM shiftarc.day_type_block_category WHERE category_id = ?", category.id());
+        verify(jdbcTemplate).update("DELETE FROM shiftarc.trigger_rule_category WHERE category_id = ?", category.id());
+        verify(repository).saveAndFlush(category);
+    }
+
+    @Test
+    void restoresArchivedCategory() {
+        CategoryEntity category = new CategoryEntity(
+            LocalWorkspace.ID,
+            "Dinlenme",
+            "#8B5CF6",
+            "armchair"
+        );
+        category.archive();
+        when(repository.findById(category.id())).thenReturn(Optional.of(category));
+        when(repository.saveAndFlush(category)).thenReturn(category);
+
         service.restore(category.id(), 0);
+
         assertEquals(false, category.archived());
-        verify(repository, times(2)).saveAndFlush(category);
+        verify(repository, times(1)).saveAndFlush(category);
     }
 }

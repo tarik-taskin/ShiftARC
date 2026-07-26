@@ -62,10 +62,17 @@ class TriggerService {
                 throw new TriggerValidationException("Triggers can only use active workspace categories");
             }
         }
+        for (UUID id : new HashSet<>(request.dayTypeIds())) {
+            if (!repository.activeDayType(LocalWorkspace.ID, id)) {
+                throw new TriggerValidationException("Triggers can only use active workspace day types");
+            }
+        }
         return new TriggerWriteRequest(request.type(), request.scheduleType(),
             request.title().strip().replaceAll("\\s+", " "),
             request.description() == null || request.description().isBlank() ? null : request.description().strip(),
             request.importance(), request.durationMinutes(), request.intervalMinutes(), request.occurrenceTarget(),
-            request.categoryIds().stream().distinct().toList(), request.version());
+            request.categoryIds().stream().distinct().toList(),
+            request.dayTypeIds().stream().distinct().toList(),
+            request.version());
     }
 }
