@@ -16,6 +16,7 @@ it('edits a date-specific day type', async () => {
   const user = userEvent.setup(); render(<CalendarPage />)
   await user.click(screen.getByRole('button', { name: `${date} gününü düzenle` }))
   expect(screen.getByRole('heading', { name: 'Gün tipi istisnası' })).toBeInTheDocument()
-  expect(screen.getByRole('option', { name: 'Tatil' })).toBeInTheDocument()
   expect(screen.getByRole('button', { name: 'Şablona dön' })).toBeInTheDocument()
+  await user.click(screen.getByRole('combobox', { name: 'Gün tipi' }))
+  expect(screen.getByRole('option', { name: 'Tatil' })).toBeInTheDocument()
 })

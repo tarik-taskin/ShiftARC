@@ -6,6 +6,7 @@ import type { BackgroundMode, ThemeId } from '@/api/workspace/types'
 import { applyThemePreferences, themes } from '@/app/theme'
 import { useCurrentWorkspace } from '@/app/workspace-context'
 import { Button } from '@/components/ui/button'
+import { Select } from '@/components/ui/select'
 import { cn } from '@/lib/utils'
 
 export function WorkspacePreferencesPage() {
@@ -77,14 +78,16 @@ export function WorkspacePreferencesPage() {
         <div className="mt-8 flex flex-col gap-5 border-t border-border/70 pt-6 sm:flex-row sm:items-end sm:justify-between">
           <label className="text-sm font-semibold">
             Arka plan davranışı
-            <select
+            <Select
               value={backgroundMode}
-              onChange={(event) => setBackgroundMode(event.target.value as BackgroundMode)}
-              className="mt-2 block h-11 min-w-60 rounded-xl border border-input bg-background/60 px-3 text-sm"
-            >
-              <option value="TIME_AWARE">Saate göre değişsin</option>
-              <option value="STATIC">Tema sabit kalsın</option>
-            </select>
+              onValueChange={(value) => setBackgroundMode(value as BackgroundMode)}
+              options={[
+                { value: 'TIME_AWARE', label: 'Saate göre değişsin' },
+                { value: 'STATIC', label: 'Tema sabit kalsın' },
+              ]}
+              ariaLabel="Arka plan davranışı"
+              className="min-w-60"
+            />
           </label>
           <Button onClick={save} disabled={updateSettings.isPending}>
             {updateSettings.isPending ? 'Kaydediliyor…' : 'Tercihleri kaydet'}

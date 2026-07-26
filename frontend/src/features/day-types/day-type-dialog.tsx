@@ -1,11 +1,12 @@
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useEffect } from 'react'
-import { useForm } from 'react-hook-form'
+import { useForm, useWatch } from 'react-hook-form'
 import { z } from 'zod'
 
 import { useCreateDayType, useUpdateDayType } from '@/api/day-types/queries'
 import type { DayType } from '@/api/day-types/types'
 import { Button } from '@/components/ui/button'
+import { ColorPicker } from '@/components/ui/color-picker'
 import {
   Dialog,
   DialogContent,
@@ -17,7 +18,7 @@ import {
 
 const schema = z.object({
   name: z.string().trim().min(1, 'Gün tipi adı zorunludur.').max(80),
-  color: z.string().regex(/^#[0-9A-Fa-f]{6}$/),
+  color: z.string().regex(/^#[0-9A-Fa-f]{6}$/, 'Geçerli bir renk seçmelisin.'),
 })
 
 type Values = z.infer<typeof schema>
@@ -35,6 +36,7 @@ export function DayTypeDialog({
   const update = useUpdateDayType()
   const mutation = dayType ? update : create
   const form = useForm<Values>({ resolver: zodResolver(schema), defaultValues: values(dayType) })
+  const selectedColor = useWatch({ control: form.control, name: 'color' })
 
   useEffect(() => {
     if (open) form.reset(values(dayType))
@@ -62,9 +64,12 @@ export function DayTypeDialog({
             <input autoFocus className="mt-2 h-11 w-full rounded-xl border border-input bg-background/60 px-3" {...form.register('name')} />
             {form.formState.errors.name ? <span role="alert" className="mt-1 block text-xs text-destructive">{form.formState.errors.name.message}</span> : null}
           </label>
-          <label className="block text-sm font-semibold">
+          <label className="block max-w-xs text-sm font-semibold">
             Renk
-            <input type="color" className="mt-2 h-11 w-28 rounded-xl border border-input bg-background p-1" {...form.register('color')} />
+            <ColorPicker
+              value={selectedColor}
+              onChange={(value) => form.setValue('color', value, { shouldDirty: true, shouldValidate: true })}
+            />
           </label>
           {mutation.error ? <p role="alert" className="text-sm text-destructive">{mutation.error.message}</p> : null}
         </form>

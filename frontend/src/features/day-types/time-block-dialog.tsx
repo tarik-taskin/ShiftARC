@@ -11,6 +11,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog'
+import { TimePicker } from '@/components/ui/date-time-picker'
 import { formatTime } from '@/features/day-types/time'
 
 export function TimeBlockDialog({
@@ -55,7 +56,7 @@ export function TimeBlockDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-        <DialogContent className="max-w-2xl">
+      <DialogContent className="max-w-2xl">
         <DialogHeader>
           <DialogTitle>Zaman bloğunu düzenle</DialogTitle>
           <DialogDescription>{formatTime(block.startMinute)}–{formatTime(block.endMinute)} aralığının görev bağlamını belirle.</DialogDescription>
@@ -64,28 +65,24 @@ export function TimeBlockDialog({
           <div className="grid gap-4 sm:grid-cols-2">
             <label className="block text-sm font-semibold">
               Başlangıç
-              <input
-                type="time"
-                step={300}
+              <TimePicker
+                value={startMinute}
+                onChange={setStartMinute}
                 disabled={minimumStart === null}
-                min={minimumStart === null ? undefined : formatTime(minimumStart)}
-                max={formatTime(endMinute - 5)}
-                value={formatTime(startMinute)}
-                onChange={(event) => setStartMinute(timeToMinute(event.target.value))}
-                className="mt-2 h-11 w-full rounded-xl border border-input bg-background/60 px-3 disabled:opacity-60"
+                minMinute={minimumStart ?? 0}
+                maxMinute={endMinute - 5}
+                label="Başlangıç saati"
               />
             </label>
             <label className="block text-sm font-semibold">
               Bitiş
-              <input
-                type="time"
-                step={300}
+              <TimePicker
+                value={endMinute}
+                onChange={setEndMinute}
                 disabled={maximumEnd === null}
-                min={formatTime(startMinute + 5)}
-                max={maximumEnd === null ? undefined : formatTime(maximumEnd)}
-                value={endMinute === 1440 ? '23:59' : formatTime(endMinute)}
-                onChange={(event) => setEndMinute(timeToMinute(event.target.value))}
-                className="mt-2 h-11 w-full rounded-xl border border-input bg-background/60 px-3 disabled:opacity-60"
+                minMinute={startMinute + 5}
+                maxMinute={maximumEnd ?? 1440}
+                label="Bitiş saati"
               />
               {endMinute === 1440 ? <span className="mt-1 block text-xs font-normal text-muted-foreground">Gün sonu: 24:00</span> : null}
             </label>
@@ -98,7 +95,7 @@ export function TimeBlockDialog({
             <legend className="text-sm font-semibold">Kabul edilen kategoriler</legend>
             <div className="mt-3 grid gap-2 sm:grid-cols-2">
               {categories.map((category) => (
-                <label key={category.id} className="flex cursor-pointer items-center gap-3 rounded-xl border border-border/70 p-3 text-sm">
+                <label key={category.id} className="flex cursor-pointer items-center gap-3 rounded-xl border border-border/70 bg-card/35 p-3 text-sm transition hover:border-primary/35">
                   <input type="checkbox" checked={categoryIds.includes(category.id)} onChange={() => toggleCategory(category.id)} />
                   <span className="size-2.5 rounded-full" style={{ backgroundColor: category.color }} />
                   {category.name}
@@ -118,9 +115,4 @@ export function TimeBlockDialog({
       </DialogContent>
     </Dialog>
   )
-}
-
-function timeToMinute(value: string) {
-  const [hour, minute] = value.split(':').map(Number)
-  return hour * 60 + minute
 }

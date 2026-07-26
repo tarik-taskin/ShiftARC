@@ -345,7 +345,7 @@ describe('product application shell', () => {
     await user.click(screen.getByRole('button', { name: 'ML Dersi günlük planını ayarla' }))
 
     expect(screen.getByRole('dialog', { name: 'Günlük görevi ayarla' })).toBeInTheDocument()
-    expect(screen.getByRole('spinbutton', { name: 'Süre (dakika)' })).toHaveValue(1440)
+    expect(screen.getByRole('spinbutton', { name: 'Süre (dakika)' })).toHaveValue('1440')
   })
 })
 

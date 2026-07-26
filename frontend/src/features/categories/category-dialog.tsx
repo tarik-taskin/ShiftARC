@@ -1,6 +1,6 @@
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useEffect } from 'react'
-import { useForm } from 'react-hook-form'
+import { useForm, useWatch } from 'react-hook-form'
 import { z } from 'zod'
 
 import {
@@ -9,6 +9,7 @@ import {
 } from '@/api/categories/queries'
 import type { Category } from '@/api/categories/types'
 import { Button } from '@/components/ui/button'
+import { ColorPicker } from '@/components/ui/color-picker'
 import {
   Dialog,
   DialogContent,
@@ -17,6 +18,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog'
+import { Select } from '@/components/ui/select'
 
 const categoryFormSchema = z.object({
   name: z
@@ -39,7 +41,7 @@ const categoryIconOptions = [
   { value: 'moon', label: 'Uyku' },
   { value: 'sparkles', label: 'Kişisel bakım' },
   { value: 'armchair', label: 'Dinlenme' },
-] as const
+]
 
 interface CategoryDialogProps {
   open: boolean
@@ -59,6 +61,8 @@ export function CategoryDialog({
     resolver: zodResolver(categoryFormSchema),
     defaultValues: formValues(category),
   })
+  const selectedColor = useWatch({ control: form.control, name: 'color' })
+  const selectedIcon = useWatch({ control: form.control, name: 'icon' })
 
   useEffect(() => {
     if (open) form.reset(formValues(category))
@@ -108,27 +112,22 @@ export function CategoryDialog({
             ) : null}
           </label>
 
-          <div className="grid gap-5 sm:grid-cols-[112px_1fr]">
+          <div className="grid gap-5 sm:grid-cols-[12rem_1fr]">
             <label className="block text-sm font-semibold">
               Renk
-              <input
-                type="color"
-                className="mt-2 h-11 w-full cursor-pointer rounded-xl border border-input bg-background p-1"
-                {...form.register('color')}
+              <ColorPicker
+                value={selectedColor}
+                onChange={(value) => form.setValue('color', value, { shouldDirty: true, shouldValidate: true })}
               />
             </label>
             <label className="block text-sm font-semibold">
               İkon
-              <select
-                className="mt-2 h-11 w-full rounded-xl border border-input bg-background/60 px-3 text-sm outline-none focus:ring-2 focus:ring-ring"
-                {...form.register('icon')}
-              >
-                {categoryIconOptions.map((option) => (
-                  <option key={option.value} value={option.value}>
-                    {option.label}
-                  </option>
-                ))}
-              </select>
+              <Select
+                value={selectedIcon}
+                onValueChange={(value) => form.setValue('icon', value, { shouldDirty: true })}
+                options={categoryIconOptions}
+                ariaLabel="İkon"
+              />
             </label>
           </div>
 

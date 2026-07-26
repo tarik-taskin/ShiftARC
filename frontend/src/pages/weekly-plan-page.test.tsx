@@ -33,14 +33,15 @@ describe('weekly plan page', () => {
 
     expect(screen.getAllByRole('combobox')).toHaveLength(7)
     expect(screen.getByText('6 gün eksik')).toBeInTheDocument()
-    expect(screen.getByLabelText('Pazartesi gün tipi')).toHaveValue(dayType().id)
+    expect(screen.getByLabelText('Pazartesi gün tipi')).toHaveTextContent(dayType().name)
   })
 
   it('saves the changed recurring assignment with the workspace version', async () => {
     const user = userEvent.setup()
     render(<WeeklyPlanPage />)
 
-    await user.selectOptions(screen.getByLabelText('Salı gün tipi'), dayType().id)
+    await user.click(screen.getByLabelText('Salı gün tipi'))
+    await user.click(screen.getByRole('option', { name: dayType().name }))
     await user.click(screen.getByRole('button', { name: 'Haftayı kaydet' }))
 
     expect(mocks.save).toHaveBeenCalledWith({

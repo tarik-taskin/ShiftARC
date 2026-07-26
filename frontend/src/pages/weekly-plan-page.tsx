@@ -7,6 +7,7 @@ import type { DayType } from '@/api/day-types/types'
 import { useUpdateWeeklyPlan, useWeeklyPlan } from '@/api/weekly-plan/queries'
 import type { WeeklyPlan } from '@/api/weekly-plan/types'
 import { Button } from '@/components/ui/button'
+import { Select } from '@/components/ui/select'
 import { formatTime } from '@/features/day-types/time'
 
 const dayNames = ['Pazartesi', 'Salı', 'Çarşamba', 'Perşembe', 'Cuma', 'Cumartesi', 'Pazar']
@@ -107,15 +108,13 @@ function WeeklyPlanEditor({ plan, dayTypes }: { plan: WeeklyPlan; dayTypes: DayT
                 </div>
                 <label className="mt-5 block text-xs font-semibold text-muted-foreground">
                   Gün tipi
-                  <select
-                    aria-label={`${dayName} gün tipi`}
+                  <Select
+                    ariaLabel={`${dayName} gün tipi`}
                     value={assignments[dayOfWeek] ?? ''}
-                    onChange={(event) => setAssignments((currentAssignments) => ({ ...currentAssignments, [dayOfWeek]: event.target.value }))}
-                    className="mt-2 h-10 w-full rounded-xl border border-input bg-background/60 px-2 text-sm text-foreground"
-                  >
-                    <option value="">Seçilmedi</option>
-                    {dayTypes.map((dayType) => <option key={dayType.id} value={dayType.id}>{dayType.name}</option>)}
-                  </select>
+                    onValueChange={(value) => setAssignments((currentAssignments) => ({ ...currentAssignments, [dayOfWeek]: value }))}
+                    options={[{ value: '', label: 'Seçilmedi' }, ...dayTypes.map((dayType) => ({ value: dayType.id, label: dayType.name }))]}
+                    className="h-10"
+                  />
                 </label>
                 {selected ? <DayPreview dayType={selected} /> : <div className="mt-5 grid min-h-44 place-items-center rounded-2xl border border-dashed border-border/70 text-center text-xs text-muted-foreground">Bu gün henüz boş</div>}
               </motion.article>

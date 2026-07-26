@@ -5,7 +5,9 @@ import { useCategories } from '@/api/categories/queries'
 import { useCreateTask, useUpdateTask } from '@/api/tasks/queries'
 import type { Task, TaskType } from '@/api/tasks/types'
 import { Button } from '@/components/ui/button'
+import { DatePicker } from '@/components/ui/date-time-picker'
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog'
+import { NumberStepper } from '@/components/ui/number-stepper'
 import { CategoryDialog } from '@/features/categories/category-dialog'
 
 const typeLabels: Record<TaskType, string> = {
@@ -75,11 +77,27 @@ export function TaskDialog({ open, onOpenChange, task }: { open: boolean; onOpen
           <label className="block text-sm font-semibold">Açıklama<textarea value={description} onChange={(event) => setDescription(event.target.value)} rows={3} className="mt-2 w-full rounded-xl border border-input bg-background/60 p-3" /></label>
           <div className="grid gap-4 sm:grid-cols-2">
             <label className="text-sm font-semibold">Önem: {importance}/5<input aria-label="Önem" type="range" min="1" max="5" value={importance} onChange={(event) => setImportance(Number(event.target.value))} className="mt-3 w-full" /></label>
-            {needsMinutes ? <label className="text-sm font-semibold">{type === 'WORK_ITEM' ? 'Toplam süre (dakika)' : 'Haftalık hedef (dakika)'}<input type="number" min="5" step="5" value={minutes} onChange={(event) => setMinutes(Number(event.target.value))} className="mt-2 h-11 w-full rounded-xl border border-input bg-background/60 px-3" /></label> : <div className="rounded-2xl border border-border/70 bg-background/35 p-3 text-sm text-muted-foreground">Fırsatlar hedef süre istemez; yalnız diğer işler bittikten sonra kalan uygun zamanlara yerleşir.</div>}
+            {needsMinutes ? (
+              <label className="text-sm font-semibold">
+                {type === 'WORK_ITEM' ? 'Toplam süre (dakika)' : 'Haftalık hedef (dakika)'}
+                <NumberStepper value={minutes} onChange={setMinutes} min={5} step={5} ariaLabel={type === 'WORK_ITEM' ? 'Toplam süre' : 'Haftalık hedef'} />
+              </label>
+            ) : (
+              <div className="rounded-2xl border border-border/70 bg-background/35 p-3 text-sm text-muted-foreground">Fırsatlar hedef süre istemez; yalnız diğer işler bittikten sonra kalan uygun zamanlara yerleşir.</div>
+            )}
           </div>
           <div className="grid gap-4 sm:grid-cols-2">
-            {type === 'WORK_ITEM' ? <label className="block text-sm font-semibold">Son teslim tarihi<input type="date" value={deadline} onChange={(event) => setDeadline(event.target.value)} className="mt-2 h-11 w-full rounded-xl border border-input bg-background/60 px-3" /></label> : null}
-            <label className="block text-sm font-semibold">Günlük limit (opsiyonel)<input type="number" min="0" step="5" value={dailyLimitMinutes} onChange={(event) => setDailyLimitMinutes(Number(event.target.value))} className="mt-2 h-11 w-full rounded-xl border border-input bg-background/60 px-3" /><span className="mt-1 block text-xs font-normal text-muted-foreground">0 bırakırsan limit uygulanmaz.</span></label>
+            {type === 'WORK_ITEM' ? (
+              <label className="block text-sm font-semibold">
+                Son teslim tarihi
+                <DatePicker value={deadline} onChange={setDeadline} label="Son teslim tarihi" />
+              </label>
+            ) : null}
+            <label className="block text-sm font-semibold">
+              Günlük limit (opsiyonel)
+              <NumberStepper value={dailyLimitMinutes} onChange={setDailyLimitMinutes} min={0} step={5} ariaLabel="Günlük limit" />
+              <span className="mt-1 block text-xs font-normal text-muted-foreground">0 bırakırsan limit uygulanmaz.</span>
+            </label>
           </div>
           <fieldset className="rounded-2xl border border-border/70 p-4">
             <div className="flex items-center justify-between gap-3">

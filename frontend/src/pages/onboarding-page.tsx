@@ -14,6 +14,7 @@ import {
 import { applyThemePreferences, themes } from '@/app/theme'
 import { BrandMark } from '@/components/brand-mark'
 import { Button } from '@/components/ui/button'
+import { Select } from '@/components/ui/select'
 
 const onboardingSchema = z.object({
   timezone: z.string().min(1, 'Bir saat dilimi seçmelisin.'),
@@ -41,6 +42,7 @@ export function OnboardingPage({ workspace }: { workspace: Workspace }) {
     control: form.control,
     name: 'backgroundMode',
   })
+  const selectedTimezone = useWatch({ control: form.control, name: 'timezone' })
   const timezoneOptions = useMemo(
     () =>
       Array.from(
@@ -155,27 +157,25 @@ export function OnboardingPage({ workspace }: { workspace: Workspace }) {
             <div className="grid gap-5 sm:grid-cols-2">
               <label className="block text-sm font-semibold">
                 Saat dilimi
-                <select
-                  className="mt-2 h-11 w-full rounded-xl border border-input bg-background/60 px-3 text-sm outline-none focus:ring-2 focus:ring-ring"
-                  {...form.register('timezone')}
-                >
-                  {timezoneOptions.map((timezone) => (
-                    <option key={timezone} value={timezone}>
-                      {timezone}
-                    </option>
-                  ))}
-                </select>
+                <Select
+                  value={selectedTimezone}
+                  onValueChange={(value) => form.setValue('timezone', value, { shouldDirty: true, shouldValidate: true })}
+                  options={timezoneOptions.map((timezone) => ({ value: timezone, label: timezone }))}
+                  ariaLabel="Saat dilimi"
+                />
               </label>
 
               <label className="block text-sm font-semibold">
                 Arka plan davranışı
-                <select
-                  className="mt-2 h-11 w-full rounded-xl border border-input bg-background/60 px-3 text-sm outline-none focus:ring-2 focus:ring-ring"
-                  {...form.register('backgroundMode')}
-                >
-                  <option value="TIME_AWARE">Saate göre değişsin</option>
-                  <option value="STATIC">Tema sabit kalsın</option>
-                </select>
+                <Select
+                  value={selectedBackgroundMode}
+                  onValueChange={(value) => form.setValue('backgroundMode', value as OnboardingFormValues['backgroundMode'], { shouldDirty: true, shouldValidate: true })}
+                  options={[
+                    { value: 'TIME_AWARE', label: 'Saate göre değişsin' },
+                    { value: 'STATIC', label: 'Tema sabit kalsın' },
+                  ]}
+                  ariaLabel="Arka plan davranışı"
+                />
               </label>
             </div>
 
