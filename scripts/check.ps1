@@ -15,6 +15,7 @@ $environmentFile = Join-Path $repoRoot ".env.local"
 
 . (Join-Path $PSScriptRoot "local-environment.ps1")
 Import-ShiftArcLocalEnvironment -Path $environmentFile -Quiet
+Use-ShiftArcNodeRuntime
 
 function Invoke-QualityStep {
     param(

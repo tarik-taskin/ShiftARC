@@ -215,6 +215,7 @@ function Show-ProcessFailure {
 }
 
 Import-ShiftArcLocalEnvironment -Path $environmentFile
+Use-ShiftArcNodeRuntime
 
 $startFrontend = $Target -in @("all", "frontend")
 $startBackend = $Target -in @("all", "backend")

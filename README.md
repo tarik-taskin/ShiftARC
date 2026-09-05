@@ -146,6 +146,7 @@ Copy-Item .env.local.example .env.local
 doldurun:
 
 ```dotenv
+SHIFTARC_NODE_HOME=
 SHIFTARC_API_PORT=8080
 SHIFTARC_DB_URL=jdbc:postgresql://localhost:5432/shiftarc
 SHIFTARC_DB_USERNAME=shiftarc_app
@@ -157,6 +158,12 @@ SHIFTARC_E2E_DB_URL=jdbc:postgresql://localhost:5432/shiftarc_e2e
 `.env.local` Git tarafından ignore edilir. `.env.local.example` hiçbir zaman
 gerçek secret içermemelidir. Terminalde daha önce tanımlanmış environment
 değerleri `.env.local` değerlerinden önceliklidir.
+
+Sistemdeki varsayılan Node.js sürümünü değiştirmeden ShiftARC için farklı bir
+sürüm kullanmak isterseniz `SHIFTARC_NODE_HOME` değerini desteklenen Node.js
+kurulumunun `node.exe` ve `npm.cmd` içeren dizinine ayarlayın. Bu seçim yalnız
+ShiftARC başlangıç sürecinin PATH değerini değiştirir; diğer terminalleri ve
+projeleri etkilemez.
 
 ### 3. Frontend bağımlılıklarını kurun
 
@@ -178,8 +185,11 @@ ve zorunlu environment değerlerini kontrol eder.
 ### 5. Uygulamayı başlatın
 
 ```powershell
-.\scripts\dev.ps1
+npm run dev
 ```
+
+Bu kök komut frontend ve backend süreçlerini birlikte başlatır. Eşdeğer doğrudan
+komut `.\scripts\dev.ps1` şeklindedir.
 
 Windows'ta aynı akış çift tıklanabilir başlatıcıyla da çalıştırılabilir:
 
@@ -207,7 +217,7 @@ logları `logs/dev/` altında tutulur ve Git'e alınmaz.
 Yalnız frontend:
 
 ```powershell
-.\scripts\dev.ps1 -Target frontend
+npm run dev:frontend
 ```
 
 Yalnız backend:

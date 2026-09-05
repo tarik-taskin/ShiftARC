@@ -54,3 +54,25 @@ function Import-ShiftArcLocalEnvironment {
         Write-Host "Loaded local environment from .env.local."
     }
 }
+
+function Use-ShiftArcNodeRuntime {
+    $configuredNodeHome = [Environment]::GetEnvironmentVariable("SHIFTARC_NODE_HOME", "Process")
+    if ([string]::IsNullOrWhiteSpace($configuredNodeHome)) {
+        return
+    }
+
+    if (-not (Test-Path -LiteralPath $configuredNodeHome -PathType Container)) {
+        throw "SHIFTARC_NODE_HOME does not point to an existing directory: $configuredNodeHome"
+    }
+
+    $nodeHome = (Resolve-Path -LiteralPath $configuredNodeHome).Path
+    foreach ($requiredFile in @("node.exe", "npm.cmd")) {
+        if (-not (Test-Path -LiteralPath (Join-Path $nodeHome $requiredFile) -PathType Leaf)) {
+            throw "SHIFTARC_NODE_HOME must contain $requiredFile. Checked: $nodeHome"
+        }
+    }
+
+    $pathEntries = $env:Path -split ";" | Where-Object { $_ -and $_ -ne $nodeHome }
+    $env:Path = (@($nodeHome) + $pathEntries) -join ";"
+    Write-Host "ShiftARC Node runtime: $nodeHome"
+}

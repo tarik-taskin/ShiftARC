@@ -1,0 +1,9 @@
+{
+  "name": "shiftarc",
+  "private": true,
+  "scripts": {
+    "dev": "powershell.exe -NoLogo -NoProfile -ExecutionPolicy Bypass -File ./scripts/dev.ps1",
+    "dev:frontend": "powershell.exe -NoLogo -NoProfile -ExecutionPolicy Bypass -File ./scripts/dev.ps1 -Target frontend",
+    "dev:check": "powershell.exe -NoLogo -NoProfile -ExecutionPolicy Bypass -File ./scripts/dev.ps1 -Target all -CheckOnly"
+  }
+}
