@@ -45,7 +45,7 @@ class PostgresMigrationIntegrationTest {
         MigrateResult result = flyway.migrate();
 
         assertTrue(result.success);
-        assertEquals(8, result.migrationsExecuted);
+        assertEquals(9, result.migrationsExecuted);
         try (Connection connection = DriverManager.getConnection(jdbcUrl, username, password)) {
             assertEquals(23, queryCount(connection, """
                 SELECT count(*)
@@ -58,6 +58,11 @@ class PostgresMigrationIntegrationTest {
                 queryCount(connection, "SELECT count(*) FROM shiftarc.workspace_settings")
             );
             assertEquals(1, queryCount(connection, "SELECT count(*) FROM shiftarc.pomodoro_settings"));
+            assertEquals(1, queryCount(connection, "SELECT count(*) FROM shiftarc.workspace_settings WHERE theme_id = 'amber' AND clock_style = 'DIGITAL' AND version = 1"));
+            try (Statement statement = connection.createStatement()) {
+                assertThrows(SQLException.class, () -> statement.executeUpdate(
+                    "UPDATE shiftarc.workspace_settings SET color_mode = 'invalid'"));
+            }
             assertExecutionHistoryConstraints(connection);
         }
     }

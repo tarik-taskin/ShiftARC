@@ -96,6 +96,15 @@ edilir.
 - Tema renklerini component içine gömme; `data-theme` ve merkezi CSS token
   manifestlerini kullan.
 
+### Görünüm tercihleri
+
+- Tema kimlikleri `amber`, `ion`, `grove`; görünüm `LIGHT` veya `DARK`,
+  saat tasarımı `DIGITAL`, `DIAL`, `SEGMENT` olarak workspace settings içinde tutulur.
+- Eski tema kimlikleri yalnız istek uyumluluğu için kabul edilir; yanıtlar yeni
+  kimlikleri döndürür. Frontend ve backend birlikte güncellenmelidir.
+- Eksik yeni tercih alanları güncellemede mevcut değeri korur; onboarding varsayılanları
+  açık görünüm ve dijital saattir. Tercih güncellemeleri sürüm kontrollüdür.
+
 ### Backend
 
 - Ana paket `com.shiftarc.api` altında kalır.

@@ -10,6 +10,8 @@ public record WorkspaceResponse(
     String themeId,
     BackgroundMode backgroundMode,
     boolean onboardingCompleted,
-    long version
+    long version,
+    ColorMode colorMode,
+    ClockStyle clockStyle
 ) {
 }

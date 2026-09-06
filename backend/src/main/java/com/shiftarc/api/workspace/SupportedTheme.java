@@ -3,9 +3,7 @@ package com.shiftarc.api.workspace;
 import java.util.Arrays;
 
 enum SupportedTheme {
-    ARC_MIDNIGHT("arc-midnight"),
-    DAWN("dawn"),
-    AURORA("aurora");
+    AMBER("amber"), ION("ion"), GROVE("grove");
 
     private final String id;
 
@@ -17,7 +15,15 @@ enum SupportedTheme {
         return id;
     }
 
+    static String normalize(String id) {
+        return switch (id) {
+            case "arc-midnight", "dawn" -> "amber";
+            case "aurora" -> "ion";
+            default -> id;
+        };
+    }
+
     static boolean contains(String candidate) {
-        return Arrays.stream(values()).anyMatch(theme -> theme.id.equals(candidate));
+        return Arrays.stream(values()).anyMatch(theme -> theme.id.equals(normalize(candidate)));
     }
 }

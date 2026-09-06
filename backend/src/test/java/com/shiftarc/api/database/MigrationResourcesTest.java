@@ -23,7 +23,7 @@ class MigrationResourcesTest {
         Resource[] migrations = new PathMatchingResourcePatternResolver()
             .getResources("classpath*:db/migration/*.sql");
 
-        assertEquals(8, migrations.length);
+        assertEquals(9, migrations.length);
         for (Resource migration : migrations) {
             assertTrue(VERSIONED_MIGRATION_NAME.matcher(migration.getFilename()).matches());
         }

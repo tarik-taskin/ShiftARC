@@ -42,7 +42,7 @@ class WorkspaceControllerTest {
             .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
             .andExpect(jsonPath("$.id").value(LocalWorkspace.ID.toString()))
             .andExpect(jsonPath("$.timezone").value("Europe/Istanbul"))
-            .andExpect(jsonPath("$.themeId").value("arc-midnight"))
+            .andExpect(jsonPath("$.themeId").value("amber"))
             .andExpect(jsonPath("$.backgroundMode").value("TIME_AWARE"))
             .andExpect(jsonPath("$.onboardingCompleted").value(false))
             .andExpect(jsonPath("$.version").value(0));
@@ -123,10 +123,12 @@ class WorkspaceControllerTest {
             "Lokal Çalışma Alanı",
             "Europe/Istanbul",
             (short) 1,
-            "arc-midnight",
+            "amber",
             BackgroundMode.TIME_AWARE,
             false,
-            0
+            0,
+            ColorMode.LIGHT,
+            ClockStyle.DIGITAL
         );
     }
 }

@@ -32,10 +32,10 @@ class WorkspaceServiceTest {
         when(settingsRepository.findById(LocalWorkspace.ID)).thenReturn(Optional.of(settings));
         when(settingsRepository.saveAndFlush(settings)).thenReturn(settings);
         when(workspace.id()).thenReturn(LocalWorkspace.ID);
-        when(workspace.name()).thenReturn("Lokal Çalışma Alanı");
+        when(workspace.name()).thenReturn("Lokal Ã‡alÄ±ÅŸma AlanÄ±");
         when(settings.timezone()).thenReturn("Europe/Istanbul");
         when(settings.weekStartsOn()).thenReturn((short) 1);
-        when(settings.themeId()).thenReturn("arc-midnight");
+        when(settings.themeId()).thenReturn("amber");
         when(settings.backgroundMode()).thenReturn(BackgroundMode.TIME_AWARE);
         when(settings.version()).thenReturn(0L);
         service = new WorkspaceService(
@@ -51,7 +51,7 @@ class WorkspaceServiceTest {
 
         assertEquals(LocalWorkspace.ID, response.id());
         assertEquals("Europe/Istanbul", response.timezone());
-        assertEquals("arc-midnight", response.themeId());
+        assertEquals("amber", response.themeId());
         assertEquals(BackgroundMode.TIME_AWARE, response.backgroundMode());
     }
 
@@ -62,7 +62,7 @@ class WorkspaceServiceTest {
             "aurora",
             BackgroundMode.STATIC,
             true,
-            0
+            0, null, null
         );
 
         service.completeOnboarding(request);
@@ -72,9 +72,37 @@ class WorkspaceServiceTest {
             "Europe/Istanbul",
             "aurora",
             BackgroundMode.STATIC,
-            true
+            true, ColorMode.LIGHT, ClockStyle.DIGITAL
         );
         verify(settingsRepository).saveAndFlush(settings);
+    }
+
+    @Test
+    void preservesAbsentNewPreferencesForOlderClients() {
+        service.updateSettings(new WorkspaceSettingsUpdateRequest(
+            "Europe/Istanbul", "dawn", BackgroundMode.STATIC, 0, null, null));
+        verify(settings).updatePreferences("Europe/Istanbul", "dawn", BackgroundMode.STATIC,
+            false, null, null);
+    }
+
+    @Test
+    void savesExplicitAppearancePreferences() {
+        service.updateSettings(new WorkspaceSettingsUpdateRequest(
+            "Europe/Istanbul", "grove", BackgroundMode.STATIC, 0, ColorMode.DARK, ClockStyle.DIAL));
+        verify(settings).updatePreferences("Europe/Istanbul", "grove", BackgroundMode.STATIC,
+            false, ColorMode.DARK, ClockStyle.DIAL);
+    }
+
+    @Test
+    void normalizesLegacyThemesWithoutLosingNewPreferences() {
+        WorkspaceSettingsEntity entity = new WorkspaceSettingsEntity();
+        entity.updatePreferences("Europe/Istanbul", "aurora", BackgroundMode.STATIC,
+            false, ColorMode.DARK, ClockStyle.SEGMENT);
+        entity.updatePreferences("Europe/Istanbul", "dawn", BackgroundMode.STATIC,
+            false, null, null);
+        assertEquals("amber", entity.themeId());
+        assertEquals(ColorMode.DARK, entity.colorMode());
+        assertEquals(ClockStyle.SEGMENT, entity.clockStyle());
     }
 
     @Test
@@ -83,7 +111,7 @@ class WorkspaceServiceTest {
             "Europe/Istanbul",
             "dawn",
             BackgroundMode.TIME_AWARE,
-            4
+            4, null, null
         );
         assertThrows(WorkspaceConflictException.class, () -> service.updateSettings(stale));
         verify(settingsRepository, never()).saveAndFlush(settings);
@@ -92,7 +120,7 @@ class WorkspaceServiceTest {
             "Mars/Olympus",
             "dawn",
             BackgroundMode.TIME_AWARE,
-            0
+            0, null, null
         );
         assertThrows(
             InvalidWorkspacePreferenceException.class,

@@ -32,6 +32,15 @@ class WorkspaceSettingsEntity {
     @Column(name = "onboarding_completed", nullable = false)
     private boolean onboardingCompleted;
 
+    @Column(name = "color_mode", nullable = false, length = 16)
+    private String colorMode = "LIGHT";
+
+    @Column(name = "clock_style", nullable = false, length = 16)
+    private String clockStyle = "DIGITAL";
+
+    ColorMode colorMode() { return ColorMode.valueOf(colorMode); }
+    ClockStyle clockStyle() { return ClockStyle.valueOf(clockStyle); }
+
     @Version
     @Column(nullable = false)
     private long version;
@@ -77,10 +86,14 @@ class WorkspaceSettingsEntity {
         String timezone,
         String themeId,
         BackgroundMode backgroundMode,
-        boolean completeOnboarding
+        boolean completeOnboarding,
+        ColorMode colorMode,
+        ClockStyle clockStyle
     ) {
         this.timezone = timezone;
-        this.themeId = themeId;
+        this.themeId = SupportedTheme.normalize(themeId);
+        if (colorMode != null) this.colorMode = colorMode.name();
+        if (clockStyle != null) this.clockStyle = clockStyle.name();
         this.backgroundMode = backgroundMode.name();
         if (completeOnboarding) {
             this.onboardingCompleted = true;

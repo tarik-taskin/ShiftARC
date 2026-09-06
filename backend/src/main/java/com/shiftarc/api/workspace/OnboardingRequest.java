@@ -9,10 +9,12 @@ import jakarta.validation.constraints.Size;
 public record OnboardingRequest(
     @NotBlank @Size(max = 64) String timezone,
     @NotBlank
-    @Pattern(regexp = "^(arc-midnight|dawn|aurora)$")
+    @Pattern(regexp = "^(amber|ion|grove|arc-midnight|dawn|aurora)$")
     String themeId,
     @NotNull BackgroundMode backgroundMode,
     boolean includeSampleData,
-    @PositiveOrZero long version
+    @PositiveOrZero long version,
+    ColorMode colorMode,
+    ClockStyle clockStyle
 ) {
 }

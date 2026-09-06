@@ -9,19 +9,19 @@ export interface ThemeDefinition {
 
 export const themes: ThemeDefinition[] = [
   {
-    id: 'arc-midnight',
+    id: 'amber',
     name: 'Arc Midnight',
     description: 'Derin yeşil, sakin ve yüksek odaklı.',
     colors: ['#07100e', '#65e6aa', '#16251f'],
   },
   {
-    id: 'dawn',
+    id: 'grove',
     name: 'Dawn',
     description: 'Sıcak, aydınlık ve kâğıt hissinde.',
     colors: ['#fbf7ed', '#b45309', '#efe4cf'],
   },
   {
-    id: 'aurora',
+    id: 'ion',
     name: 'Aurora',
     description: 'Gece mavisi üzerinde canlı mor ve camgöbeği.',
     colors: ['#080b1d', '#a78bfa', '#14213d'],

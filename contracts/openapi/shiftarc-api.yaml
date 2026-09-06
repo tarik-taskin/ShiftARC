@@ -241,7 +241,7 @@ paths:
       - $ref: "#/components/parameters/DayTypeId"
     put:
       operationId: replaceDayTypeBlocks
-      summary: Replace a day type's complete 00:00–24:00 timeline
+      summary: Replace a day type's complete 00:00â€“24:00 timeline
       tags: [Day types]
       requestBody:
         required: true
@@ -1348,6 +1348,8 @@ components:
         - weekStartsOn
         - themeId
         - backgroundMode
+        - colorMode
+        - clockStyle
         - onboardingCompleted
         - version
       properties:
@@ -1366,6 +1368,10 @@ components:
           example: 1
         themeId:
           $ref: "#/components/schemas/ThemeId"
+        colorMode:
+          $ref: "#/components/schemas/ColorMode"
+        clockStyle:
+          $ref: "#/components/schemas/ClockStyle"
         backgroundMode:
           $ref: "#/components/schemas/BackgroundMode"
         onboardingCompleted:
@@ -1388,7 +1394,11 @@ components:
           minLength: 1
           maxLength: 64
         themeId:
-          $ref: "#/components/schemas/ThemeId"
+          $ref: "#/components/schemas/ThemeInput"
+        colorMode:
+          $ref: "#/components/schemas/ColorMode"
+        clockStyle:
+          $ref: "#/components/schemas/ClockStyle"
         backgroundMode:
           $ref: "#/components/schemas/BackgroundMode"
         version:
@@ -1410,7 +1420,11 @@ components:
           minLength: 1
           maxLength: 64
         themeId:
-          $ref: "#/components/schemas/ThemeId"
+          $ref: "#/components/schemas/ThemeInput"
+        colorMode:
+          $ref: "#/components/schemas/ColorMode"
+        clockStyle:
+          $ref: "#/components/schemas/ClockStyle"
         backgroundMode:
           $ref: "#/components/schemas/BackgroundMode"
         includeSampleData:
@@ -1422,9 +1436,19 @@ components:
     ThemeId:
       type: string
       enum:
-        - arc-midnight
-        - dawn
-        - aurora
+        - amber
+        - ion
+        - grove
+    ThemeInput:
+      type: string
+      description: Legacy theme identifiers are accepted as aliases; responses use ThemeId.
+      enum: [amber, ion, grove, arc-midnight, dawn, aurora]
+    ColorMode:
+      type: string
+      enum: [LIGHT, DARK]
+    ClockStyle:
+      type: string
+      enum: [DIGITAL, DIAL, SEGMENT]
     BackgroundMode:
       type: string
       enum:

@@ -45,7 +45,9 @@ public class WorkspaceService {
             request.timezone(),
             request.themeId(),
             request.backgroundMode(),
-            false
+            false,
+            request.colorMode(),
+            request.clockStyle()
         );
         return save(workspace, settings);
     }
@@ -66,7 +68,9 @@ public class WorkspaceService {
             request.timezone(),
             request.themeId(),
             request.backgroundMode(),
-            true
+            true,
+            request.colorMode() == null ? ColorMode.LIGHT : request.colorMode(),
+            request.clockStyle() == null ? ClockStyle.DIGITAL : request.clockStyle()
         );
         return save(workspace, settings);
     }
@@ -130,7 +134,9 @@ public class WorkspaceService {
             settings.themeId(),
             settings.backgroundMode(),
             settings.onboardingCompleted(),
-            settings.version()
+            settings.version(),
+            settings.colorMode(),
+            settings.clockStyle()
         );
     }
 }
