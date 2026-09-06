@@ -121,7 +121,7 @@ export function CategoriesPage() {
           <DialogFooter>
             <Button variant="outline" onClick={() => setDeletingCategory(null)}>Vazgeç</Button>
             <Button
-              className="bg-destructive text-white hover:bg-destructive/90"
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
               disabled={archiveCategory.isPending}
               onClick={() => {
                 if (!deletingCategory) return

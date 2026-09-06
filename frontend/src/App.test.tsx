@@ -1,4 +1,4 @@
-import { cleanup, render, screen, within } from '@testing-library/react'
+import { act, cleanup, render, screen, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { BrowserRouter } from 'react-router-dom'
@@ -293,6 +293,21 @@ describe('product application shell', () => {
         name: 'Kehribar: Krem, mürdüm ve sıcak altın.',
       }),
     ).toHaveAttribute('aria-pressed', 'true')
+  })
+
+  it('refreshes the daily snapshot once when the workspace date changes', () => {
+    vi.useFakeTimers()
+    vi.setSystemTime(new Date('2026-09-06T20:59:59Z'))
+    const refetch = vi.fn()
+    mockUseTodayPlan.mockReturnValue({ data: dailyPlanFixture(), isPending: false, isError: false, refetch })
+    window.history.pushState({}, '', '/')
+    try {
+      renderApp()
+      act(() => { vi.advanceTimersByTime(2000) })
+      expect(refetch).toHaveBeenCalledTimes(1)
+      act(() => { vi.advanceTimersByTime(2000) })
+      expect(refetch).toHaveBeenCalledTimes(1)
+    } finally { cleanup(); vi.useRealTimers() }
   })
 
   it('previews appearance and restores saved colors when leaving without saving', async () => {

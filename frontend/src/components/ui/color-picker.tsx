@@ -41,12 +41,12 @@ export function ColorPicker({
           className,
         )}
       >
-        <span className="size-6 rounded-lg border border-white/25 shadow-[0_0_18px_rgba(255,255,255,.08)]" style={{ backgroundColor: normalized }} />
+        <span className="size-6 rounded-lg border border-border" style={{ backgroundColor: normalized }} />
         <span className="font-mono text-xs text-muted-foreground">{normalized}</span>
         <Pipette className="ml-auto size-4 text-muted-foreground" />
       </Popover.Trigger>
       <Popover.Portal>
-        <Popover.Content sideOffset={8} className="z-50 w-72 rounded-lg border border-border/80 bg-popover/96 p-4 shadow-2xl shadow-black/35 backdrop-blur-xl">
+        <Popover.Content sideOffset={8} className="z-50 w-72 rounded-lg border border-border/80 bg-popover p-4 shadow-lg">
           <p className="text-sm font-semibold">Renk paleti</p>
           <div className="mt-3 grid grid-cols-6 gap-2">
             {palette.map((color) => (
@@ -58,7 +58,7 @@ export function ColorPicker({
                   className="grid size-9 place-items-center rounded-xl border border-white/15 transition hover:scale-105 focus:outline-none focus:ring-2 focus:ring-ring/35"
                   style={{ backgroundColor: color }}
                 >
-                  {normalized === color ? <Check className="size-4 text-white drop-shadow" /> : null}
+                  {normalized === color ? <Check className="size-4 rounded-full bg-card text-foreground" /> : null}
                 </button>
               </Popover.Close>
             ))}

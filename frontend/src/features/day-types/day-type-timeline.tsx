@@ -90,7 +90,7 @@ export function DayTypeTimeline({
   return (
     <div className="timeline-scrollbar overflow-x-auto rounded-lg border border-border/70 bg-background/35 p-3 pb-4">
       <div className="min-w-[1080px]">
-        <div className="mb-2 grid grid-cols-25 px-1 font-mono text-xs text-muted-foreground">
+        <div className="mb-2 flex justify-between px-1 font-mono text-xs text-muted-foreground">
           {Array.from({ length: 25 }, (_, hour) => (
             <span key={hour} className={hour === 24 ? 'text-right' : ''}>
               {String(hour).padStart(2, '0')}
@@ -99,35 +99,34 @@ export function DayTypeTimeline({
         </div>
         <div
           ref={timelineRef}
-          className={`relative flex h-56 overflow-visible rounded-xl border-2 ${disabled ? 'cursor-default' : 'cursor-crosshair'}`}
+          className={`relative flex h-40 overflow-visible rounded-xl border-2 ${disabled ? 'cursor-default' : 'cursor-crosshair'}`}
           style={{ borderColor: `${dayType.color}80` }}
           aria-label={`${dayType.name} zaman çizelgesi`}
         >
-          <div className="pointer-events-none absolute inset-0 z-10 bg-[linear-gradient(90deg,rgba(255,255,255,.08)_1px,transparent_1px)] bg-[length:60px_100%]" />
           {blocks.map((block, index) => {
             const duration = block.endMinute - block.startMinute
             const color = colorForBlock(index, block.name === 'Plansız')
             return (
               <div
                 key={block.id}
-                className="group relative min-w-0 shrink-0 border-r border-black/25 p-3 text-white last:border-r-0"
-                style={{ width: `${(duration / 1440) * 100}%`, minWidth: '7.5rem', backgroundColor: color }}
+                className="group relative min-w-0 shrink-0 border-r border-border p-0 text-foreground last:border-r-0"
+                style={{ width: `${(duration / 1440) * 100}%`, backgroundColor: `color-mix(in srgb, ${color} 12%, var(--card))`, borderTop: `3px solid ${color}` }}
                 title={`${block.name} · ${formatTime(block.startMinute)}–${formatTime(block.endMinute)}`}
                 onClick={(event) => {
                   if (!disabled) onSplit(minuteAtPointer(event.clientX))
                 }}
               >
-                <div className="pointer-events-none relative z-20 flex h-full w-full flex-col items-start text-left">
-                  <span className="max-w-full truncate text-sm font-bold">{block.name}</span>
-                  <span className="mt-1 whitespace-nowrap font-mono text-xs text-white/80">
-                    {formatTime(block.startMinute)}–{formatTime(block.endMinute)}
+                <div className="pointer-events-none relative z-20 flex h-full w-full flex-col items-start overflow-hidden p-2 text-left">
+                  <span className="max-w-full truncate text-sm font-bold">{duration >= 90 ? block.name : ''}</span>
+                  <span className="mt-1 whitespace-nowrap font-mono text-xs text-muted-foreground">
+                    {duration >= 150 ? formatTime(block.startMinute) + '–' + formatTime(block.endMinute) : ''}
                   </span>
-                  {duration >= 60 ? (
+                  {duration >= 150 ? (
                     <Button
                       type="button"
                       size="sm"
                       variant="ghost"
-                      className="pointer-events-auto mt-auto h-7 bg-black/20 px-2 text-xs text-white hover:bg-black/35 hover:text-white"
+                      className="pointer-events-auto mt-auto min-h-9 bg-card px-2 text-xs text-foreground hover:bg-accent"
                       onClick={(event) => {
                         event.stopPropagation()
                         onEdit(index)
@@ -138,7 +137,7 @@ export function DayTypeTimeline({
                 {index < blocks.length - 1 ? (
                   <button
                     type="button"
-                    className={`absolute top-0 right-0 z-30 flex h-full w-4 translate-x-1/2 touch-none items-center justify-center border-x border-white/30 bg-black/20 text-white shadow-lg hover:w-5 hover:bg-black/45 focus-visible:w-5 focus-visible:bg-black/50 focus-visible:outline-none ${draggingBoundary === index ? 'w-6 bg-black/55' : ''}`}
+                    className={`absolute top-0 right-0 z-30 flex h-full w-4 translate-x-1/2 touch-none items-center justify-center border-x border-border bg-card text-primary hover:w-5 hover:bg-accent focus-visible:w-5 focus-visible:bg-accent focus-visible:outline-none ${draggingBoundary === index ? 'w-6 bg-accent' : ''}`}
                     aria-label={`${block.name} ve ${blocks[index + 1].name} sınırını sürükle`}
                     aria-valuemin={block.startMinute + 5}
                     aria-valuemax={blocks[index + 1].endMinute - 5}

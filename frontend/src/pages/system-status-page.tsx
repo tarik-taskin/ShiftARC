@@ -149,7 +149,7 @@ function StatusCard({
 
 function getToneClassName(tone: StatusTone) {
   return {
-    up: 'text-emerald-400',
+    up: 'text-success',
     checking: 'text-warning',
     down: 'text-destructive',
     unknown: 'text-muted-foreground',

@@ -16,4 +16,5 @@ it('shows the persisted active focus timer', () => {
   expect(screen.getByRole('heading', { name: 'Odak sayacı' })).toBeInTheDocument()
   expect(screen.getByRole('button', { name: 'Tamamla' })).toBeInTheDocument()
   expect(screen.getByText('2')).toBeInTheDocument()
+  expect(screen.getByRole('timer')).toHaveTextContent('01:00')
 })

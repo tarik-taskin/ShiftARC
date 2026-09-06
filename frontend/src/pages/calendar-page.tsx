@@ -1,3 +1,5 @@
+import { useOptionalWorkspace } from '@/app/workspace-context'
+import { workspaceDate } from '@/features/daily-plan/time-scale'
 import { PageHeader, ErrorState } from '@/components/ui/page'
 import { CalendarCog, ChevronLeft, ChevronRight, RotateCcw, Save } from 'lucide-react'
 import { useMemo, useState } from 'react'
@@ -10,7 +12,9 @@ import { Select } from '@/components/ui/select'
 const weekdays = ['Pzt', 'Sal', 'Çar', 'Per', 'Cum', 'Cmt', 'Paz']
 
 export function CalendarPage() {
-  const [month, setMonth] = useState(() => { const now = new Date(); return new Date(now.getFullYear(), now.getMonth(), 1) }); const [selected, setSelected] = useState<string | null>(null); const [dayTypeId, setDayTypeId] = useState(''); const [today] = useState(() => iso(new Date()))
+  const workspace = useOptionalWorkspace()
+  const localNow = () => new Date(workspaceDate(new Date(), workspace?.timezone ?? 'Europe/Istanbul') + 'T12:00:00')
+  const [month, setMonth] = useState(() => { const now = localNow(); return new Date(now.getFullYear(), now.getMonth(), 1) }); const [selected, setSelected] = useState<string | null>(null); const [dayTypeId, setDayTypeId] = useState(''); const [today] = useState(() => workspaceDate(new Date(), workspace?.timezone ?? 'Europe/Istanbul'))
   const from = iso(month); const next = new Date(month.getFullYear(), month.getMonth() + 1, 1); const to = iso(new Date(next.getTime() - 86_400_000))
   const overrides = useCalendarOverrides(from, to); const dayTypes = useDayTypes(false); const save = useSaveCalendarOverride(); const remove = useDeleteCalendarOverride()
   const overrideMap = useMemo(() => new Map(overrides.data?.map((item) => [item.date, item]) ?? []), [overrides.data]); const selectedOverride = selected ? overrideMap.get(selected) : undefined

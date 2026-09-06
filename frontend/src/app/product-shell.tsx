@@ -44,7 +44,7 @@ export function ProductShell() {
       <div className="min-w-0">
         <header className="sticky top-0 z-30 flex h-16 items-center justify-between gap-3 border-b bg-background px-4 sm:px-6">
           <div className="flex min-w-0 items-center gap-3"><NavLink to="/" className="lg:hidden" aria-label="ShiftARC ana sayfası"><BrandMark /></NavLink><span className="truncate text-sm font-medium">{currentPage.label}</span></div>
-          {workspace ? <Button size="sm" onClick={() => setTaskDialogOpen(true)}><Plus className="size-4" aria-hidden="true" />Yeni görev</Button> : null}
+          {workspace && location.pathname !== '/tasks' ? <Button size="sm" onClick={() => setTaskDialogOpen(true)}><Plus className="size-4" aria-hidden="true" />Yeni görev</Button> : null}
         </header>
         <main id="main-content" className="mx-auto w-full max-w-[1800px] min-w-0 px-4 pt-6 pb-28 sm:px-6 lg:pb-10 xl:px-8"><Outlet /></main>
       </div>

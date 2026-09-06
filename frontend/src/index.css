@@ -22,6 +22,7 @@
   --color-sidebar: var(--sidebar);
   --font-sans: 'Onest', sans-serif;
   --font-mono: 'JetBrains Mono', monospace;
+  --color-destructive-foreground: var(--destructive-foreground);
   --color-success: var(--success);
   --color-warning: var(--warning);
   --color-info: var(--info);
@@ -72,12 +73,14 @@
   --ring: var(--primary); --sidebar: var(--card);
   --ambient-one: var(--seed-accent); --ambient-two: var(--seed-support);
   --font-sans: 'Onest', sans-serif; --font-display: 'Manrope', sans-serif;
-  --font-mono: 'JetBrains Mono', monospace; --radius: 0.75rem;
+  --destructive-foreground: #ffffff;
+  --font-mono: 'JetBrains Mono', monospace; --radius: 0.5rem;
   font-family: var(--font-sans); color: var(--foreground); background: var(--background);
   font-synthesis: none; text-rendering: optimizeLegibility; -webkit-font-smoothing: antialiased;
 }
 [data-color-mode="DARK"] {
   color-scheme: dark;
+  --destructive-foreground: var(--seed-ink);
   --background: color-mix(in srgb, var(--seed-ink) 85%, #080a0c);
   --foreground: color-mix(in srgb, var(--seed-paper) 12%, #f7f7f5);
   --card: color-mix(in srgb, var(--seed-ink) 92%, white);
@@ -102,6 +105,7 @@ button, a { -webkit-tap-highlight-color: transparent; }
 button:not(:disabled) { cursor: pointer; }
 :focus-visible { outline: 2px solid var(--ring); outline-offset: 3px; }
 ::selection { color: var(--primary-foreground); background: var(--primary); }
+@layer base {
 :where(input:not([type="checkbox"]):not([type="radio"]):not([type="range"]):not([type="color"]), select, textarea) {
   min-height: 2.75rem; width: 100%; border: 1px solid var(--input); border-radius: 8px;
   background: var(--card); color: var(--foreground); padding: 0.625rem 0.75rem;
@@ -116,6 +120,7 @@ input[type="checkbox"], input[type="radio"], input[type="range"] { accent-color:
 input[type="checkbox"], input[type="radio"] { width: 1rem; height: 1rem; }
 input[type="color"] { width: 100%; height: 44px; padding: 4px; border: 1px solid var(--input); border-radius: 8px; background: var(--card); }
 input[type="date"], input[type="time"] { font-variant-numeric: tabular-nums; }
+}
 .app-canvas { background: var(--background); }
 [data-background-mode="TIME_AWARE"][data-day-phase="morning"] .app-canvas { background: color-mix(in srgb, var(--seed-paper) 3%, var(--background)); }
 [data-background-mode="TIME_AWARE"][data-day-phase="evening"] .app-canvas { background: color-mix(in srgb, var(--seed-accent) 2%, var(--background)); }

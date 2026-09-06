@@ -105,6 +105,15 @@ edilir.
 - Eksik yeni tercih alanları güncellemede mevcut değeri korur; onboarding varsayılanları
   açık görünüm ve dijital saattir. Tercih güncellemeleri sürüm kontrollüdür.
 
+- Yeni görünüm bileşenleri ortak PageHeader, Section, StatusBadge, EmptyState,
+  ErrorState ve FormField öğelerini kullanır. Yerel fontlar public/fonts altındadır.
+- Günlük çizelgede değişken ölçek yalnız sunumdur; plan dakikalarını değiştirme.
+  Zaman geometrisini time-scale.ts üzerinden üret, etkileşim sırasında sabitle.
+- Gün tipi editöründeki doğrusal ölçeğe minimum blok genişliği ekleyerek zaman
+  sınırlarını kaydırma; dar blokların ayrıntısını erişilebilir listede göster.
+- Görsel QA kişisel veri yerine tarayıcıda yakalanan sentetik API fixture’larıyla
+  çalışır; test-results çıktıları commit edilmez.
+
 ### Backend
 
 - Ana paket `com.shiftarc.api` altında kalır.

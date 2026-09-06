@@ -20,9 +20,19 @@ kapsamda değildir.
 ## Mevcut ürün akışı
 
 İlk açılışta ShiftARC lokal workspace kaydını API üzerinden yükler ve onboarding
-ekranını gösterir. Kullanıcı IANA saat dilimini, `Arc Midnight`, `Dawn` veya
-`Aurora` temasını, saate duyarlı ya da sabit arka plan davranışını ve örnek
-planlama verilerinin eklenip eklenmeyeceğini seçebilir.
+ekranını gösterir. Kullanıcı IANA saat dilimini; Kehribar, İyon veya Koruluk
+paletini; açık/koyu görünümü ve dijital/kadran/segmentli saat tasarımını seçebilir.
+Arka plan sabit kalabilir veya workspace saat dilimine göre hafifçe değişebilir.
+Tercihler daha sonra Görünüm sayfasından önizlenerek kaydedilir.
+
+Görsel sistem ve tarayıcı doğrulama komutu için
+[visual-system.md](docs/design/visual-system.md) belgesine bak.
+
+**API uyumluluğu:** Workspace yanıtı artık `amber`, `ion`, `grove` tema
+kimliklerini ve zorunlu `colorMode` / `clockStyle` alanlarını döndürür.
+Eski tema adları isteklerde takma ad olarak kabul edilir; yanıt enum değişikliği
+nedeniyle frontend ve backend birlikte güncellenmelidir. V9 migration’ı mevcut
+tercihleri taşır; görevler, snapshot’lar ve yürütme kayıtları değişmez.
 
 Örnek veri seçeneği altı kategori, iki gün tipi ve pazartesi–pazar şablonunu tek
 transaction içinde oluşturur; görev oluşturmaz. Tercihler daha sonra `Görünüm`
@@ -54,8 +64,9 @@ son tarih, oluşturulma zamanı, tip, durum ve kategoriye göre filtrelenebilir.
 tamamlanabilir, arşivlenebilir ve yeniden aktifleştirilebilir. Uygulama üst çubuğundaki
 `Yeni görev` eylemi aynı dialogu her sayfadan açar.
 
-Ana sayfa workspace saat diliminde canlı saat ve saniyeyi, bugünün gün tipinden
-üretilmiş 24 saatlik snapshot çizelgesini ve kırmızı mevcut-zaman imlecini gösterir.
+Ana sayfa workspace saat diliminde seçilen saati ve 24 saatlik snapshot çizelgesini
+gösterir. Bir saat önceden beş saat sonrasına uzanan aralık alanın %60’ını kaplar;
+günün kalan kısmı sıkışır. Mevcut-zaman imleci merkezi tema rengini kullanır.
 Günlük plan üreticisi görevleri kategori uyumu ve önem sırasıyla değerlendirir; iş
 parçacığı süresini son tarihe kalan günlere, alışkanlık hedefini haftada kalan günlere
 böler. Günlük limitler aynı görev için ayrılacak süreyi sınırlar. Fırsatlar zorunlu

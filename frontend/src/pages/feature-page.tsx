@@ -22,7 +22,7 @@ export function FeaturePage({
           {description}
         </p>
         <div className="mt-10 flex items-start gap-3 rounded-lg border border-border/70 bg-background/45 p-4">
-          <span className="mt-1 size-2 shrink-0 rounded-full bg-primary shadow-[0_0_12px_var(--primary)]" />
+          <span className="mt-1 size-2 shrink-0 rounded-full bg-primary " />
           <p className="text-sm leading-6 text-muted-foreground">{nextStep}</p>
         </div>
       </div>

@@ -67,6 +67,50 @@ class PostgresMigrationIntegrationTest {
         }
     }
 
+    @Test
+    void upgradesAllLegacyPalettesAndPreservesOtherPreferences() throws SQLException {
+        String password = System.getenv("SHIFTARC_DB_PASSWORD");
+        Assumptions.assumeTrue(password != null && !password.isBlank());
+        String jdbcUrl = environmentOrDefault("SHIFTARC_TEST_DB_URL", DEFAULT_TEST_URL);
+        String username = environmentOrDefault("SHIFTARC_DB_USERNAME", DEFAULT_USERNAME);
+        IsolatedDatabaseUrlGuard.requireIsolatedLocalDatabase(jdbcUrl);
+        resetIsolatedDatabase(jdbcUrl, username, password);
+        Flyway.configure().dataSource(jdbcUrl, username, password).defaultSchema("public")
+            .locations("classpath:db/migration").target("8").cleanDisabled(true).load().migrate();
+        try (Connection connection = DriverManager.getConnection(jdbcUrl, username, password);
+             Statement statement = connection.createStatement()) {
+            statement.executeUpdate("""
+                UPDATE shiftarc.workspace_settings
+                SET onboarding_completed = true, theme_id = 'arc-midnight', version = 7;
+                INSERT INTO shiftarc.workspace (id, slug, name) VALUES
+                ('10000000-0000-4000-8000-000000000001', 'test-dawn', 'Dawn migration'),
+                ('10000000-0000-4000-8000-000000000002', 'test-aurora', 'Aurora migration');
+                INSERT INTO shiftarc.workspace_settings (workspace_id, theme_id, background_mode, onboarding_completed, version)
+                VALUES ('10000000-0000-4000-8000-000000000001', 'dawn', 'STATIC', true, 3),
+                       ('10000000-0000-4000-8000-000000000002', 'aurora', 'TIME_AWARE', true, 5);
+                """);
+        }
+        Flyway.configure().dataSource(jdbcUrl, username, password).defaultSchema("public")
+            .locations("classpath:db/migration").cleanDisabled(true).load().migrate();
+        try (Connection connection = DriverManager.getConnection(jdbcUrl, username, password)) {
+            assertEquals(1, queryCount(connection, """
+                SELECT count(*) FROM shiftarc.workspace_settings
+                WHERE theme_id = 'amber' AND color_mode = 'DARK' AND version = 8
+                  AND background_mode = 'TIME_AWARE' AND clock_style = 'DIGITAL'
+                """));
+            assertEquals(1, queryCount(connection, """
+                SELECT count(*) FROM shiftarc.workspace_settings
+                WHERE theme_id = 'amber' AND color_mode = 'LIGHT' AND version = 4
+                  AND background_mode = 'STATIC'
+                """));
+            assertEquals(1, queryCount(connection, """
+                SELECT count(*) FROM shiftarc.workspace_settings
+                WHERE theme_id = 'ion' AND color_mode = 'DARK' AND version = 6
+                  AND timezone = 'Europe/Istanbul' AND onboarding_completed
+                """));
+        }
+    }
+
     private void assertExecutionHistoryConstraints(Connection connection) throws SQLException {
         try (Statement statement = connection.createStatement()) {
             statement.executeUpdate("""

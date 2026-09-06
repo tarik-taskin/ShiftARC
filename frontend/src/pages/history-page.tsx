@@ -1,3 +1,5 @@
+import { useOptionalWorkspace } from '@/app/workspace-context'
+import { workspaceDate } from '@/features/daily-plan/time-scale'
 import { PageHeader, ErrorState } from '@/components/ui/page'
 import { CalendarDays, ChevronLeft, ChevronRight, Clock3, History } from 'lucide-react'
 import { useMemo, useState } from 'react'
@@ -9,7 +11,9 @@ import { formatTime } from '@/features/day-types/time'
 const weekdays = ['Pzt', 'Sal', 'Çar', 'Per', 'Cum', 'Cmt', 'Paz']
 
 export function HistoryPage() {
-  const [month, setMonth] = useState(() => monthStart(new Date()))
+  const workspace = useOptionalWorkspace()
+  const localNow = () => new Date(workspaceDate(new Date(), workspace?.timezone ?? 'Europe/Istanbul') + 'T12:00:00')
+  const [month, setMonth] = useState(() => monthStart(localNow()))
   const [selected, setSelected] = useState<string | null>(null)
   const from = iso(month); const next = new Date(month.getFullYear(), month.getMonth() + 1, 1); const to = iso(new Date(next.getTime() - 86_400_000))
   const history = useHistoryDays(from, to); const detail = useHistoryDetail(selected)

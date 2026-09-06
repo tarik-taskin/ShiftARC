@@ -23,7 +23,7 @@ export function AdaptiveTimeline({ plan, minute, frozen = false }: { plan: Daily
   const items = plan.blocks.flatMap((block) => block.items.map((item) => ({ ...item, blockName: block.name })))
   const selectedItem = items.find((item) => item.id === selection)
   const selectedBlock = plan.blocks.find((block) => block.id === selection)
-  const ticks = Array.from({ length: 25 }, (_, hour) => hour * 60).filter((tick) => (tick >= scale.start && tick <= scale.end) || tick % 120 === 0)
+  const ticks = Array.from({ length: 25 }, (_, hour) => hour * 60).filter((tick) => (tick >= scale.start && tick <= scale.end) || tick % 180 === 0)
   return <section aria-label="Günlük zaman çizelgesi" className="overflow-hidden rounded-xl border bg-card">
     <div className="flex flex-wrap items-center justify-between gap-2 border-b px-4 py-3">
       <h2 className="font-semibold">Günün akışı</h2><p className="text-xs text-muted-foreground">Ayrıntılı aralık <strong className="font-mono font-medium text-foreground">{formatTime(scale.start)}–{formatTime(scale.end)}</strong></p>
