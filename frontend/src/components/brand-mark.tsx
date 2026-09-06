@@ -8,7 +8,7 @@ export function BrandMark({ className }: BrandMarkProps) {
   return (
     <span
       className={cn(
-        'grid size-9 place-items-center rounded-xl border border-primary/25 bg-primary/10 shadow-[inset_0_1px_0_rgba(255,255,255,0.14)]',
+        'grid size-9 place-items-center rounded-xl border border-primary/25 bg-primary/10 ',
         className,
       )}
       aria-hidden="true"

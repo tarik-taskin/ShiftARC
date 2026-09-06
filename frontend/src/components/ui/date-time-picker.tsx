@@ -34,7 +34,7 @@ export function TimePicker({
         <span className="font-mono">{formatMinute(value)}</span>
       </Popover.Trigger>
       <Popover.Portal>
-        <Popover.Content sideOffset={8} className="z-50 max-h-72 w-48 overflow-y-auto rounded-2xl border border-border/80 bg-popover/96 p-2 shadow-2xl shadow-black/35 backdrop-blur-xl">
+        <Popover.Content sideOffset={8} className="z-50 max-h-72 w-48 overflow-y-auto rounded-lg border border-border/80 bg-popover/96 p-2 shadow-2xl shadow-black/35 backdrop-blur-xl">
           {options.map((minute) => (
             <Popover.Close key={minute} asChild>
               <button type="button" onClick={() => onChange(minute)} className={`block w-full rounded-xl px-3 py-2 text-left font-mono text-sm transition hover:bg-accent ${minute === value ? 'bg-primary/15 text-primary' : ''}`}>
@@ -70,7 +70,7 @@ export function DatePicker({
         <span>{value ? new Intl.DateTimeFormat('tr-TR', { dateStyle: 'medium' }).format(selected) : 'Tarih seç'}</span>
       </Popover.Trigger>
       <Popover.Portal>
-        <Popover.Content sideOffset={8} className="z-50 w-80 rounded-2xl border border-border/80 bg-popover/96 p-4 shadow-2xl shadow-black/35 backdrop-blur-xl">
+        <Popover.Content sideOffset={8} className="z-50 w-80 rounded-lg border border-border/80 bg-popover/96 p-4 shadow-2xl shadow-black/35 backdrop-blur-xl">
           <div className="flex items-center justify-between">
             <Button type="button" size="sm" variant="ghost" aria-label="Önceki ay" onClick={() => setMonth(new Date(month.getFullYear(), month.getMonth() - 1, 1))}><ChevronLeft className="size-4" /></Button>
             <p className="font-semibold capitalize">{monthLabel}</p>

@@ -23,10 +23,10 @@ function DialogContent({
 }: ComponentProps<typeof DialogPrimitive.Content>) {
   return (
     <DialogPrimitive.Portal>
-      <DialogPrimitive.Overlay className="fixed inset-0 z-50 bg-black/55 backdrop-blur-sm data-[state=closed]:animate-out data-[state=open]:animate-in" />
+      <DialogPrimitive.Overlay className="fixed inset-0 z-50 bg-black/55  data-[state=closed]:animate-out data-[state=open]:animate-in" />
       <DialogPrimitive.Content
         className={cn(
-          'fixed top-1/2 left-1/2 z-50 max-h-[calc(100svh-2rem)] w-[calc(100%-2rem)] max-w-lg -translate-x-1/2 -translate-y-1/2 overflow-y-auto rounded-3xl border border-border bg-card p-6 text-card-foreground shadow-2xl focus:outline-none sm:p-7',
+          'fixed top-1/2 left-1/2 z-50 max-h-[calc(100svh-2rem)] w-[calc(100%-2rem)] max-w-lg -translate-x-1/2 -translate-y-1/2 overflow-y-auto rounded-xl border border-border bg-card p-6 text-card-foreground shadow-2xl focus:outline-none sm:p-6 max-sm:top-0 max-sm:left-0 max-sm:h-svh max-sm:max-h-svh max-sm:w-full max-sm:max-w-none max-sm:translate-x-0 max-sm:translate-y-0 max-sm:rounded-none',
           className,
         )}
         {...props}
@@ -48,7 +48,7 @@ function DialogHeader({ className, ...props }: ComponentProps<'div'>) {
 function DialogFooter({ className, ...props }: ComponentProps<'div'>) {
   return (
     <div
-      className={cn('mt-6 flex flex-col-reverse gap-3 sm:flex-row sm:justify-end', className)}
+      className={cn('sticky bottom-0 -mx-6 -mb-6 mt-6 border-t bg-card px-6 py-4 flex flex-col-reverse gap-3 sm:flex-row sm:justify-end', className)}
       {...props}
     />
   )

@@ -46,7 +46,7 @@ export function ColorPicker({
         <Pipette className="ml-auto size-4 text-muted-foreground" />
       </Popover.Trigger>
       <Popover.Portal>
-        <Popover.Content sideOffset={8} className="z-50 w-72 rounded-2xl border border-border/80 bg-popover/96 p-4 shadow-2xl shadow-black/35 backdrop-blur-xl">
+        <Popover.Content sideOffset={8} className="z-50 w-72 rounded-lg border border-border/80 bg-popover/96 p-4 shadow-2xl shadow-black/35 backdrop-blur-xl">
           <p className="text-sm font-semibold">Renk paleti</p>
           <div className="mt-3 grid grid-cols-6 gap-2">
             {palette.map((color) => (
