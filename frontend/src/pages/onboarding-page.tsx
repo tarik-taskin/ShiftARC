@@ -77,27 +77,27 @@ export function OnboardingPage({ workspace }: { workspace: Workspace }) {
   return (
     <main className="app-canvas grid min-h-svh place-items-center overflow-hidden px-5 py-10 text-foreground sm:px-8">
       <motion.section
-        initial={reduceMotion ? false : { opacity: 0, y: 14 }}
-        animate={{ opacity: 1, y: 0 }}
+        initial={reduceMotion ? false : { opacity: 0 }}
+        animate={{ opacity: 1 }}
         transition={{ duration: reduceMotion ? 0 : 0.28 }}
-        className="w-full max-w-5xl overflow-hidden rounded-[2rem] border border-border/80 bg-card/78 shadow-2xl shadow-black/20 backdrop-blur-2xl"
+        className="w-full max-w-6xl overflow-hidden rounded-xl border border-border/80 bg-card  "
         aria-labelledby="onboarding-title"
       >
-        <div className="grid lg:grid-cols-[0.8fr_1.2fr]">
-          <div className="border-b border-border/70 bg-primary/[0.055] p-7 sm:p-10 lg:border-r lg:border-b-0">
+        <div className="grid lg:grid-cols-[0.65fr_1.35fr]">
+          <div className="border-b border-border/70 bg-primary/[0.055] p-5 sm:p-7 lg:border-r lg:border-b-0">
             <div className="flex items-center gap-3">
               <BrandMark />
               <div>
                 <p className="text-sm font-bold">ShiftARC</p>
-                <p className="font-mono text-[10px] text-muted-foreground">
+                <p className="font-mono text-xs text-muted-foreground">
                   local workspace · 0.1.0
                 </p>
               </div>
             </div>
-            <p className="section-kicker mt-14">Başlangıç · 1/1</p>
+            <p className="section-kicker mt-8">Başlangıç · 1/1</p>
             <h1
               id="onboarding-title"
-              className="mt-4 text-4xl leading-[1] font-semibold tracking-[-0.05em] sm:text-5xl"
+              className="mt-4 text-[28px] leading-tight font-semibold tracking-[-0.05em] sm:text-[32px]"
             >
               Çalışma alanını kendine uydur.
             </h1>
@@ -124,7 +124,7 @@ export function OnboardingPage({ workspace }: { workspace: Workspace }) {
             </div>
           </div>
 
-          <form className="space-y-8 p-7 sm:p-10" onSubmit={submit}>
+          <form className="space-y-6 p-5 sm:p-7" onSubmit={submit}>
             <AppearanceOptions value={{ themeId: selectedTheme, colorMode: selectedColorMode, clockStyle: selectedClockStyle }} onChange={(value) => { form.setValue('themeId', value.themeId); form.setValue('colorMode', value.colorMode); form.setValue('clockStyle', value.clockStyle) }} />
 
             <div className="grid gap-5 sm:grid-cols-2">
@@ -152,7 +152,7 @@ export function OnboardingPage({ workspace }: { workspace: Workspace }) {
               </label>
             </div>
 
-            <label className="flex cursor-pointer items-start gap-3 rounded-2xl border border-border/75 bg-background/35 p-4">
+            <label className="flex cursor-pointer items-start gap-3 rounded-lg border border-border/75 bg-background/35 p-4">
               <input
                 type="checkbox"
                 className="mt-0.5 size-4 rounded border-input accent-[var(--primary)]"

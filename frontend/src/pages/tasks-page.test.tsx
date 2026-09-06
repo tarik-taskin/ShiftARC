@@ -24,6 +24,13 @@ describe('tasks page', () => {
     expect(screen.getByRole('button', { name: 'Tamamla' })).toBeInTheDocument()
   })
 
+  it('shows a retryable error without claiming the task list is empty', () => {
+    mocks.useTasks.mockReturnValue({ isPending: false, isError: true, refetch: vi.fn() })
+    render(<TasksPage />)
+    expect(screen.getByRole('alert')).toHaveTextContent('Görevler yüklenemedi')
+    expect(screen.queryByText('Bu görünümde görev yok')).not.toBeInTheDocument()
+  })
+
   it('opens the reusable task dialog', async () => {
     const user = userEvent.setup()
     render(<TasksPage />)

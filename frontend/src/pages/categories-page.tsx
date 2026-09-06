@@ -1,3 +1,4 @@
+import { PageHeader, StatusBadge } from '@/components/ui/page'
 import {
   Archive,
   ArchiveRestore,
@@ -61,25 +62,10 @@ export function CategoriesPage() {
   }
 
   return (
-    <div className="space-y-8">
-      <section className="flex flex-col gap-6 pt-4 sm:pt-8 lg:flex-row lg:items-end lg:justify-between">
-        <div className="max-w-3xl">
-          <p className="section-kicker">Planlama sözlüğü</p>
-          <h1 className="mt-4 text-4xl font-semibold tracking-[-0.05em] sm:text-6xl">
-            Kategoriler
-          </h1>
-          <p className="mt-5 max-w-2xl text-base leading-7 text-muted-foreground">
-            Görevleri birden fazla bağlamda grupla; zaman bloklarının hangi işleri
-            kabul edeceğini aynı kategorilerle belirle.
-          </p>
-        </div>
-        <Button onClick={openCreateDialog}>
-          <Plus className="size-4" aria-hidden="true" />
-          Yeni kategori
-        </Button>
-      </section>
+    <div className="space-y-6">
+      <PageHeader title="Kategoriler" description="Görevlerin ve zaman bloklarının ortak bağlamlarını düzenle." actions={<Button onClick={openCreateDialog}><Plus className="size-4" />Yeni kategori</Button>} />
 
-      <section className="rounded-3xl border border-border/75 bg-card/60 p-5 sm:p-6">
+      <section className="rounded-xl border border-border/75 bg-card p-5 sm:p-6">
         <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           <label className="relative block w-full max-w-md">
             <span className="sr-only">Kategorilerde ara</span>
@@ -117,6 +103,7 @@ export function CategoriesPage() {
         />
       </section>
 
+      {restoreCategory.error ? <p role="alert" className="text-sm text-destructive">{restoreCategory.error.message}</p> : null}
       <CategoryDialog
         open={dialogOpen}
         onOpenChange={setDialogOpen}
@@ -130,6 +117,7 @@ export function CategoriesPage() {
               Bu kategori arşivlenecek ve bağlı görev, gün tipi bloğu ve trigger ilişkileri kaldırılacak. Geçmiş kayıtlar korunur.
             </DialogDescription>
           </DialogHeader>
+          {archiveCategory.error ? <p role="alert" className="mt-3 text-sm text-destructive">{archiveCategory.error.message}</p> : null}
           <DialogFooter>
             <Button variant="outline" onClick={() => setDeletingCategory(null)}>Vazgeç</Button>
             <Button
@@ -197,7 +185,7 @@ function CategoryListState({
     return (
       <div className="grid min-h-64 place-items-center text-center">
         <div>
-          <div className="mx-auto grid size-12 place-items-center rounded-2xl bg-primary/10 text-primary">
+          <div className="mx-auto grid size-12 place-items-center rounded-lg bg-primary/10 text-primary">
             <Tags className="size-5" aria-hidden="true" />
           </div>
           <h2 className="mt-4 text-lg font-semibold">Henüz kategori yok</h2>
@@ -214,7 +202,7 @@ function CategoryListState({
   }
 
   return (
-    <div className="mt-6 grid gap-3 md:grid-cols-2 xl:grid-cols-3">
+    <div className="mt-5 space-y-2">
       {categories.map((category) => (
         <CategoryCard
           key={category.id}
@@ -241,29 +229,25 @@ function CategoryCard({
 }) {
   const Icon = icons[category.icon ?? 'tag'] ?? Tag
   return (
-    <article className="rounded-2xl border border-border/75 bg-background/35 p-4">
+    <article className="flex flex-wrap items-center justify-between gap-3 rounded-lg border bg-card p-3">
       <div className="flex items-start justify-between gap-4">
         <div className="flex min-w-0 items-center gap-3">
           <div
-            className="grid size-10 shrink-0 place-items-center rounded-xl text-white shadow-sm"
-            style={{ backgroundColor: category.color }}
+            className="grid size-10 shrink-0 place-items-center rounded-lg border text-foreground"
+            style={{ borderColor: category.color, backgroundColor: 'var(--muted)' }}
           >
             <Icon className="size-5" aria-hidden="true" />
           </div>
           <div className="min-w-0">
             <h2 className="truncate font-semibold">{category.name}</h2>
-            <p className="mt-1 font-mono text-[10px] text-muted-foreground">
-              {category.color}
-            </p>
+            <p className="mt-1 text-xs text-muted-foreground">Planlama kategorisi</p>
           </div>
         </div>
         {category.archived ? (
-          <span className="rounded-full bg-muted px-2 py-1 text-[10px] font-semibold text-muted-foreground">
-            Arşivde
-          </span>
+          <StatusBadge>Arşivde</StatusBadge>
         ) : null}
       </div>
-      <div className="mt-5 flex justify-end gap-2 border-t border-border/60 pt-3">
+      <div className="flex flex-wrap justify-end gap-2">
         {!category.archived ? (
           <>
             <Button size="sm" variant="ghost" onClick={() => onEdit(category)}>

@@ -27,10 +27,10 @@ export function SystemStatusPage() {
   const isLoading = state.phase === 'loading'
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-6">
       <section className="max-w-3xl pt-4 sm:pt-8">
         <p className="section-kicker">Teknik doğrulama</p>
-        <h1 className="mt-4 text-4xl font-semibold tracking-[-0.05em] sm:text-6xl">
+        <h1 className="mt-4 text-[28px] font-semibold tracking-tight sm:text-[32px]">
           Lokal sistem durumu
         </h1>
         <p className="mt-5 text-base leading-7 text-muted-foreground">
@@ -40,7 +40,7 @@ export function SystemStatusPage() {
         </p>
       </section>
 
-      <section className="rounded-3xl border border-border/75 bg-card/65 p-5 shadow-lg shadow-black/5 backdrop-blur-xl sm:p-7" aria-labelledby="status-heading">
+      <section className="rounded-xl border border-border/75 bg-card p-5 shadow-lg shadow-black/5 backdrop-blur-xl sm:p-7" aria-labelledby="status-heading">
         <div className="flex flex-col gap-5 sm:flex-row sm:items-center sm:justify-between">
           <div aria-live="polite">
             <p className="section-kicker">Sistem durumu</p>
@@ -94,7 +94,7 @@ export function SystemStatusPage() {
         </div>
 
         {state.phase === 'error' ? (
-          <div className="mt-4 flex items-start gap-3 rounded-2xl border border-destructive/20 bg-destructive/8 p-4" role="alert">
+          <div className="mt-4 flex items-start gap-3 rounded-lg border border-destructive/20 bg-destructive/8 p-4" role="alert">
             <AlertTriangle className="mt-0.5 size-5 shrink-0 text-destructive" aria-hidden="true" />
             <div>
               <strong className="text-sm text-foreground">
@@ -121,10 +121,10 @@ function StatusCard({
   icon: Icon,
 }: StatusCardProps) {
   return (
-    <article className="min-h-60 rounded-2xl border border-border/70 bg-background/35 p-5">
+    <article className="min-h-60 rounded-lg border border-border/70 bg-background/35 p-5">
       <div className="flex items-start justify-between gap-4">
         <div>
-          <p className="text-[11px] font-semibold tracking-[0.12em] text-muted-foreground uppercase">
+          <p className="text-xs font-semibold tracking-[0.12em] text-muted-foreground uppercase">
             {label}
           </p>
           <h3 className="mt-1 text-base font-semibold">{technology}</h3>
@@ -140,7 +140,7 @@ function StatusCard({
       <p className="mt-2 min-h-12 text-sm leading-6 text-muted-foreground">
         {detail}
       </p>
-      <code className="mt-4 inline-flex rounded-lg border border-border/70 bg-muted/60 px-2.5 py-1.5 font-mono text-[11px] text-muted-foreground">
+      <code className="mt-4 inline-flex rounded-lg border border-border/70 bg-muted/60 px-2.5 py-1.5 font-mono text-xs text-muted-foreground">
         {endpoint}
       </code>
     </article>
@@ -150,7 +150,7 @@ function StatusCard({
 function getToneClassName(tone: StatusTone) {
   return {
     up: 'text-emerald-400',
-    checking: 'text-amber-400',
+    checking: 'text-warning',
     down: 'text-destructive',
     unknown: 'text-muted-foreground',
   }[tone]

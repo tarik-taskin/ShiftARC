@@ -1,3 +1,4 @@
+import { FormField } from '@/components/ui/page'
 import { Plus, Trash2 } from 'lucide-react'
 import { useState } from 'react'
 
@@ -49,9 +50,11 @@ export function TaskDialog({ open, onOpenChange, task }: { open: boolean; onOpen
       stages: stages.map((stage) => ({ title: stage.title.trim(), completed: stage.completed })).filter((stage) => stage.title),
       categoryIds,
     }
+    try {
     if (task) await update.mutateAsync({ ...input, id: task.id, version: task.version })
     else await create.mutateAsync(input)
     onOpenChange(false)
+    } catch { /* Keep the form and mutation error visible. */ }
   }
 
   const updateStage = (index: number, value: string) => {
@@ -63,9 +66,9 @@ export function TaskDialog({ open, onOpenChange, task }: { open: boolean; onOpen
       <DialogContent className="max-w-3xl">
         <DialogHeader>
           <DialogTitle>{task ? 'Görevi düzenle' : 'Yeni görev'}</DialogTitle>
-          <DialogDescription>İş parçacığını, tekrarlayan alışkanlığı veya boş kapasitede ele alınacak fırsatı planlama motoruna tanıt.</DialogDescription>
+          <DialogDescription>Görev tipini seç; süreyi, önemi ve kategorileri belirle.</DialogDescription>
         </DialogHeader>
-        <div className="mt-5 max-h-[68vh] space-y-5 overflow-y-auto pr-1">
+        <div className="mt-5 space-y-5">
           <div className="grid gap-2 sm:grid-cols-3" role="group" aria-label="Görev tipi">
             {(Object.keys(typeLabels) as TaskType[]).map((value) => (
               <button key={value} type="button" aria-pressed={type === value} onClick={() => setType(value)} className="rounded-xl border p-3 text-sm font-semibold aria-pressed:border-primary aria-pressed:bg-primary/10">
@@ -73,7 +76,7 @@ export function TaskDialog({ open, onOpenChange, task }: { open: boolean; onOpen
               </button>
             ))}
           </div>
-          <label className="block text-sm font-semibold">Başlık<input autoFocus value={title} onChange={(event) => setTitle(event.target.value)} className="mt-2 h-11 w-full rounded-xl border border-input bg-background/60 px-3" /></label>
+          <FormField label="Başlık" htmlFor="task-title"><input id="task-title" autoFocus value={title} onChange={(event) => setTitle(event.target.value)} className="mt-2 h-11 w-full rounded-xl border border-input bg-background/60 px-3" /></FormField>
           <label className="block text-sm font-semibold">Açıklama<textarea value={description} onChange={(event) => setDescription(event.target.value)} rows={3} className="mt-2 w-full rounded-xl border border-input bg-background/60 p-3" /></label>
           <div className="grid gap-4 sm:grid-cols-2">
             <label className="text-sm font-semibold">Önem: {importance}/5<input aria-label="Önem" type="range" min="1" max="5" value={importance} onChange={(event) => setImportance(Number(event.target.value))} className="mt-3 w-full" /></label>
@@ -83,7 +86,7 @@ export function TaskDialog({ open, onOpenChange, task }: { open: boolean; onOpen
                 <NumberStepper value={minutes} onChange={setMinutes} min={5} step={5} ariaLabel={type === 'WORK_ITEM' ? 'Toplam süre' : 'Haftalık hedef'} />
               </label>
             ) : (
-              <div className="rounded-2xl border border-border/70 bg-background/35 p-3 text-sm text-muted-foreground">Fırsatlar hedef süre istemez; yalnız diğer işler bittikten sonra kalan uygun zamanlara yerleşir.</div>
+              <div className="rounded-lg border border-border/70 bg-background/35 p-3 text-sm text-muted-foreground">Fırsatlar hedef süre istemez; yalnız diğer işler bittikten sonra kalan uygun zamanlara yerleşir.</div>
             )}
           </div>
           <div className="grid gap-4 sm:grid-cols-2">
@@ -99,7 +102,7 @@ export function TaskDialog({ open, onOpenChange, task }: { open: boolean; onOpen
               <span className="mt-1 block text-xs font-normal text-muted-foreground">0 bırakırsan limit uygulanmaz.</span>
             </label>
           </div>
-          <fieldset className="rounded-2xl border border-border/70 p-4">
+          <fieldset className="rounded-lg border border-border/70 p-4">
             <div className="flex items-center justify-between gap-3">
               <legend className="text-sm font-semibold">Sıralı aşamalar</legend>
               <Button type="button" size="sm" variant="ghost" onClick={() => setStages((current) => [...current, { title: '', completed: false }])}><Plus className="size-3.5" />Aşama ekle</Button>
