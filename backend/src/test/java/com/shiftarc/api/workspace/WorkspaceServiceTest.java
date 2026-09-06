@@ -32,7 +32,7 @@ class WorkspaceServiceTest {
         when(settingsRepository.findById(LocalWorkspace.ID)).thenReturn(Optional.of(settings));
         when(settingsRepository.saveAndFlush(settings)).thenReturn(settings);
         when(workspace.id()).thenReturn(LocalWorkspace.ID);
-        when(workspace.name()).thenReturn("Lokal Ã‡alÄ±ÅŸma AlanÄ±");
+        when(workspace.name()).thenReturn("Lokal Çalışma Alanı");
         when(settings.timezone()).thenReturn("Europe/Istanbul");
         when(settings.weekStartsOn()).thenReturn((short) 1);
         when(settings.themeId()).thenReturn("amber");

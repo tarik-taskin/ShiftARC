@@ -1,50 +1,26 @@
-import type { BackgroundMode, ThemeId } from '@/api/workspace/types'
+import type { BackgroundMode, ColorMode, ThemeId } from '@/api/workspace/types'
 
 export interface ThemeDefinition {
   id: ThemeId
   name: string
   description: string
-  colors: [string, string, string]
+  colors: [string, string, string, string, string]
 }
-
 export const themes: ThemeDefinition[] = [
-  {
-    id: 'amber',
-    name: 'Arc Midnight',
-    description: 'Derin yeşil, sakin ve yüksek odaklı.',
-    colors: ['#07100e', '#65e6aa', '#16251f'],
-  },
-  {
-    id: 'grove',
-    name: 'Dawn',
-    description: 'Sıcak, aydınlık ve kâğıt hissinde.',
-    colors: ['#fbf7ed', '#b45309', '#efe4cf'],
-  },
-  {
-    id: 'ion',
-    name: 'Aurora',
-    description: 'Gece mavisi üzerinde canlı mor ve camgöbeği.',
-    colors: ['#080b1d', '#a78bfa', '#14213d'],
-  },
+  { id: 'amber', name: 'Kehribar', description: 'Krem, mürdüm ve sıcak altın.', colors: ['#E3170A', '#A9E5BB', '#FCF6B1', '#F7B32B', '#2D1E2F'] },
+  { id: 'ion', name: 'İyon', description: 'Berrak mavi, mor ve arduvaz.', colors: ['#091BE3', '#CEE6AA', '#B1CFFC', '#722AF7', '#1D272E'] },
+  { id: 'grove', name: 'Koruluk', description: 'Zeytin yeşili, sarı ve mürekkep.', colors: ['#28502E', '#47682C', '#CF1259', '#E3D26F', '#0D0C1D'] },
 ]
 
-export function applyThemePreferences(
-  themeId: ThemeId,
-  backgroundMode: BackgroundMode,
-) {
+export function applyThemePreferences(themeId: ThemeId, backgroundMode: BackgroundMode, colorMode: ColorMode = 'LIGHT', timezone = 'Europe/Istanbul') {
   const root = document.documentElement
   root.dataset.theme = themeId
   root.dataset.backgroundMode = backgroundMode
-  root.dataset.dayPhase = getDayPhase(new Date().getHours())
+  root.dataset.colorMode = colorMode
+  refreshDayPhase(timezone)
 }
 
-export function refreshDayPhase() {
-  document.documentElement.dataset.dayPhase = getDayPhase(new Date().getHours())
-}
-
-function getDayPhase(hour: number) {
-  if (hour >= 5 && hour < 9) return 'morning'
-  if (hour >= 9 && hour < 17) return 'day'
-  if (hour >= 17 && hour < 21) return 'evening'
-  return 'night'
+export function refreshDayPhase(timezone = 'Europe/Istanbul') {
+  const hour = Number(new Intl.DateTimeFormat('en-GB', { timeZone: timezone, hour: '2-digit', hourCycle: 'h23' }).format(new Date()))
+  document.documentElement.dataset.dayPhase = hour < 5 || hour >= 21 ? 'night' : hour < 9 ? 'morning' : hour < 17 ? 'day' : 'evening'
 }

@@ -279,7 +279,7 @@ describe('product application shell', () => {
     ).toBeInTheDocument()
     expect(
       screen.getByRole('button', {
-        name: 'Arc Midnight: Derin yeşil, sakin ve yüksek odaklı.',
+        name: 'Kehribar: Krem, mürdüm ve sıcak altın.',
       }),
     ).toHaveAttribute('aria-pressed', 'true')
   })

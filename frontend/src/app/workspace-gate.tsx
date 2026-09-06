@@ -20,8 +20,8 @@ export function WorkspaceGate({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     if (!workspace) return
-    applyThemePreferences(workspace.themeId, workspace.backgroundMode)
-    const interval = window.setInterval(refreshDayPhase, 60_000)
+    applyThemePreferences(workspace.themeId, workspace.backgroundMode, workspace.colorMode, workspace.timezone)
+    const interval = window.setInterval(() => refreshDayPhase(workspace.timezone), 60_000)
     return () => window.clearInterval(interval)
   }, [workspace])
 

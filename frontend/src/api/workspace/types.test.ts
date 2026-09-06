@@ -15,7 +15,7 @@ describe('workspace contract', () => {
   it('accepts the stable local workspace identifier', () => {
     const workspace = workspaceSchema.parse({
       id: '00000000-0000-0000-0000-000000000001',
-      name: 'Lokal Ã‡alÄ±ÅŸma AlanÄ±',
+      name: 'Lokal Çalışma Alanı',
       timezone: 'Europe/Istanbul',
       weekStartsOn: 1,
       colorMode: 'LIGHT' as const,

@@ -241,7 +241,7 @@ paths:
       - $ref: "#/components/parameters/DayTypeId"
     put:
       operationId: replaceDayTypeBlocks
-      summary: Replace a day type's complete 00:00â€“24:00 timeline
+      summary: Replace a day type's complete 00:00–24:00 timeline
       tags: [Day types]
       requestBody:
         required: true
