@@ -286,13 +286,36 @@ describe('product application shell', () => {
     renderApp()
 
     expect(
-      screen.getByRole('heading', { name: 'ShiftARC’ın atmosferini seç.' }),
+      screen.getByRole('heading', { name: 'Görünüm' }),
     ).toBeInTheDocument()
     expect(
       screen.getByRole('button', {
         name: 'Kehribar: Krem, mürdüm ve sıcak altın.',
       }),
     ).toHaveAttribute('aria-pressed', 'true')
+  })
+
+  it('previews appearance and restores saved colors when leaving without saving', async () => {
+    const user = userEvent.setup()
+    window.history.pushState({}, '', '/settings/preferences')
+    renderApp()
+    await user.click(screen.getByRole('button', { name: 'Koyu' }))
+    expect(document.documentElement.dataset.colorMode).toBe('DARK')
+    await user.click(within(screen.getByRole('navigation', { name: 'Ana navigasyon' })).getByRole('link', { name: 'Bugün' }))
+    expect(document.documentElement.dataset.colorMode).toBe('LIGHT')
+  })
+
+  it('saves independent palette, color and clock choices with the workspace version', async () => {
+    const user = userEvent.setup()
+    const save = vi.fn().mockResolvedValue(workspaceFixture({ themeId: 'grove', colorMode: 'DARK', clockStyle: 'SEGMENT' }))
+    mockUseUpdateWorkspaceSettings.mockReturnValue({ mutateAsync: save, isPending: false, isSuccess: false })
+    window.history.pushState({}, '', '/settings/preferences')
+    renderApp()
+    await user.click(screen.getByRole('button', { name: /^Koruluk:/ }))
+    await user.click(screen.getByRole('button', { name: 'Koyu' }))
+    await user.click(screen.getByRole('button', { name: 'Segmentli' }))
+    await user.click(screen.getByRole('button', { name: 'Tercihleri kaydet' }))
+    expect(save).toHaveBeenCalledWith(expect.objectContaining({ themeId: 'grove', colorMode: 'DARK', clockStyle: 'SEGMENT', version: 0 }))
   })
 
   it('shows controls for an active task execution', () => {
@@ -360,7 +383,7 @@ describe('product application shell', () => {
   })
 })
 
-function workspaceFixture(overrides: { onboardingCompleted: boolean }) {
+function workspaceFixture(overrides: Partial<import('./api/workspace/types').Workspace>) {
   return {
     id: '00000000-0000-0000-0000-000000000001',
     name: 'Lokal Çalışma Alanı',

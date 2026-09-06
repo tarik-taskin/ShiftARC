@@ -9,6 +9,8 @@ import { useCompleteTrigger, useTriggers } from '@/api/triggers/queries'
 import type { TriggerRule } from '@/api/triggers/types'
 import { AdaptiveTimeline } from '@/features/daily-plan/adaptive-timeline'
 import { workspaceDate, workspaceTime } from '@/features/daily-plan/time-scale'
+import { Clock } from '@/components/clock'
+import { useOptionalWorkspace } from '@/app/workspace-context'
 import { ErrorState } from '@/components/ui/page'
 import { Button } from '@/components/ui/button'
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog'
@@ -37,6 +39,7 @@ export function TodayPage() {
 }
 
 function TodayPlan({ plan, onRegenerate, regenerating }: { plan: DailyPlan; onRegenerate: () => void; regenerating: boolean }) {
+  const workspace = useOptionalWorkspace()
   const [now, setNow] = useState(() => new Date())
   const [correctingSession, setCorrectingSession] = useState<ExecutionSession | null>(null)
   const [adjustingItem, setAdjustingItem] = useState<{ item: DailyPlanItem; maxDurationMinutes: number } | null>(null)
@@ -78,7 +81,7 @@ function TodayPlan({ plan, onRegenerate, regenerating }: { plan: DailyPlan; onRe
   return <div className="space-y-5">
     <header className="flex flex-wrap items-center justify-between gap-4">
       <div><p className="text-xs text-muted-foreground">{new Intl.DateTimeFormat('tr-TR', { weekday: 'long', day: 'numeric', month: 'long', timeZone: plan.timezone }).format(now)}</p><h1 className="mt-1 text-[28px] font-semibold">Bugün</h1><p className="mt-1 text-sm text-muted-foreground">{plan.sourceDayTypeName} · {plan.timezone}</p></div>
-      <div className="text-right"><p className="font-mono text-3xl">{pad(time.hour)}:{pad(time.minute)}<span className="ml-2 text-base text-muted-foreground">{pad(time.second)}</span></p><p className="mt-1 text-xs text-muted-foreground">{Math.floor(plannedMinutes / 60)} sa {plannedMinutes % 60} dk planlandı</p></div>
+      <div className="text-right"><Clock now={now} timezone={plan.timezone} style={workspace?.clockStyle} /><p className="mt-1 text-xs text-muted-foreground">{Math.floor(plannedMinutes / 60)} sa {plannedMinutes % 60} dk planlandı</p></div>
     </header>
     <AdaptiveTimeline plan={plan} minute={minute} frozen={Boolean(adjustingItem || correctingSession || activeTrigger)} />
     <section className="rounded-xl border bg-card p-4">

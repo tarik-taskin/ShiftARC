@@ -7,11 +7,12 @@ import { z } from 'zod'
 
 import { useCompleteOnboarding } from '@/api/workspace/queries'
 import {
-  backgroundModes,
+  backgroundModes, colorModes, clockStyles,
   themeIds,
   type Workspace,
 } from '@/api/workspace/types'
-import { applyThemePreferences, themes } from '@/app/theme'
+import { applyThemePreferences } from '@/app/theme'
+import { AppearanceOptions } from '@/components/appearance-options'
 import { BrandMark } from '@/components/brand-mark'
 import { Button } from '@/components/ui/button'
 import { Select } from '@/components/ui/select'
@@ -19,6 +20,8 @@ import { Select } from '@/components/ui/select'
 const onboardingSchema = z.object({
   timezone: z.string().min(1, 'Bir saat dilimi seçmelisin.'),
   themeId: z.enum(themeIds),
+  colorMode: z.enum(colorModes),
+  clockStyle: z.enum(clockStyles),
   backgroundMode: z.enum(backgroundModes),
   includeSampleData: z.boolean(),
 })
@@ -33,10 +36,14 @@ export function OnboardingPage({ workspace }: { workspace: Workspace }) {
     defaultValues: {
       timezone: workspace.timezone,
       themeId: workspace.themeId,
+      colorMode: workspace.colorMode,
+      clockStyle: workspace.clockStyle,
       backgroundMode: workspace.backgroundMode,
       includeSampleData: true,
     },
   })
+  const selectedColorMode = useWatch({ control: form.control, name: 'colorMode' })
+  const selectedClockStyle = useWatch({ control: form.control, name: 'clockStyle' })
   const selectedTheme = useWatch({ control: form.control, name: 'themeId' })
   const selectedBackgroundMode = useWatch({
     control: form.control,
@@ -60,11 +67,11 @@ export function OnboardingPage({ workspace }: { workspace: Workspace }) {
   )
 
   useEffect(() => {
-    applyThemePreferences(selectedTheme, selectedBackgroundMode)
-  }, [selectedBackgroundMode, selectedTheme])
+    applyThemePreferences(selectedTheme, selectedBackgroundMode, selectedColorMode, selectedTimezone)
+  }, [selectedBackgroundMode, selectedTheme, selectedColorMode, selectedTimezone])
 
   const submit = form.handleSubmit(async (values) => {
-    await onboarding.mutateAsync({ ...values, version: workspace.version })
+    try { await onboarding.mutateAsync({ ...values, version: workspace.version }) } catch { /* Display the mutation error in the form. */ }
   })
 
   return (
@@ -118,41 +125,7 @@ export function OnboardingPage({ workspace }: { workspace: Workspace }) {
           </div>
 
           <form className="space-y-8 p-7 sm:p-10" onSubmit={submit}>
-            <fieldset>
-              <legend className="text-sm font-semibold">Tema</legend>
-              <p className="mt-1 text-xs text-muted-foreground">
-                Renkler seçildiği anda önizlenir.
-              </p>
-              <div className="mt-4 grid gap-3 sm:grid-cols-3">
-                {themes.map((theme) => (
-                  <label key={theme.id} className="cursor-pointer">
-                    <input
-                      type="radio"
-                      value={theme.id}
-                      className="peer sr-only"
-                      {...form.register('themeId')}
-                    />
-                    <span className="block h-full rounded-2xl border border-border/80 bg-background/35 p-3 transition peer-checked:border-primary peer-checked:ring-2 peer-checked:ring-primary/20">
-                      <span className="flex gap-1.5" aria-hidden="true">
-                        {theme.colors.map((color) => (
-                          <span
-                            key={color}
-                            className="size-6 rounded-full border border-white/10"
-                            style={{ backgroundColor: color }}
-                          />
-                        ))}
-                      </span>
-                      <span className="mt-3 block text-sm font-semibold">
-                        {theme.name}
-                      </span>
-                      <span className="mt-1 block text-[11px] leading-4 text-muted-foreground">
-                        {theme.description}
-                      </span>
-                    </span>
-                  </label>
-                ))}
-              </div>
-            </fieldset>
+            <AppearanceOptions value={{ themeId: selectedTheme, colorMode: selectedColorMode, clockStyle: selectedClockStyle }} onChange={(value) => { form.setValue('themeId', value.themeId); form.setValue('colorMode', value.colorMode); form.setValue('clockStyle', value.clockStyle) }} />
 
             <div className="grid gap-5 sm:grid-cols-2">
               <label className="block text-sm font-semibold">
