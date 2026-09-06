@@ -234,7 +234,7 @@ describe('product application shell', () => {
 
     renderApp()
 
-    expect(screen.getByRole('heading', { name: 'ML Dersi', level: 1 })).toBeInTheDocument()
+    expect(screen.getByRole('heading', { name: 'Bugün', level: 1 })).toBeInTheDocument()
     expect(
       within(screen.getByRole('navigation', { name: 'Ana navigasyon' })).getByRole(
         'link',
