@@ -1,3 +1,4 @@
+import { PageHeader } from '@/components/ui/page'
 import { motion, useReducedMotion } from 'motion/react'
 import { CalendarCheck2, CalendarRange, CircleAlert, Save } from 'lucide-react'
 import { useMemo, useState } from 'react'
@@ -62,44 +63,34 @@ function WeeklyPlanEditor({ plan, dayTypes }: { plan: WeeklyPlan; dayTypes: DayT
   })
 
   return (
-    <div className="space-y-8">
-      <section className="flex flex-col gap-6 pt-4 sm:pt-8 lg:flex-row lg:items-end lg:justify-between">
-        <div className="max-w-3xl">
-          <p className="section-kicker">Haftalık ritim</p>
-          <h1 className="mt-4 text-4xl font-semibold tracking-[-0.05em] sm:text-6xl">Haftanı karakterlendir.</h1>
-          <p className="mt-5 max-w-2xl leading-7 text-muted-foreground">Her güne bir gün tipi ata. Burada yalnız tekrar eden haftalık düzeni kuruyoruz; belirli tarihlere ait istisnalar daha sonra takvimden yönetilecek.</p>
-        </div>
-        <Button onClick={save} disabled={!changed || updatePlan.isPending}>
-          <Save className="size-4" aria-hidden="true" />
-          {updatePlan.isPending ? 'Kaydediliyor…' : 'Haftayı kaydet'}
-        </Button>
-      </section>
+    <div className="space-y-6">
+      <PageHeader title="Haftalık plan" description="Tekrarlayan haftanın gün tiplerini belirle. Tarih istisnalarını Takvim’den yönet." actions={<Button onClick={save} disabled={!changed || updatePlan.isPending}><Save className="size-4" />{updatePlan.isPending ? 'Kaydediliyor…' : 'Haftayı kaydet'}</Button>} />
 
-      <section className="grid gap-3 sm:grid-cols-3">
+      <section className="grid gap-3 rounded-xl border bg-card sm:grid-cols-3">
         <Summary icon={CalendarCheck2} label="Atanan gün" value={`${assignedCount} / 7`} />
         <Summary icon={CalendarRange} label="Kullanılan gün tipi" value={String(assignedTypes)} />
         <Summary icon={CircleAlert} label="Plan durumu" value={assignedCount === 7 ? 'Tamamlandı' : `${7 - assignedCount} gün eksik`} />
       </section>
 
       {!dayTypes.length ? (
-        <section className="rounded-3xl border border-dashed border-border p-10 text-center">
+        <section className="rounded-xl border border-dashed border-border p-10 text-center">
           <CalendarRange className="mx-auto size-8 text-muted-foreground" />
           <h2 className="mt-4 text-lg font-semibold">Önce bir gün tipi oluştur</h2>
           <p className="mt-2 text-sm text-muted-foreground">Haftaya atayabileceğin aktif bir gün tipi henüz yok.</p>
           <Button className="mt-5" variant="outline" asChild><a href="/day-types">Gün tiplerine git</a></Button>
         </section>
       ) : (
-        <section className="grid gap-4 md:grid-cols-2 xl:grid-cols-7">
+        <section className="grid gap-3 md:grid-cols-2 2xl:grid-cols-7">
           {dayNames.map((dayName, index) => {
             const dayOfWeek = index + 1
             const selected = dayTypes.find((dayType) => dayType.id === assignments[dayOfWeek])
             return (
               <motion.article
                 key={dayName}
-                initial={reduceMotion ? false : { opacity: 0, y: 12 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: reduceMotion ? 0 : index * 0.035 }}
-                className="min-w-0 rounded-3xl border border-border/75 bg-card/60 p-4 xl:min-h-[420px]"
+                initial={reduceMotion ? false : { opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ duration: reduceMotion ? 0 : 0.14 }}
+                className="min-w-0 rounded-xl border border-border/75 bg-card p-3 2xl:min-h-[340px]"
                 style={{ borderColor: selected ? `${selected.color}88` : undefined }}
               >
                 <div className="flex items-center justify-between gap-2">
@@ -116,15 +107,15 @@ function WeeklyPlanEditor({ plan, dayTypes }: { plan: WeeklyPlan; dayTypes: DayT
                     className="h-10"
                   />
                 </label>
-                {selected ? <DayPreview dayType={selected} /> : <div className="mt-5 grid min-h-44 place-items-center rounded-2xl border border-dashed border-border/70 text-center text-xs text-muted-foreground">Bu gün henüz boş</div>}
+                {selected ? <DayPreview dayType={selected} /> : <div className="mt-5 grid min-h-44 place-items-center rounded-lg border border-dashed border-border/70 text-center text-xs text-muted-foreground">Bu gün henüz boş</div>}
               </motion.article>
             )
           })}
         </section>
       )}
 
-      {updatePlan.error ? <p role="alert" className="rounded-2xl border border-destructive/25 bg-destructive/8 p-4 text-sm text-destructive">{updatePlan.error.message}</p> : null}
-      {updatePlan.isSuccess ? <p role="status" className="text-sm text-primary">Haftalık şablon PostgreSQL’e kaydedildi.</p> : null}
+      {updatePlan.error ? <p role="alert" className="rounded-lg border border-destructive/25 bg-destructive/8 p-4 text-sm text-destructive">{updatePlan.error.message}</p> : null}
+      {updatePlan.isSuccess ? <p role="status" className="text-sm text-primary">Haftalık plan kaydedildi.</p> : null}
     </div>
   )
 }
@@ -133,23 +124,23 @@ function DayPreview({ dayType }: { dayType: DayType }) {
   return (
     <div className="mt-5 space-y-2">
       <p className="truncate text-sm font-semibold">{dayType.name}</p>
-      <div className="flex h-32 overflow-hidden rounded-2xl border border-border/50 xl:flex-col">
+      <div className="flex h-32 overflow-hidden rounded-lg border border-border/50 2xl:flex-col">
         {dayType.blocks.map((block) => (
           <div
             key={block.id}
-            className="grid min-w-0 place-items-center border-r border-background/30 px-1 text-center text-[9px] font-semibold text-white last:border-0 xl:border-r-0 xl:border-b"
-            style={{ backgroundColor: block.name === 'Plansız' ? `${dayType.color}66` : dayType.color, flex: block.endMinute - block.startMinute }}
+            className="grid min-w-0 place-items-center border-r border-background/30 px-1 text-center text-xs font-semibold text-foreground last:border-0 2xl:border-r-0 2xl:border-b"
+            style={{ backgroundColor: `color-mix(in srgb, ${dayType.color} 18%, var(--card))`, flex: block.endMinute - block.startMinute }}
             title={`${block.name} · ${formatTime(block.startMinute)}–${formatTime(block.endMinute)}`}
           >
             <span className="line-clamp-2">{block.name}</span>
           </div>
         ))}
       </div>
-      <p className="text-[10px] text-muted-foreground">{dayType.blocks.length} zaman bloğu</p>
+      <p className="text-xs text-muted-foreground">{dayType.blocks.length} zaman bloğu</p>
     </div>
   )
 }
 
 function Summary({ icon: Icon, label, value }: { icon: typeof CalendarRange; label: string; value: string }) {
-  return <article className="flex items-center gap-3 rounded-2xl border border-border/70 bg-card/45 p-4"><div className="grid size-10 place-items-center rounded-xl bg-primary/10 text-primary"><Icon className="size-4" /></div><div><p className="text-xs text-muted-foreground">{label}</p><p className="mt-1 font-semibold">{value}</p></div></article>
+  return <article className="flex items-center gap-3 rounded-lg border border-border/70 bg-card p-4"><div className="grid size-10 place-items-center rounded-xl bg-primary/10 text-primary"><Icon className="size-4" /></div><div><p className="text-xs text-muted-foreground">{label}</p><p className="mt-1 font-semibold">{value}</p></div></article>
 }

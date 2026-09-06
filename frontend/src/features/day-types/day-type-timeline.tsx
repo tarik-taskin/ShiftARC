@@ -88,9 +88,9 @@ export function DayTypeTimeline({
   }
 
   return (
-    <div className="timeline-scrollbar overflow-x-auto rounded-2xl border border-border/70 bg-background/35 p-3 pb-4">
+    <div className="timeline-scrollbar overflow-x-auto rounded-lg border border-border/70 bg-background/35 p-3 pb-4">
       <div className="min-w-[1080px]">
-        <div className="mb-2 grid grid-cols-25 px-1 font-mono text-[10px] text-muted-foreground">
+        <div className="mb-2 grid grid-cols-25 px-1 font-mono text-xs text-muted-foreground">
           {Array.from({ length: 25 }, (_, hour) => (
             <span key={hour} className={hour === 24 ? 'text-right' : ''}>
               {String(hour).padStart(2, '0')}
@@ -119,7 +119,7 @@ export function DayTypeTimeline({
               >
                 <div className="pointer-events-none relative z-20 flex h-full w-full flex-col items-start text-left">
                   <span className="max-w-full truncate text-sm font-bold">{block.name}</span>
-                  <span className="mt-1 whitespace-nowrap font-mono text-[10px] text-white/80">
+                  <span className="mt-1 whitespace-nowrap font-mono text-xs text-white/80">
                     {formatTime(block.startMinute)}–{formatTime(block.endMinute)}
                   </span>
                   {duration >= 60 ? (
@@ -127,7 +127,7 @@ export function DayTypeTimeline({
                       type="button"
                       size="sm"
                       variant="ghost"
-                      className="pointer-events-auto mt-auto h-7 bg-black/20 px-2 text-[10px] text-white hover:bg-black/35 hover:text-white"
+                      className="pointer-events-auto mt-auto h-7 bg-black/20 px-2 text-xs text-white hover:bg-black/35 hover:text-white"
                       onClick={(event) => {
                         event.stopPropagation()
                         onEdit(index)

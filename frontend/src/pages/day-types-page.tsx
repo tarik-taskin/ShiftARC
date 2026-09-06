@@ -1,3 +1,4 @@
+import { PageHeader, ErrorState } from '@/components/ui/page'
 import { AnimatePresence, motion, useReducedMotion } from 'motion/react'
 import { ArchiveRestore, Clock3, Copy, Pencil, Plus, Shapes, Trash2 } from 'lucide-react'
 import { useState } from 'react'
@@ -126,18 +127,11 @@ export function DayTypesPage() {
   }
 
   return (
-    <div className="space-y-8">
-      <section className="flex flex-col gap-6 pt-4 sm:pt-8 lg:flex-row lg:items-end lg:justify-between">
-        <div className="max-w-3xl">
-          <p className="section-kicker">Zaman mimarisi</p>
-          <h1 className="mt-4 text-4xl font-semibold tracking-[-0.05em] sm:text-6xl">Gün tipleri</h1>
-          <p className="mt-5 max-w-2xl leading-7 text-muted-foreground">Bir günü beş dakikalık hassasiyetle böl; her zaman bloğunun kabul ettiği görev kategorilerini belirle.</p>
-        </div>
-        <Button onClick={openCreate}><Plus className="size-4" aria-hidden="true" />Yeni gün tipi</Button>
-      </section>
+    <div className="space-y-6">
+      <PageHeader title="Gün tipleri" description="Günün bloklarını ve her bloğa uygun kategorileri düzenle." actions={<Button onClick={openCreate}><Plus className="size-4" />Yeni gün tipi</Button>} />
 
-      <div className="grid gap-6 2xl:grid-cols-[300px_minmax(0,1fr)]">
-        <aside className="self-start rounded-3xl border border-border/75 bg-card/60 p-4 2xl:sticky 2xl:top-24">
+      <div className="grid gap-6 xl:grid-cols-[224px_minmax(0,1fr)]">
+        <aside className="self-start rounded-xl border border-border/75 bg-card p-4 xl:sticky xl:top-24">
           <div className="flex items-center justify-between gap-3 px-1 pb-4">
             <h2 className="font-semibold">Gün düzenleri</h2>
             <label className="flex items-center gap-2 text-xs text-muted-foreground">
@@ -145,14 +139,14 @@ export function DayTypesPage() {
             </label>
           </div>
           {dayTypes.isPending ? <p role="status" className="p-4 text-sm text-muted-foreground">Gün tipleri yükleniyor…</p> : null}
-          {dayTypes.isError ? <Button variant="outline" onClick={() => dayTypes.refetch()}>Yeniden dene</Button> : null}
-          <div className="grid gap-2 md:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-1">
+          {dayTypes.isError ? <ErrorState title="Gün tipleri yüklenemedi" retry={() => dayTypes.refetch()} /> : null}
+          <div className="grid gap-2 sm:grid-cols-2 xl:grid-cols-1">
             {dayTypes.data?.map((dayType) => (
               <button
                 key={dayType.id}
                 type="button"
                 onClick={() => { setSelectedId(dayType.id); setTimelineDraft(null) }}
-                className="flex w-full items-center gap-3 rounded-2xl border p-3 text-left transition-colors"
+                className="flex w-full items-center gap-3 rounded-lg border p-3 text-left transition-colors"
                 style={{ borderColor: effectiveSelectedId === dayType.id ? dayType.color : undefined, backgroundColor: effectiveSelectedId === dayType.id ? `${dayType.color}12` : undefined }}
                 aria-pressed={effectiveSelectedId === dayType.id}
               >
@@ -164,7 +158,7 @@ export function DayTypesPage() {
               </button>
             ))}
           </div>
-          {!dayTypes.isPending && !dayTypes.data?.length ? (
+          {!dayTypes.isPending && !dayTypes.isError && !dayTypes.data?.length ? (
             <div className="py-10 text-center">
               <Shapes className="mx-auto size-6 text-muted-foreground" />
               <p className="mt-3 text-sm font-semibold">Henüz gün tipi yok</p>
@@ -173,10 +167,10 @@ export function DayTypesPage() {
           ) : null}
         </aside>
 
-        <main className="min-w-0 rounded-3xl border border-border/75 bg-card/60 p-5 sm:p-7 xl:p-8">
+        <section className="min-w-0 rounded-xl border border-border/75 bg-card p-4 sm:p-5">
           <AnimatePresence mode="wait">
             {selected ? (
-              <motion.div key={selected.id} initial={reduceMotion ? false : { opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} exit={reduceMotion ? undefined : { opacity: 0 }}>
+              <motion.div key={selected.id} initial={reduceMotion ? false : { opacity: 0 }} animate={{ opacity: 1 }} exit={reduceMotion ? undefined : { opacity: 0 }}>
                 <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
                   <div>
                     <p className="text-xs font-semibold uppercase tracking-[0.18em] text-muted-foreground">24 saatlik şablon</p>
@@ -206,10 +200,10 @@ export function DayTypesPage() {
                   />
                 </div>
 
-                <div className="mt-6 grid gap-3 md:grid-cols-2 2xl:grid-cols-3">
+                <div className="mt-5 grid gap-2">
                   {timelineBlocks.map((block, index) => (
-                    <button key={block.id} type="button" onClick={() => beginBlockEdit(timelineBlocks, index)} className="flex items-center gap-3 rounded-2xl border border-border/70 bg-background/30 p-4 text-left transition-colors hover:border-primary/35 hover:bg-background/50">
-                      <span className="grid size-9 shrink-0 place-items-center rounded-xl text-white" style={{ backgroundColor: colorForBlock(index, block.name === 'Plansız') }}><Clock3 className="size-4" /></span>
+                    <button key={block.id} type="button" onClick={() => beginBlockEdit(timelineBlocks, index)} className="flex items-center gap-3 rounded-lg border border-border/70 bg-background/30 p-4 text-left transition-colors hover:border-primary/35 hover:bg-background/50">
+                      <span className="grid size-9 shrink-0 place-items-center rounded-lg text-foreground border" style={{ borderColor: colorForBlock(index, block.name === 'Plansız') }}><Clock3 className="size-4" /></span>
                       <span className="min-w-0 flex-1"><span className="block truncate text-sm font-semibold">{block.name}</span><span className="line-clamp-2 text-xs text-muted-foreground">{formatTime(block.startMinute)}–{formatTime(block.endMinute)} · {block.categoryIds.map((id) => categoryNames.get(id)).filter(Boolean).join(', ') || 'Kategori yok'}</span></span>
                     </button>
                   ))}
@@ -222,7 +216,7 @@ export function DayTypesPage() {
               </motion.div>
             )}
           </AnimatePresence>
-        </main>
+        </section>
       </div>
 
       <DayTypeDialog open={dayTypeDialogOpen} onOpenChange={setDayTypeDialogOpen} dayType={editingDayType} />
