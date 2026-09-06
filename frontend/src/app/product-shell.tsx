@@ -1,176 +1,67 @@
-import { AnimatePresence, motion, useReducedMotion } from 'motion/react'
-import { Activity, ArrowUpRight, Plus } from 'lucide-react'
+import { Menu, Plus, X } from 'lucide-react'
 import { useState } from 'react'
 import { NavLink, Outlet, useLocation } from 'react-router-dom'
-
-import {
-  allNavigation,
-  primaryNavigation,
-  utilityNavigation,
-  type NavigationItem,
-} from '@/app/navigation'
+import { allNavigation, type NavigationItem } from '@/app/navigation'
 import { BrandMark } from '@/components/brand-mark'
 import { Button } from '@/components/ui/button'
+import { Dialog, DialogContent, DialogTitle, DialogDescription } from '@/components/ui/dialog'
 import { cn } from '@/lib/utils'
 import { useOptionalWorkspace } from '@/app/workspace-context'
 import { TaskDialog } from '@/features/tasks/task-dialog'
 
+const groups = [
+  { label: 'Günlük', paths: ['/', '/tasks', '/focus', '/triggers'] },
+  { label: 'Planlama', paths: ['/week', '/day-types', '/calendar', '/categories'] },
+  { label: 'Kayıtlar', paths: ['/history'] },
+  { label: 'Ayarlar', paths: ['/settings/preferences', '/settings/system'] },
+]
+const mobilePaths = ['/', '/tasks', '/calendar']
+
 export function ProductShell() {
   const location = useLocation()
-  const reduceMotion = useReducedMotion()
   const workspace = useOptionalWorkspace()
   const [taskDialogOpen, setTaskDialogOpen] = useState(false)
-  const currentPage =
-    allNavigation.find((item) => item.path === location.pathname) ??
-    primaryNavigation[0]
+  const [menuOpen, setMenuOpen] = useState(false)
+  const currentPage = allNavigation.find((item) => item.path === location.pathname) ?? allNavigation[0]
+  const groupedLinks = (close?: () => void) => groups.map((group) => <div key={group.label} className="mt-5">
+    <p className="mb-2 px-3 text-xs font-medium text-muted-foreground">{group.label}</p>
+    {group.paths.map((path) => {
+      const item = allNavigation.find((entry) => entry.path === path)!
+      return <NavigationLink key={path} item={item} onClick={close} />
+    })}
+  </div>)
 
-  return (
-    <div className="app-canvas min-h-svh bg-background text-foreground">
-      <a
-        href="#main-content"
-        className="fixed top-3 left-3 z-50 -translate-y-20 rounded-lg bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground focus:translate-y-0"
-      >
-        İçeriğe geç
-      </a>
-
-      <div className="grid min-h-svh w-full lg:grid-cols-[248px_minmax(0,1fr)] xl:grid-cols-[264px_minmax(0,1fr)]">
-        <aside className="sticky top-0 hidden h-svh flex-col border-r border-border/70 bg-sidebar/82 px-5 py-6 backdrop-blur-2xl lg:flex">
-          <NavLink
-            to="/"
-            className="flex items-center gap-3 rounded-2xl px-2 py-1 text-foreground"
-            aria-label="ShiftARC ana sayfası"
-          >
-            <BrandMark />
-            <span>
-              <span className="block text-sm font-bold tracking-[-0.02em]">
-                ShiftARC
-              </span>
-              <span className="block font-mono text-[10px] text-muted-foreground">
-                {workspace?.name ?? 'local workspace'} · 0.1.0
-              </span>
-            </span>
-          </NavLink>
-
-          <nav className="mt-10 space-y-1" aria-label="Ana navigasyon">
-            {primaryNavigation.map((item) => (
-              <DesktopNavigationLink key={item.path} item={item} />
-            ))}
-          </nav>
-
-          <div className="mt-auto space-y-4">
-            <div className="rounded-2xl border border-border/70 bg-card/55 p-4">
-              <div className="flex items-center gap-2 text-xs font-semibold text-foreground">
-                <span className="size-2 rounded-full bg-emerald-400 shadow-[0_0_14px_rgba(52,211,153,0.7)]" />
-                {workspace?.name ?? 'Lokal çalışma alanı'}
-              </div>
-              <p className="mt-2 text-xs leading-5 text-muted-foreground">
-                {workspace
-                  ? 'Tercihler PostgreSQL çalışma alanıyla eşitlendi.'
-                  : 'Sistem görünümü bağlantıdan bağımsız kullanılabilir.'}
-              </p>
-            </div>
-            {utilityNavigation.map((item) => (
-              <DesktopNavigationLink key={item.path} item={item} />
-            ))}
-          </div>
-        </aside>
-
-        <div className="min-w-0">
-          <header className="sticky top-0 z-30 flex h-18 items-center justify-between border-b border-border/60 bg-background/78 px-5 backdrop-blur-2xl sm:px-8 lg:px-10">
-            <div className="flex min-w-0 items-center gap-3">
-              <NavLink
-                to="/"
-                className="shrink-0 lg:hidden"
-                aria-label="ShiftARC ana sayfası"
-              >
-                <BrandMark className="size-8" />
-              </NavLink>
-              <div className="min-w-0">
-                <p className="truncate text-[11px] font-semibold tracking-[0.12em] text-primary uppercase">
-                  {currentPage.label}
-                </p>
-                <p className="hidden truncate text-xs text-muted-foreground sm:block">
-                  {currentPage.description}
-                </p>
-              </div>
-            </div>
-
-            <div className="flex items-center gap-2">
-            {workspace ? <Button size="sm" onClick={() => setTaskDialogOpen(true)}><Plus className="size-4" /><span className="hidden sm:inline">Yeni görev</span></Button> : null}
-            <Button asChild variant="outline" size="sm">
-              <NavLink
-                to="/settings/system"
-                aria-label="Sistem durumunu aç"
-              >
-                <Activity className="size-4" aria-hidden="true" />
-                <span className="hidden sm:inline">Sistem durumu</span>
-                <ArrowUpRight className="size-3.5 opacity-60" aria-hidden="true" />
-              </NavLink>
-            </Button>
-            </div>
-          </header>
-
-          <AnimatePresence mode="wait" initial={false}>
-            <motion.main
-              id="main-content"
-              key={location.pathname}
-              initial={reduceMotion ? false : { opacity: 0, y: 8 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={reduceMotion ? undefined : { opacity: 0, y: -5 }}
-              transition={{ duration: reduceMotion ? 0 : 0.18, ease: 'easeOut' }}
-              className="w-full px-5 pt-8 pb-28 sm:px-8 sm:pt-10 lg:px-8 lg:pb-12 xl:px-12 2xl:px-16"
-            >
-              <Outlet />
-            </motion.main>
-          </AnimatePresence>
-        </div>
+  return <div className="app-canvas min-h-svh text-foreground">
+    <a href="#main-content" className="fixed top-3 left-3 z-50 -translate-y-20 rounded-lg bg-primary px-4 py-2 text-primary-foreground focus:translate-y-0">İçeriğe geç</a>
+    <div className="grid min-h-svh lg:grid-cols-[224px_minmax(0,1fr)]">
+      <aside className="sticky top-0 hidden h-svh flex-col overflow-y-auto border-r bg-sidebar px-3 py-5 lg:flex">
+        <NavLink to="/" aria-label="ShiftARC ana sayfası" className="flex items-center gap-3 rounded-lg px-3">
+          <BrandMark /><span className="font-semibold tracking-tight">ShiftARC<span className="block text-xs font-normal text-muted-foreground">Günün akışı</span></span>
+        </NavLink>
+        <nav aria-label="Ana navigasyon">{groupedLinks()}</nav>
+        <div className="mt-auto px-3 pt-6 text-xs text-muted-foreground"><span className="block truncate">{workspace?.name ?? 'Çalışma alanı'}</span><span className="mt-1 block">{workspace?.timezone ?? 'Yerel ortam'}</span></div>
+      </aside>
+      <div className="min-w-0">
+        <header className="sticky top-0 z-30 flex h-16 items-center justify-between gap-3 border-b bg-background px-4 sm:px-6">
+          <div className="flex min-w-0 items-center gap-3"><NavLink to="/" className="lg:hidden" aria-label="ShiftARC ana sayfası"><BrandMark /></NavLink><span className="truncate text-sm font-medium">{currentPage.label}</span></div>
+          {workspace ? <Button size="sm" onClick={() => setTaskDialogOpen(true)}><Plus className="size-4" aria-hidden="true" />Yeni görev</Button> : null}
+        </header>
+        <main id="main-content" className="mx-auto w-full max-w-[1800px] min-w-0 px-4 pt-6 pb-28 sm:px-6 lg:pb-10 xl:px-8"><Outlet /></main>
       </div>
-
-      <nav
-        className="fixed inset-x-3 bottom-3 z-40 grid grid-cols-6 rounded-2xl border border-border/75 bg-sidebar/92 p-1.5 shadow-2xl shadow-black/25 backdrop-blur-2xl lg:hidden"
-        aria-label="Mobil navigasyon"
-      >
-        {primaryNavigation.map((item) => {
-          const Icon = item.icon
-          return (
-            <NavLink
-              key={item.path}
-              to={item.path}
-              end={item.path === '/'}
-              className={({ isActive }) =>
-                cn(
-                  'flex min-w-0 flex-col items-center gap-1 rounded-xl px-1 py-2 text-[10px] font-semibold text-muted-foreground transition-colors',
-                  isActive && 'bg-primary/12 text-primary',
-                )
-              }
-            >
-              <Icon className="size-[18px]" aria-hidden="true" />
-              <span className="truncate">{item.shortLabel ?? item.label}</span>
-            </NavLink>
-          )
-        })}
-      </nav>
-      {taskDialogOpen ? <TaskDialog open onOpenChange={setTaskDialogOpen} /> : null}
     </div>
-  )
+    <nav aria-label="Mobil navigasyon" className="fixed inset-x-0 bottom-0 z-40 grid grid-cols-4 border-t bg-sidebar px-2 pt-2 pb-[max(8px,env(safe-area-inset-bottom))] lg:hidden">
+      {mobilePaths.map((path) => {
+        const item = allNavigation.find((entry) => entry.path === path)!
+        const Icon = item.icon
+        return <NavLink key={path} to={path} end={path === '/'} className={({ isActive }) => cn('flex min-h-12 flex-col items-center justify-center gap-1 rounded-lg text-xs', isActive ? 'bg-accent text-primary' : 'text-muted-foreground')}><Icon className="size-5" aria-hidden="true" />{item.label}</NavLink>
+      })}
+      <button type="button" onClick={() => setMenuOpen(true)} aria-expanded={menuOpen} aria-haspopup="dialog" className={cn('flex min-h-12 flex-col items-center justify-center gap-1 rounded-lg text-xs', !mobilePaths.includes(location.pathname) ? 'bg-accent text-primary' : 'text-muted-foreground')}><Menu className="size-5" aria-hidden="true" />Diğer</button>
+    </nav>
+    <Dialog open={menuOpen} onOpenChange={setMenuOpen}><DialogContent><DialogTitle>Tüm sayfalar</DialogTitle><DialogDescription>Çalışma alanında gezin.</DialogDescription><nav aria-label="Diğer sayfalar">{groupedLinks(() => setMenuOpen(false))}</nav><Button className="mt-5" variant="outline" onClick={() => setMenuOpen(false)}><X className="size-4" />Menüyü kapat</Button></DialogContent></Dialog>
+    {taskDialogOpen ? <TaskDialog open onOpenChange={setTaskDialogOpen} /> : null}
+  </div>
 }
-
-function DesktopNavigationLink({ item }: { item: NavigationItem }) {
+function NavigationLink({ item, onClick }: { item: NavigationItem; onClick?: () => void }) {
   const Icon = item.icon
-
-  return (
-    <NavLink
-      to={item.path}
-      end={item.path === '/'}
-      className={({ isActive }) =>
-        cn(
-          'group flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium text-muted-foreground transition-colors hover:bg-accent/70 hover:text-foreground',
-          isActive && 'bg-primary/12 text-primary',
-        )
-      }
-    >
-      <Icon className="size-[18px]" aria-hidden="true" />
-      <span>{item.label}</span>
-    </NavLink>
-  )
+  return <NavLink to={item.path} end={item.path === '/'} onClick={onClick} className={({ isActive }) => cn('my-0.5 flex min-h-10 items-center gap-3 rounded-lg px-3 py-2 text-sm transition-colors hover:bg-accent', isActive ? 'bg-accent font-medium text-primary' : 'text-muted-foreground')}><Icon className="size-[18px]" aria-hidden="true" />{item.label}</NavLink>
 }

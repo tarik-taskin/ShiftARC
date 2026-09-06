@@ -242,8 +242,19 @@ describe('product application shell', () => {
       ),
     ).toHaveAttribute('href', '/day-types')
     expect(
-      screen.getByRole('link', { name: 'Sistem durumunu aç' }),
+      screen.getByRole('link', { name: 'Sistem durumu' }),
     ).toHaveAttribute('href', '/settings/system')
+  })
+
+  it('opens additional mobile destinations and closes after navigation', async () => {
+    const user = userEvent.setup()
+    window.history.pushState({}, '', '/')
+    renderApp()
+    await user.click(screen.getByRole('button', { name: 'Diğer' }))
+    const menu = screen.getByRole('dialog', { name: 'Tüm sayfalar' })
+    await user.click(within(menu).getByRole('link', { name: 'Görünüm' }))
+    expect(screen.queryByRole('dialog', { name: 'Tüm sayfalar' })).not.toBeInTheDocument()
+    expect(window.location.pathname).toBe('/settings/preferences')
   })
 
   it('shows onboarding before exposing the product workspace', async () => {
